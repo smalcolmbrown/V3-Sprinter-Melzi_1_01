@@ -65,8 +65,8 @@
 void V3_I2C_Command(  int iCommand, boolean bEchoCommand ) ;    // bEchoCommand true if command echoed over the serial link
 void check_PauseID() ;                                          // function located in V3.cpp
 void EmergencyStop();                                           // function located in Sprinter_Melzo_play.pde
-void Read_Z_MAX_LENGTH_M240_FromEEPROM();                       // function located in Sprinter_Melzo_play.pde
-void Write_Z_MAX_LENGTH_M240_FromEEPROM(float);                 // function located in Sprinter_Melzo_play.pde
+float Read_Z_MAX_LENGTH_M240_FromEEPROM();                      // function located in Sprinter_Melzo_play.pde
+void Write_Z_MAX_LENGTH_M240_ToEEPROM(float);                   // function located in Sprinter_Melzo_play.pde
 
 #endif
 

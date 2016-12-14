@@ -9,6 +9,8 @@
 #include "V3.h"
 #include <stdio.h>
 #include <Wire.h>
+#include <EEPROM.h>
+
 #include "SerialManager.h"
 
 
@@ -25,6 +27,12 @@ int FSW_Counter = 0;                  //rp3d.com Front Switch Counter
 int FSW_status = 1;                   //rp3d.com Front Switch Status
 
 unsigned long previous_millis_PauseID;
+
+#define Z_MAX_LENGTH_EEPROM 1
+union data {
+  float v;
+  unsigned char fchar[4];
+} fvalue; 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -45,11 +53,48 @@ void V3_I2C_Command ( int iCommand, boolean bEchoCommand ) {
   }
 }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// float Read_Z_MAX_LENGTH_M240_FromEEPROM() - reads and returns Z_MAX_LENGTH_M240 from the EEPROM
+//
+// unique to the V3 3D printer
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Read_Z_MAX_LENGTH_M240_FromEEPROM() {
+  for(int i = 0; i < 4; i++) {
+    fvalue.fchar[i] = EEPROM.read(i + Z_MAX_LENGTH_EEPROM);
+  }
+  Serial.print("PrinterHeight: ");
+  Serial.println(fvalue.v);
+//  Z_MAX_LENGTH_M240 = fvalue.v;
+  return fvalue.v;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// void Write_Z_MAX_LENGTH_M240_ToEEPROM(float fZ_Max_Length) - reads Z_MAX_LENGTH_M240 from the EEPROM
+//
+// unique to the V3 3D printer
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void Write_Z_MAX_LENGTH_M240_ToEEPROM(float fZ_Max_Length) {
+  fvalue.v = fZ_Max_Length ;
+  unsigned char *fpointer;
+  fpointer = fvalue.fchar;
+  for(int i = 0; i < 4; i++) {
+    EEPROM.write(i + Z_MAX_LENGTH_EEPROM,*fpointer);
+    fpointer++;
+  }
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // void check_PauseID()
 //
-// 
+// unique to V3
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

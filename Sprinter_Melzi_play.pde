@@ -53,7 +53,7 @@
 // M26  - Set SD position in bytes (M26 S12345)
 // M27  - Report SD print status
 // M28  - Start SD write (M28 filename.g)
-// M29  - Stop SD write  not supported in V3
+// M29  - Stop SD write does not do anything.
 // M80  - Turn on Power Supply
 // M81  - Turn off Power Supply
 // M82  - Set E codes absolute (default)
@@ -162,12 +162,14 @@ float axis_diff[NUM_AXIS] = {0, 0, 0, 0};
 #endif
 
 #define Z_ADJUST_BYTE 0
-#define Z_MAX_LENGTH_EEPROM 1
 float Z_MAX_LENGTH_M240 = 120.00;
+
+/*
+#define Z_MAX_LENGTH_EEPROM 1
 union data {
   float v;
   unsigned char fchar[4];
-} fvalue;
+} fvalue;          */
               
 
 // comm variables
@@ -288,32 +290,6 @@ unsigned long stepper_inactive_time = 0;
 
 #ifdef V3 // V3 specific code
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// void ReadMaxZfromEeprom() - reads Max Z length from the EEprom
-//
-// unique to the V3 3D printer
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void Read_Z_MAX_LENGTH_M240_FromEEPROM() {
-  for(int i = 0; i < 4; i++) {
-    fvalue.fchar[i] = EEPROM.read(i + Z_MAX_LENGTH_EEPROM);
-  }
-  Serial.print("PrinterHeight: ");
-  Serial.println(fvalue.v);
-  Z_MAX_LENGTH_M240 = fvalue.v;
-}
-
-void Write_Z_MAX_LENGTH_M240_FromEEPROM(float fZ_Max_Length) {
-  fvalue.v = fZ_Max_Length ;
-  unsigned char *fpointer;
-  fpointer = fvalue.fchar;
-  for(int i = 0; i < 4; i++) {
-    EEPROM.write(i + Z_MAX_LENGTH_EEPROM,*fpointer);
-    fpointer++;
-  }
-}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // void EmergencyStop() - p
@@ -516,12 +492,7 @@ void setup()
 
 #endif
 
-  Read_Z_MAX_LENGTH_M240_FromEEPROM();
-
-/* for(int i = 0; i < 4; i++) fvalue.fchar[i] = EEPROM.read(i + Z_MAX_LENGTH_EEPROM);
-Serial.print("PrinterHeight: ");
-Serial.println(fvalue.v);
-Z_MAX_LENGTH_M240 = fvalue.v;    */
+  Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();
 
 }
 
@@ -730,8 +701,7 @@ inline void process_commands()
 
   if(code_seen('G'))
   {
-    switch((int)code_value())
-    {
+    switch((int)code_value()) {
       case 0: // G0 -> G1
       case 1: // G1
         #if (defined DISABLE_CHECK_DURING_ACC) || (defined DISABLE_CHECK_DURING_MOVE) || (defined DISABLE_CHECK_DURING_TRAVEL)
@@ -840,7 +810,7 @@ inline void process_commands()
             //destination[2] = current_position[2];
             feedrate = 0;
           
-        }
+          }
         }
         
         feedrate = saved_feedrate;
@@ -1369,10 +1339,10 @@ Example 2: M240
 This Gets the Z_MAX_LENGTH_M240 value from the EEPROM      */
       case 240: // M240 - set or get Z_MAX_LENGTH_M240               // either sets Z_MAX_LENGTH_M240 or gets Z_MAX_LENGTH_M240
         if(code_seen('Z')){
-          Write_Z_MAX_LENGTH_M240_FromEEPROM(code_value());          // 数据拆分 - Save Data in eeprom
-          Read_Z_MAX_LENGTH_M240_FromEEPROM();                       //数据还原  - Now read data from eeprom and set variable
+          Write_Z_MAX_LENGTH_M240_ToEEPROM(code_value());            // 数据拆分 - Save Data in eeprom
+          Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   //数据还原  - Now read data from eeprom and set variable
         } else { 
-          Read_Z_MAX_LENGTH_M240_FromEEPROM();                       //数据还原  - read data from eeprom and set variable 
+          Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   //数据还原  - read data from eeprom and set variable 
         }
       break;
 #endif  // ifdef V3
