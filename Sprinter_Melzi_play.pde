@@ -1333,7 +1333,6 @@ The maximum adjustment is +/-1.27mm.
       case 239: // M239	Short Beep x 1
         V3_I2C_Command( V3_SHORT_BEEP, true ) ;             // sends 239, Short Beep
         break;
-#endif  // ifdef V3
       case 240: // M240 - set Z_MAX_LENGTH
       
         if(code_seen('Z')){
@@ -1361,6 +1360,7 @@ The maximum adjustment is +/-1.27mm.
                 Z_MAX_LENGTH_M240 = fvalue.v;
         }
       break;
+#endif  // ifdef V3
 
 #ifdef PIDTEMP
       case 301: // M301
