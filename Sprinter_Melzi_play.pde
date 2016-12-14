@@ -2,6 +2,7 @@
 // Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 // Licence: GPL
 // based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi
+// V3 parts rp3d.com 
 
 #include "fastio.h"
 //#include "Configuration.h"
@@ -73,7 +74,7 @@
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 // M203 - Adjust Z height
-
+// M205 - Advanced settings
 // V3 mods for non standard M Codes
 // M211 - sends 211 to V3_I2C device, extruder Red LED on
 // M212 - sends 212 to V3_I2C device, extruder Red LED flashing
