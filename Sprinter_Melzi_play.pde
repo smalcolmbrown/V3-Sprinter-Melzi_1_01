@@ -161,15 +161,11 @@ float axis_diff[NUM_AXIS] = {0, 0, 0, 0};
   long long_step_delay_ratio = STEP_DELAY_RATIO * 100;
 #endif
 
+// EEPROM related variables
 #define Z_ADJUST_BYTE 0
 float Z_MAX_LENGTH_M240 = 120.00;
 
-/*
-#define Z_MAX_LENGTH_EEPROM 1
-union data {
-  float v;
-  unsigned char fchar[4];
-} fvalue;          */
+
               
 
 // comm variables
