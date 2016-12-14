@@ -30,7 +30,7 @@ M25  - Pause SD print
 M26  - Set SD position in bytes (M26 S12345)
 M27  - Report SD print status
 M28  - Start SD write (M28 filename.g)
-M29  - Stop SD write  not supported in V3
+M29  - Stop SD write does not do anything.
 M80  - Turn on Power Supply
 M81  - Turn off Power Supply
 M82  - Set E codes absolute (default)
