@@ -104,6 +104,7 @@
 // M237 - Hood Switch Enable
 // M238	- Hood Switch Disable
 // M239 - sends 239 to V3_I2C device, Short Beep
+// M240 - set Z_MAX_LENGTH
 // end of V3 mods
 
 // M301 - Set PID parameters
