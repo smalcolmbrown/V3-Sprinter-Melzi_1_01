@@ -3,16 +3,18 @@ The original Eaglemoss V3 3D printer firmware cleaned up and modified.
 
 arduino 0023 is required for the build and upload.
 
-almost all V3 specific and all V3 specific variables have been moved to two new files unsurpringly called V3.cpp and V3.h
+Almost all V3 specific and all V3 specific variables have been moved to two new files unsurpringly called V3.cpp and V3.h
 added a function to handle the V3 I2C device and the necessay defines 
 
-all instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required
+All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required
+
+Nominally called version 1.01
 
 look here for descriptions of gcodes: http://reprap.org/wiki/G-code
 
 Implemented Codes
 -------------------
-G0  -> G1
+G0  - Coordinated Movement X Y Z E
 G1  - Coordinated Movement X Y Z E
 G4  - Dwell S<seconds> or P<milliseconds>
 G28 - Home all Axis
