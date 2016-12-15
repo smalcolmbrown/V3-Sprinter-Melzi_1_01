@@ -69,6 +69,7 @@
 // M109 - Wait for extruder current temp to reach target temp.
 // M114 - Display current position
 // M115	- Capabilities string
+// M119 - Report endstops status.
 // M140 - Set bed target temp
 // M190 - Wait for bed current temp to reach target temp.
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
@@ -285,7 +286,6 @@ unsigned long stepper_inactive_time = 0;
 #endif
 
 #ifdef V3 // V3 specific code
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // void EmergencyStop() - p
@@ -297,6 +297,16 @@ unsigned long stepper_inactive_time = 0;
 void EmergencyStop() {
   
   V3_I2C_Command( V3_LONG_BEEP, false ) ;                         // beep long x1
+  PauseID = 0;                                                    // clear PauseID
+  kill() ;                                                        // Now disable the x,y,z and e motors andswitch off the heaters etc.
+  gcode_M107();                                                   // stop fan
+  SerialMgr.cur()->println("Emergency Stop");                     // tell the world
+  while(1){ ; }                                                   // indefinite loop (reset requited to break out of)
+
+
+/*
+Original Emergency stop code - repeatdly switching everythig off forever just seemed inelegent to 
+me when you already have a kill() function that does all that. S M-B 2016/12/15
   
   while(1){                                                       // Now disable the x,y,z and e motors
       
@@ -313,13 +323,12 @@ void EmergencyStop() {
 //      target_bed_raw = temp2analogBed(0);                         // set target bed temperature to 0
 //      target_raw = temp2analogh(0);                               // set target nozzle temperature to 0
       
-    WRITE(HEATER_0_PIN,LOW);                                    // switch off extruder heater
-    WRITE(HEATER_1_PIN,LOW);                                    // Switch off bed heater
+    WRITE(HEATER_0_PIN,LOW);                                      // switch off extruder heater
+    WRITE(HEATER_1_PIN,LOW);                                      // Switch off bed heater
     SerialMgr.cur()->println("Emergency Stop");
     }    // end of while(1)
-
+*/
 }
-
 #endif   // ifdef V3
 
 #ifdef MALSOFT_I2C_DISPLAY
@@ -493,8 +502,8 @@ void setup()
 }
 
 
-void loop()
-{
+void loop() {
+  
 #ifdef BLUETOOTH
   if(BLUETOOTH_SERIAL.available() && !serial_count) {
     SerialMgr.ChangeSerial(&BLUETOOTH_SERIAL);
@@ -535,17 +544,17 @@ void loop()
 #endif
     buflen = (buflen-1);
     bufindr = (bufindr + 1)%BUFSIZE;
-    }
-  //check heater every n milliseconds
-      manage_heater();
-      manage_inactivity(1);
-#ifdef V3  // V3 specific code
-      check_PauseID();
-#endif   // ifdef V3
   }
+  //check heater every n milliseconds
+  manage_heater();
+  manage_inactivity(1);
+#ifdef V3  // V3 specific code
+  check_PauseID();
+#endif   // ifdef V3
+}
 
-inline void get_command() 
-{
+inline void get_command() {
+  
 //  SerialMgr.cur()->println("get_command"); 
   while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE) {
     serial_char = SerialMgr.cur()->read();
@@ -674,8 +683,8 @@ inline float code_value() { return (strtod(&cmdbuffer[bufindr][strchr_pointer - 
 inline long code_value_long() { return (strtol(&cmdbuffer[bufindr][strchr_pointer - cmdbuffer[bufindr] + 1], NULL, 10)); }
 inline bool code_seen(char code_string[]) { return (strstr(cmdbuffer[bufindr], code_string) != NULL); }  //Return True if the string was found
 
-inline bool code_seen(char code)
-{
+inline bool code_seen(char code) {
+  
   strchr_pointer = strchr(cmdbuffer[bufindr], code);
   return (strchr_pointer != NULL);  //Return True if a character was found
 }
@@ -695,14 +704,13 @@ inline void process_commands()
   }
 #endif
 
-  if(code_seen('G'))
-  {
+  if(code_seen('G')) {
     switch((int)code_value()) {
       case 0: // G0 -> G1
       case 1: // G1
-        #if (defined DISABLE_CHECK_DURING_ACC) || (defined DISABLE_CHECK_DURING_MOVE) || (defined DISABLE_CHECK_DURING_TRAVEL)
-          manage_heater();
-        #endif
+#if (defined DISABLE_CHECK_DURING_ACC) || (defined DISABLE_CHECK_DURING_MOVE) || (defined DISABLE_CHECK_DURING_TRAVEL)
+        manage_heater();
+#endif
         get_coordinates(); // For X Y Z E F
         prepare_move();
         previous_millis_cmd = millis();
@@ -985,258 +993,64 @@ inline void process_commands()
         axis_relative_modes[3] = true;
         break;
       case 84: // M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
-        if(code_seen('S')){ 
-          stepper_inactive_time = code_value() * 1000; 
-        } else { 
-          disable_x(); 
-          disable_y(); 
-          disable_z(); 
-          disable_e(); 
-        }
-        
-#ifdef V3
-        V3_I2C_Command( V3_BUTTON_GREEN, false ) ;                   // Green on front
-        V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
-//        V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                   // 3 short beep
-                  
-#endif // ifdef V3
+        gcode_M84();
         break;
       case 85: // M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
-        code_seen('S');
-        max_inactive_time = code_value() * 1000; 
+        gcode_M85(); 
         break;
       case 92: // M92  - Set axis_steps_per_unit - same syntax as G92
-        for(int i=0; i < NUM_AXIS; i++) {
-          if(code_seen(axis_codes[i])) axis_steps_per_unit[i] = code_value();
-        }
-        //Update start speed intervals and axis order. TODO: refactor axis_max_interval[] calculation into a function, as it
-        // should also be used in setup() as well
-#ifdef RAMP_ACCELERATION
-          long temp_max_intervals[NUM_AXIS];
-          for(int i=0; i < NUM_AXIS; i++) {
-            axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);//TODO: do this for
-                  // all steps_per_unit related variables
-          }
-#endif
+        gcode_M92();
         break;
       case 104: // M104 - Set extruder target temp
-#ifdef V3  // V3 specific code
-        // code note Eaglemoss coder uses yellow and orange interchangerably
-        V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;             // front orange flashing 
-        V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;             // nozzle orange flashing
-#endif    // ifdef V3
-        if (code_seen('S')) target_raw = temp2analogh(code_value());
-        if (error_code == ERROR_CODE_HOTEND_TEMPERATURE) {
-            wait_for_temp(); //if we have had a nozzle error, we should wait even though not wait command
-        } else {
-#ifdef WATCHPERIOD
-          if(target_raw > current_raw){
-            watchmillis = max(1,millis());
-            watch_raw = current_raw;
-          }else{
-             watchmillis = 0;
-          }
-#endif
-        }
-#ifdef V3  // V3 specific code
-        V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
-        V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-        V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
-#endif // ifdef V3
+        gcode_M104();
         break;
       case 105: // M105 - Read current temp
-        #if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675)|| defined HEATER_USES_AD595
-          tt = analog2temp(current_raw);
-        #endif
-        #if TEMP_1_PIN > -1 || defined BED_USES_AD595
-          bt = analog2tempBed(current_bed_raw);
-        #endif
-        #if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675) || defined HEATER_USES_AD595
-            SerialMgr.cur()->print("ok T:");
-            SerialMgr.cur()->print(tt); 
-          #if TEMP_1_PIN > -1 || defined BED_USES_AD595
-            SerialMgr.cur()->print(" B:");
-            SerialMgr.cur()->println(bt);
-#ifdef DEBUG_PID
-            SerialMgr.cur()->print(" R:");
-            SerialMgr.cur()->print(output);
-            SerialMgr.cur()->print(" E:");
-            SerialMgr.cur()->print(error);
-            SerialMgr.cur()->print(" P:");
-            SerialMgr.cur()->print(pTerm);
-            SerialMgr.cur()->print(" I:");
-            SerialMgr.cur()->print(iTerm);
-            SerialMgr.cur()->print(" D:");
-            SerialMgr.cur()->print(dTerm);
-            SerialMgr.cur()->print(" iState:");
-            SerialMgr.cur()->println(temp_iState);                        
-#endif
-          #else
-            SerialMgr.cur()->println();
-          #endif
-        #else
-          #error No temperature source available
-        #endif
+        gcode_M105();
         return;
         //break;
 #if FAN_PIN > -1
       case 106: //M106 Fan On
-        if (code_seen('S')) {
-            WRITE(FAN_PIN, HIGH);
-            analogWrite(FAN_PIN, constrain(code_value(),0,255) );
-        } else {
-            WRITE(FAN_PIN, HIGH);
-        }
+        gcode_M106();
         break;
       case 107: //M107 Fan Off
-        analogWrite(FAN_PIN, 0);
-        WRITE(FAN_PIN, LOW);
+        gcode_M107();
         break;
 #endif
       case 109: // M109 - Wait for extruder heater to reach target.
-#ifdef V3  // V3 specific code
-        V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;            // front orange flashing 
-        V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;            // nozzle orange flashing
-#endif // ifdef V3
-        if (code_seen('S')) 
-          target_raw = temp2analogh(code_value() - nzone);
-        wait_for_temp();
-#ifdef V3
-        V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
-        V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
-        V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
-#endif // ifdef V3
+        gcode_M109();
         break;
       case 114: // M114 - Display current position
-	SerialMgr.cur()->print("X:");
-        SerialMgr.cur()->print(current_position[0]);
-	SerialMgr.cur()->print("Y:");
-        SerialMgr.cur()->print(current_position[1]);
-	SerialMgr.cur()->print("Z:");
-        SerialMgr.cur()->print(current_position[2]);
-	SerialMgr.cur()->print("E:");
-        SerialMgr.cur()->println(current_position[3]);
+        gcode_M114();
         break;
       case 115: // M115	- Capabilities string
-        //SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
-        SerialMgr.cur()->print("FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http://rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:");
-        SerialMgr.cur()->println(uuid);
+        gcode_M115();
         break;
-      case 119: // M119
-      	#if (X_MIN_PIN > -1)
-      	SerialMgr.cur()->print("x_min:");
-        SerialMgr.cur()->print((READ(X_MIN_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
-      	#endif
-      	#if (X_MAX_PIN > -1)
-      	SerialMgr.cur()->print("x_max:");
-        SerialMgr.cur()->print((READ(X_MAX_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
-      	#endif
-      	#if (Y_MIN_PIN > -1)
-      	SerialMgr.cur()->print("y_min:");
-        SerialMgr.cur()->print((READ(Y_MIN_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
-      	#endif
-      	#if (Y_MAX_PIN > -1)
-      	SerialMgr.cur()->print("y_max:");
-        SerialMgr.cur()->print((READ(Y_MAX_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
-      	#endif
-      	#if (Z_MIN_PIN > -1)
-      	SerialMgr.cur()->print("z_min:");
-        SerialMgr.cur()->print((READ(Z_MIN_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
-      	#endif
-      	#if (Z_MAX_PIN > -1)
-      	SerialMgr.cur()->print("z_max:");
-        SerialMgr.cur()->print((READ(Z_MAX_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
-      	#endif
-        SerialMgr.cur()->println("");
+      case 119: // M119 - Report endstops status.
+        gcode_M119();
       	break;
-      case 140: // M140 set bed temp
-#ifdef V3  // V3 specific code
-        // code note Eaglemoss coder uses yellow and orange interchangerably
-        V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;             // front orange flashing 
-        V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;             // nozzle orange flashing
-#endif // ifdef V3
-
-#if TEMP_1_PIN > -1 || defined BED_USES_AD595
-        if (code_seen('S')) {
-          target_bed_raw = temp2analogBed(code_value());
-        }
-#endif  // if TEMP_1_PIN > -1 || defined BED_USES_AD595
-#ifdef V3
-        V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
-        V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
-        V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
-#endif // ifdef V3
+      case 140: // M140 - Set bed temp
+        gcode_M140();
         break;
-
-       case 190: // M190 - Wait bed for heater to reach target.
-                  
-#ifdef V3  // V3 specific code
-        V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;            // front orange flashing 
-        V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;            // nozzle orange flashing
-#endif // ifdef V3
-      
-      #if TEMP_1_PIN > -1
-        if (code_seen('S')) target_bed_raw = temp2analogh(code_value());
-        codenum = millis(); 
-        while(current_bed_raw < target_bed_raw) {
-          if( (millis()-codenum) > 1000 ) //Print Temp Reading every 1 second while heating up.
-          {
-            tt=analog2temp(current_raw);
-            SerialMgr.cur()->print("T:");
-            SerialMgr.cur()->print( tt );
-            SerialMgr.cur()->print(" B:");
-            SerialMgr.cur()->println( analog2temp(current_bed_raw) ); 
-            codenum = millis(); 
-          }
-            manage_heater();
-        }
-      #endif
-#ifdef V3  // V3 specific code
-      V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                      // blue on front
-      V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                     // nozzle white
-      V3_I2C_Command( V3_LONG_BEEP, false ) ;                        // beep long x1
-#endif // ifdef V3
-      break;
+      case 190: // M190 - Wait for bed heater to reach target.
+        gcode_M190();
+        break;
       
 #ifdef RAMP_ACCELERATION
-      //TODO: update for all axis, use for loop
       case 201: // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
-        for(int i=0; i < NUM_AXIS; i++) {
-          if(code_seen(axis_codes[i])) axis_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
-        }
+        gcode_M201();
         break;
       case 202: // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
-        for(int i=0; i < NUM_AXIS; i++) {
-          if(code_seen(axis_codes[i])) axis_travel_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
-        }
+        gcode_M202();
         break;
 #endif
       
-      /*
-      M203: Record Z adjustment
-Example: M203 Z-0.75
-This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set, 
-even when the power is turned off and on again. 
-If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
-If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed. 
-The maximum adjustment is +/-1.27mm.
-      */
       case 203: // M203 - set Z height adjustment
-        if(code_seen('Z')){
-          EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
-        }
+        gcode_M203();
         break;
-
       case 205: // M205 - Advanced settings
-          SerialMgr.cur()->print("ok o:");
-          SerialMgr.cur()->print(output);
-          SerialMgr.cur()->print(", p:");
-          SerialMgr.cur()->print(pTerm);
-          SerialMgr.cur()->print(", i:");
-          SerialMgr.cur()->print(iTerm);
-          SerialMgr.cur()->print(", d:");
-          SerialMgr.cur()->print(dTerm);
-          return;
+        gcode_M205();
+        return;
+          
 #ifdef V3  // V3 specific code
       case 211: // M211 - red on
         V3_I2C_Command( V3_NOZZLE_RED, true ) ;              // sends 211, Red LED on
@@ -1327,38 +1141,14 @@ The maximum adjustment is +/-1.27mm.
       case 239: // M239	Short Beep x 1
         V3_I2C_Command( V3_SHORT_BEEP, true ) ;             // sends 239, Short Beep
         break;
-/*
-M240: Set or Get Z_MAX_LENGTH_M240
-Example 1: M240 Z120.00
-This sets the Z_MAX_LENGTH_M240 to 120.00 in the EEPROM then sets the Z_MAX_LENGTH_M240 variable.
-Example 2: M240  
-This Gets the Z_MAX_LENGTH_M240 value from the EEPROM      */
-      case 240: // M240 - set or get Z_MAX_LENGTH_M240               // either sets Z_MAX_LENGTH_M240 or gets Z_MAX_LENGTH_M240
-        if(code_seen('Z')){
-          Write_Z_MAX_LENGTH_M240_ToEEPROM(code_value());            // 数据拆分 - Save Data in eeprom
-          Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   //数据还原  - Now read data from eeprom and set variable
-        } else { 
-          Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   //数据还原  - read data from eeprom and set variable 
-        }
+      case 240: // M240 - Stores Z_MAX_LENGTH_M240 in EEPROM or Get Z_MAX_LENGTH_M240 from EEPROM
+        gcode_M240();
       break;
 #endif  // ifdef V3
 
 #ifdef PIDTEMP
       case 301: // M301 - Set PID parameters
-        if(code_seen('P')) Kp = code_value();
-        if(code_seen('I')) Ki = code_value();
-        if(code_seen('D')) Kd = code_value();
-        if(code_seen('F')) pid_max = code_value();
-        if(code_seen('Z')) nzone = code_value();
-        if(code_seen('W')) pid_i_max = code_value();
-        SerialMgr.cur()->print("Kp ");SerialMgr.cur()->println(Kp);
-        SerialMgr.cur()->print("Ki ");SerialMgr.cur()->println(Ki);
-        SerialMgr.cur()->print("Kd ");SerialMgr.cur()->println(Kd);
-        SerialMgr.cur()->print("PID_MAX ");SerialMgr.cur()->println(pid_max);
-        SerialMgr.cur()->print("PID_I_MAX ");SerialMgr.cur()->println(pid_i_max);
-        SerialMgr.cur()->print("NZONE ");SerialMgr.cur()->println(nzone);
-        temp_iState_min = -pid_i_max / Ki;
-        temp_iState_max = pid_i_max / Ki;
+        gcode_M301();
         break;
 #endif //PIDTEMP
       default:
@@ -1377,15 +1167,13 @@ This Gets the Z_MAX_LENGTH_M240 value from the EEPROM      */
 }
 
 int byteToint(byte value){
-    if(value>>7)
-    {
-      return (255-value+1)*-1;
-    }
-    return value;
+  if(value>>7) {
+    return (255-value+1)*-1;
+  }
+  return value;
 }
 
-void FlushSerialRequestResend()
-{
+void FlushSerialRequestResend() {
   //char cmdbuffer[bufindr][100]="Resend:";
   SerialMgr.cur()->flush();
   SerialMgr.cur()->print("Resend:");
@@ -1393,42 +1181,444 @@ void FlushSerialRequestResend()
   ClearToSend();
 }
 
-void ClearToSend()
-{
+void ClearToSend() {
   previous_millis_cmd = millis();
-  if (status == STATUS_ERROR)
-  {
+  if (status == STATUS_ERROR) {
     SerialMgr.cur()->print("EC:");
     SerialMgr.cur()->println(error_code);
     SerialMgr.cur()->print(", ");
     SerialMgr.cur()->print(error_code_str[error_code]);
-  }
-  else
-  {
-    #ifdef SDSUPPORT
-    if(fromsd[bufindr])
+  } else {
+#ifdef SDSUPPORT
+    if(fromsd[bufindr]) {
       return;
-    #endif
+    }
+#endif
   }   
 //  SerialMgr.cur()->println("Clear to Send ok");
   SerialMgr.cur()->println("ok");
 }
 
-inline void get_coordinates()
-{
+
+
+
+////////////////////////////////
+// M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
+////////////////////////////////
+
+inline void gcode_M84() {
+  if(code_seen('S')){ 
+    stepper_inactive_time = code_value() * 1000; 
+  } else { 
+    disable_x(); 
+    disable_y(); 
+    disable_z(); 
+    disable_e(); 
+  }
+#ifdef V3
+  V3_I2C_Command( V3_BUTTON_GREEN, false ) ;                   // Green on front
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
+//  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                   // 3 short beep
+#endif // ifdef V3
+}
+
+////////////////////////////////
+// M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
+////////////////////////////////
+
+inline void gcode_M85() {
+  code_seen('S');
+  max_inactive_time = code_value() * 1000; 
+}
+        
+////////////////////////////////
+// M92  - Set axis_steps_per_unit - same syntax as G92
+////////////////////////////////
+
+inline void gcode_M92() {
   for(int i=0; i < NUM_AXIS; i++) {
-    if(code_seen(axis_codes[i])) destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
-    else destination[i] = current_position[i];                                                       //Are these else lines really needed?
+    if(code_seen(axis_codes[i])) {
+      axis_steps_per_unit[i] = code_value();
+    }
+  }
+  //Update start speed intervals and axis order. TODO: refactor axis_max_interval[] calculation into a function, as it
+  // should also be used in setup() as well
+#ifdef RAMP_ACCELERATION
+   long temp_max_intervals[NUM_AXIS];
+    for(int i=0; i < NUM_AXIS; i++) {
+      axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);//TODO: do this for
+      // all steps_per_unit related variables
+    }
+#endif
+}
+
+////////////////////////////////
+// M104 - Set extruder target temp
+////////////////////////////////
+
+inline void gcode_M104() {
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;             // front orange flashing 
+  V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;             // nozzle orange flashing
+#endif    // ifdef V3
+  if (code_seen('S')) {
+    target_raw = temp2analogh(code_value());
+  }
+  if (error_code == ERROR_CODE_HOTEND_TEMPERATURE) {
+    wait_for_temp(); //if we have had a nozzle error, we should wait even though not wait command
+  } else {
+#ifdef WATCHPERIOD
+    if(target_raw > current_raw){
+      watchmillis = max(1,millis());
+      watch_raw = current_raw;
+    }else{
+      watchmillis = 0;
+    }
+#endif    // ifdef WATCHPERIOD
+  }
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+#endif // ifdef V3
+}
+        
+////////////////////////////////
+// M105 - Read current temp
+////////////////////////////////
+
+inline void gcode_M105() {
+
+#if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675)|| defined HEATER_USES_AD595
+  tt = analog2temp(current_raw);
+#endif
+#if TEMP_1_PIN > -1 || defined BED_USES_AD595
+  bt = analog2tempBed(current_bed_raw);
+#endif
+#if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675) || defined HEATER_USES_AD595
+  SerialMgr.cur()->print("ok T:");
+  SerialMgr.cur()->print(tt); 
+  #if TEMP_1_PIN > -1 || defined BED_USES_AD595
+  SerialMgr.cur()->print(" B:");
+  SerialMgr.cur()->println(bt);
+    #ifdef DEBUG_PID
+  SerialMgr.cur()->print(" R:");
+  SerialMgr.cur()->print(output);
+  SerialMgr.cur()->print(" E:");
+  SerialMgr.cur()->print(error);
+  SerialMgr.cur()->print(" P:");
+  SerialMgr.cur()->print(pTerm);
+  SerialMgr.cur()->print(" I:");
+  SerialMgr.cur()->print(iTerm);
+  SerialMgr.cur()->print(" D:");
+  SerialMgr.cur()->print(dTerm);
+  SerialMgr.cur()->print(" iState:");
+  SerialMgr.cur()->println(temp_iState);                        
+    #endif
+  #else
+  SerialMgr.cur()->println();
+  #endif
+#else
+  #error No temperature source available
+#endif
+}
+
+#if FAN_PIN > -1
+
+////////////////////////////////
+// M106: Set Fan Speed
+// *
+// *  S<int>   Speed between 0-255
+////////////////////////////////
+
+inline void gcode_M106() {
+  if (code_seen('S')) {
+    WRITE(FAN_PIN, HIGH);
+    analogWrite(FAN_PIN, constrain(code_value(),0,255) );
+  } else {
+    WRITE(FAN_PIN, HIGH);
+  }
+}
+
+////////////////////////////////
+// M107: Fan Off
+////////////////////////////////
+
+inline void gcode_M107() {
+  analogWrite(FAN_PIN, 0);
+  WRITE(FAN_PIN, LOW);
+}
+#endif
+
+////////////////////////////////
+// M109 - Wait for extruder heater to reach target.
+////////////////////////////////
+
+inline void gcode_M109() {
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;            // front orange flashing 
+  V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;            // nozzle orange flashing
+#endif // ifdef V3
+  if (code_seen('S')) 
+    target_raw = temp2analogh(code_value() - nzone);
+  wait_for_temp();
+#ifdef V3
+  V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+#endif // ifdef V3
+}
+
+////////////////////////////////
+// M114 - Display current position
+////////////////////////////////
+
+inline void gcode_M114() {
+  SerialMgr.cur()->print("X:");
+  SerialMgr.cur()->print(current_position[0]);
+  SerialMgr.cur()->print("Y:");
+  SerialMgr.cur()->print(current_position[1]);
+  SerialMgr.cur()->print("Z:");
+  SerialMgr.cur()->print(current_position[2]);
+  SerialMgr.cur()->print("E:");
+  SerialMgr.cur()->println(current_position[3]);
+}
+
+////////////////////////////////
+// M115	- Capabilities string
+////////////////////////////////
+
+inline void gcode_M115() {
+  //SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
+  SerialMgr.cur()->print("FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http://rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:");
+  SerialMgr.cur()->println(uuid);
+}
+
+////////////////////////////////
+// M119 - Report endstops status.
+////////////////////////////////
+
+inline void gcode_M119() {
+#if (X_MIN_PIN > -1)
+  SerialMgr.cur()->print("x_min:");
+  SerialMgr.cur()->print((READ(X_MIN_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
+#endif
+#if (X_MAX_PIN > -1)
+   SerialMgr.cur()->print("x_max:");
+   SerialMgr.cur()->print((READ(X_MAX_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
+#endif
+#if (Y_MIN_PIN > -1)
+  SerialMgr.cur()->print("y_min:");
+  SerialMgr.cur()->print((READ(Y_MIN_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
+#endif
+#if (Y_MAX_PIN > -1)
+  SerialMgr.cur()->print("y_max:");
+  SerialMgr.cur()->print((READ(Y_MAX_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
+#endif
+#if (Z_MIN_PIN > -1)
+  SerialMgr.cur()->print("z_min:");
+  SerialMgr.cur()->print((READ(Z_MIN_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
+#endif
+#if (Z_MAX_PIN > -1)
+  SerialMgr.cur()->print("z_max:");
+  SerialMgr.cur()->print((READ(Z_MAX_PIN)^ENDSTOPS_INVERTING)?"H ":"L ");
+#endif
+  SerialMgr.cur()->println("");
+}
+
+////////////////////////////////
+// M140 set bed temp.
+////////////////////////////////
+
+inline void gcode_M140() {
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;             // front orange flashing 
+  V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;             // nozzle orange flashing
+#endif // ifdef V3
+
+#if TEMP_1_PIN > -1 || defined BED_USES_AD595
+  if (code_seen('S')) {
+    target_bed_raw = temp2analogBed(code_value());
+  }
+#endif  // if TEMP_1_PIN > -1 || defined BED_USES_AD595
+#ifdef V3
+  V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+#endif // ifdef V3
+}
+
+////////////////////////////////
+// M190 - Wait bed for heater to reach target.
+////////////////////////////////
+
+inline void gcode_M190() {
+  unsigned long codenum; //throw away variable
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;            // front orange flashing 
+  V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;            // nozzle orange flashing
+#endif // ifdef V3
+#if TEMP_1_PIN > -1
+  if (code_seen('S')) {
+    target_bed_raw = temp2analogh(code_value());
+  }
+  codenum = millis(); 
+  while(current_bed_raw < target_bed_raw) {
+    if( (millis()-codenum) > 1000 ) {
+      //Print Temp Reading every 1 second while heating up.
+      tt=analog2temp(current_raw);
+      SerialMgr.cur()->print("T:");
+      SerialMgr.cur()->print( tt );
+      SerialMgr.cur()->print(" B:");
+      SerialMgr.cur()->println( analog2temp(current_bed_raw) ); 
+      codenum = millis(); 
+    }
+    manage_heater();
+  }
+#endif  // if TEMP_1_PIN > -1
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                      // blue on front
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                     // nozzle white
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                        // beep long x1
+#endif // ifdef V3
+}
+
+#ifdef RAMP_ACCELERATION
+      
+////////////////////////////////
+// M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
+// TODO: update for all axis, use for loop?
+////////////////////////////////
+
+inline void gcode_M201() {
+  for(int i=0; i < NUM_AXIS; i++) {
+    if(code_seen(axis_codes[i])) {
+      axis_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+    }
+  }
+}
+
+////////////////////////////////
+// M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
+////////////////////////////////
+
+inline void gcode_M202() {
+  for(int i=0; i < NUM_AXIS; i++) {
+    if(code_seen(axis_codes[i])) { 
+      axis_travel_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+    }
+  }
+}
+
+#endif  // ifdef RAMP_ACCELERATION
+
+////////////////////////////////
+// M203 - set Z height adjustment
+////////////////////////////////
+
+inline void gcode_M203() {
+  if(code_seen('Z')){
+    EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
+  }
+}
+
+////////////////////////////////
+// M205 - Advanced settings
+////////////////////////////////
+
+inline void gcode_M205() {
+  SerialMgr.cur()->print("ok o:");
+  SerialMgr.cur()->print(output);
+  SerialMgr.cur()->print(", p:");
+  SerialMgr.cur()->print(pTerm);
+  SerialMgr.cur()->print(", i:");
+  SerialMgr.cur()->print(iTerm);
+  SerialMgr.cur()->print(", d:");
+  SerialMgr.cur()->print(dTerm);
+}
+
+
+////////////////////////////////
+// M240 - Set or Get Z_MAX_LENGTH_M240 from EEPROM
+// 
+// Example 1: M240 Z120.00
+// This sets the Z_MAX_LENGTH_M240 to 120.00 in the EEPROM 
+// then sets the Z_MAX_LENGTH_M240 variable from EEPROM.
+// 
+// Example 2: M240 
+// This Gets the Z_MAX_LENGTH_M240 value from the EEPROM 
+////////////////////////////////
+
+inline void gcode_M240() {
+  if(code_seen('Z')){
+    Write_Z_MAX_LENGTH_M240_ToEEPROM(code_value());            // 数据拆分 - Save Data in eeprom
+    Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   //数据还原  - Now read data from eeprom and set variable
+  } else { 
+    Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   //数据还原  - read data from eeprom and set variable 
+  }
+}
+
+#ifdef PIDTEMP
+
+////////////////////////////////
+// M301 - Set PID parameters
+////////////////////////////////
+
+inline void gcode_M301(){
+  if(code_seen('P')) {
+    Kp = code_value();
+  }
+  if(code_seen('I')) {
+    Ki = code_value();
+  }
+  if(code_seen('D')) { 
+    Kd = code_value();
+  }
+  if(code_seen('F')) {
+    pid_max = code_value();
+  }
+  if(code_seen('Z')) {
+    nzone = code_value();
+  }
+  if(code_seen('W')) {
+    pid_i_max = code_value();
+  }
+  SerialMgr.cur()->print("Kp ");
+  SerialMgr.cur()->println(Kp);
+  SerialMgr.cur()->print("Ki ");
+  SerialMgr.cur()->println(Ki);
+  SerialMgr.cur()->print("Kd ");
+  SerialMgr.cur()->println(Kd);
+  SerialMgr.cur()->print("PID_MAX ");
+  SerialMgr.cur()->println(pid_max);
+  SerialMgr.cur()->print("PID_I_MAX ");
+  SerialMgr.cur()->println(pid_i_max);
+  SerialMgr.cur()->print("NZONE ");
+  SerialMgr.cur()->println(nzone);
+  temp_iState_min = -pid_i_max / Ki;
+  temp_iState_max = pid_i_max / Ki;
+}
+
+#endif //PIDTEMP
+
+inline void get_coordinates() {
+  for(int i=0; i < NUM_AXIS; i++) {
+    if(code_seen(axis_codes[i])) {
+      destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
+    } else {
+      destination[i] = current_position[i];                                                       //Are these else lines really needed?
+    }
   }
   if(code_seen('F')) {
     next_feedrate = code_value();
-    if(next_feedrate > 0.0) feedrate = next_feedrate;
+    if(next_feedrate > 0.0) {
+      feedrate = next_feedrate;
+    }
   }
 }
 
 
-void prepare_move()
-{
+void prepare_move() {
   //Find direction
   for(int i=0; i < NUM_AXIS; i++) {
     if(destination[i] >= current_position[i]) move_direction[i] = 1;
@@ -1852,14 +2042,13 @@ int read_max6675()
 }
 #endif
 
-void reset_status()
-{
+void reset_status() {
     status = STATUS_OK;
     error_code = ERROR_CODE_NO_ERROR;
 }
 
-void wait_for_temp()
-{
+void wait_for_temp() {
+  
   unsigned long codenum; //throw away variable
   
   if (error_code == ERROR_CODE_HOTEND_TEMPERATURE) {
@@ -1885,10 +2074,10 @@ void wait_for_temp()
   }
 }
 
-void manage_heater()
-{
-  if((millis() - previous_millis_heater) < HEATER_CHECK_INTERVAL )
+void manage_heater() {
+  if((millis() - previous_millis_heater) < HEATER_CHECK_INTERVAL ) {
     return;
+  }
   previous_millis_heater = millis();
   #ifdef HEATER_USES_THERMISTOR
     current_raw = analogRead(TEMP_0_PIN); 
@@ -2087,23 +2276,25 @@ int analog2tempu(int raw,const short table[][2], int numtemps, int source) {
 }
 
 
-inline void kill()
-{
-  #if TEMP_0_PIN > -1
+inline void kill() {
+#if TEMP_0_PIN > -1
   target_raw=0;
   WRITE(HEATER_0_PIN,LOW);
-  #endif
-  #if TEMP_1_PIN > -1
+#endif
+#if TEMP_1_PIN > -1
   target_bed_raw=0;
-  if(HEATER_1_PIN > -1) WRITE(HEATER_1_PIN,LOW);
-  #endif
+  if(HEATER_1_PIN > -1) {
+    WRITE(HEATER_1_PIN,LOW);
+  }
+#endif
   disable_x();
   disable_y();
   disable_z();
   disable_e();
   
-  if(PS_ON_PIN > -1) pinMode(PS_ON_PIN,INPUT);
-  
+  if(PS_ON_PIN > -1) {
+    pinMode(PS_ON_PIN,INPUT);
+  }
 }
 
 inline void manage_inactivity(byte debug) { 
