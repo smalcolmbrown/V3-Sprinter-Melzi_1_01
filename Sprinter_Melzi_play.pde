@@ -706,124 +706,16 @@ inline void process_commands()
 
   if(code_seen('G')) {
     switch((int)code_value()) {
-      case 0: // G0 -> G1
-      case 1: // G1
-#if (defined DISABLE_CHECK_DURING_ACC) || (defined DISABLE_CHECK_DURING_MOVE) || (defined DISABLE_CHECK_DURING_TRAVEL)
-        manage_heater();
-#endif
-        get_coordinates(); // For X Y Z E F
-        prepare_move();
-        previous_millis_cmd = millis();
-        //ClearToSend();
+      case 0:  // G0 -> G1
+      case 1:  // G1  - Coordinated Movement X Y Z E
+        gcode_G0_G1();
         return;
         //break;
-
-      case 4: // G4 dwell
-        codenum = 0;
-        if(code_seen('P')) codenum = code_value(); // milliseconds to wait
-        if(code_seen('S')) codenum = code_value() * 1000; // seconds to wait
-        codenum += millis();  // keep track of when we started waiting
-        while(millis()  < codenum ){
-          manage_heater();
-        }
+      case 4:  // G4  - Dwell S<seconds> or P<milliseconds>
+        gcode_G4();
         break;
-      case 28: //G28 Home all Axis one at a time
-#ifdef V3 // V3 specific code
-        V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
-        V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-        V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
-        delay(2000);                                                  // wait for beeps end   
-#endif   // ifdef V3
-        saved_feedrate = feedrate;
-        for(int i=0; i < NUM_AXIS; i++) {
-          destination[i] = current_position[i];
-        }
-        feedrate = 0;
-
-        home_all_axis = !((code_seen(axis_codes[0])) || (code_seen(axis_codes[1])) || (code_seen(axis_codes[2])));
-
-        if((home_all_axis) || (code_seen(axis_codes[0]))) {
-          if ((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
-            current_position[0] = 0;
-            destination[0] = 1.5 * X_MAX_LENGTH * X_HOME_DIR;
-            feedrate = homing_feedrate[0];
-            prepare_move();
-          
-            current_position[0] = 0;
-            destination[0] = -5 * X_HOME_DIR;
-            prepare_move();
-          
-            destination[0] = 10 * X_HOME_DIR;
-            prepare_move();
-
-            //for X offset 20160329
-            if(X_OFFSET > 0){
-              destination[0] = X_OFFSET;
-              prepare_move();
-            }
-            
-            current_position[0] = (X_HOME_DIR == -1) ? 0 : X_MAX_LENGTH;
-            destination[0] = current_position[0];
-            
-            feedrate = 0;
-          }
-        }
-        
-        if((home_all_axis) || (code_seen(axis_codes[1]))) {
-          if ((Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
-            current_position[1] = 0;
-            destination[1] = 1.5 * Y_MAX_LENGTH * Y_HOME_DIR;
-            feedrate = homing_feedrate[1];
-            prepare_move();
-          
-            current_position[1] = 0;
-            destination[1] = -5 * Y_HOME_DIR;
-            prepare_move();
-          
-            destination[1] = 10 * Y_HOME_DIR;
-            prepare_move();
-            
-            //for Y offset 20160329
-            if(Y_OFFSET > 0){
-              destination[1] = Y_OFFSET;
-              prepare_move();
-            }
-          
-            current_position[1] = (Y_HOME_DIR == -1) ? 0 : Y_MAX_LENGTH;
-            destination[1] = current_position[1];
-            feedrate = 0;
-          }
-        }
-        
-        if((home_all_axis) || (code_seen(axis_codes[2]))) {
-          if ((Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
-            current_position[2] = 0;
-            destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;
-            feedrate = homing_feedrate[2];
-            prepare_move();
-          
-            current_position[2] = 0;
-            destination[2] = -2 * Z_HOME_DIR;
-            prepare_move();
-          
-            destination[2] = 10 * Z_HOME_DIR;
-            prepare_move();
-            
-            current_position[2] = (Z_HOME_DIR == -1) ? (float)byteToint(EEPROM.read(Z_ADJUST_BYTE))/100 : Z_MAX_LENGTH_M240;
-            //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
-            //destination[2] = current_position[2];
-            feedrate = 0;
-          
-          }
-        }
-        
-        feedrate = saved_feedrate;
-        previous_millis_cmd = millis();
-#ifdef V3  // V3 specific code
-        V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
-        V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
-        V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-#endif // ifdef V3
+      case 28: // G28 - Home all Axis
+        gcode_G28();
         break;
 /*      case 29:
         saved_feedrate = feedrate;
@@ -853,18 +745,15 @@ inline void process_commands()
           feedrate = 0;
         }
         break;*/
-      case 90: // G90
+      case 90: // G90 - Use Absolute Coordinates
         relative_mode = false;
         break;
-      case 91: // G91
+      case 91: // G91 - Use Relative Coordinates
         relative_mode = true;
         break;
-      case 92: // G92
-        for(int i=0; i < NUM_AXIS; i++) {
-          if(code_seen(axis_codes[i])) current_position[i] = code_value();  
-        }
+      case 92: // G92 - Set current position to coordinates given
+        gcode_G92();
         break;
-        
     }
   }
 
@@ -873,108 +762,42 @@ inline void process_commands()
     
     switch((int)code_value()) {
       case 4: // M4 - Ask for status
-        SerialMgr.cur()->print("S:");
-        SerialMgr.cur()->print(status);
-        SerialMgr.cur()->print(", ");
-        SerialMgr.cur()->println(status_str[status]);
-        if(status == STATUS_ERROR) {
-          SerialMgr.cur()->print("EC:");
-          SerialMgr.cur()->print(error_code);
-          SerialMgr.cur()->print(", ");
-          SerialMgr.cur()->println(error_code_str[error_code]);
-        }
+        gcode_M4();
         break;
       case 5: // M5 - Reset errors
-        status = STATUS_OK;
-        error_code = ERROR_CODE_NO_ERROR;
+        gcode_M5();
         break;
         
 #ifdef SDSUPPORT
       case 20: // M20 - list SD card
-        SerialMgr.cur()->println("Begin file list");
-        root.ls();
-        SerialMgr.cur()->println("End file list");
+        gcode_M20();
         break;
       case 21: // M21 - init SD card
-        sdmode = false;
-        initsd();
+        gcode_M21();
         break;
-      case 22: //M22 - release SD card
-        sdmode = false;
-        sdactive = false;
+      case 22: // M22 - release SD card
+        gcode_M22();
         break;
-      case 23: //M23 - Select file
-        if(sdactive){
-          sdmode = false;
-          file.close();
-          starpos = (strchr(strchr_pointer + 4,'*'));
-          if(starpos!=NULL) {
-            *(starpos-1)='\0';
-          }
-          if(file.open(&root, strchr_pointer + 4, O_READ)) {
-             SerialMgr.cur()->print("File opened:");
-             SerialMgr.cur()->print(strchr_pointer + 4);
-             SerialMgr.cur()->print(" Size:");
-             SerialMgr.cur()->println(file.fileSize());
-             sdpos = 0;
-             filesize = file.fileSize();
-             SerialMgr.cur()->println("File selected");
-           } else {
-             SerialMgr.cur()->println("file.open failed");
-           }
-        }
+      case 23: // M23 - Select file
+        gcode_M23();
         break;
-      case 24: //M24 - Start SD print
-        if(sdactive){
-          sdmode = true;
-        }
+      case 24: // M24 - Start SD print
+        gcode_M24();
         break;
-      case 25: //M25 - Pause SD print
-        if(sdmode){
-          sdmode = false;
-        }
+      case 25: // M25 - Pause SD print
+        gcode_M25();
         break;
-      case 26: //M26 - Set SD index
-        if(sdactive && code_seen('S')){
-          sdpos = code_value_long();
-          file.seekSet(sdpos);
-        }
+      case 26: // M26 - Set SD index
+        gcode_M26();
         break;
-      case 27: //M27 - Get SD status
-        if(sdactive){
-          SerialMgr.cur()->print("SD printing byte ");
-          SerialMgr.cur()->print(sdpos);
-          SerialMgr.cur()->print("/");
-          SerialMgr.cur()->println(filesize);
-        }else{
-          SerialMgr.cur()->println("Not SD printing");
-        }
+      case 27: // M27 - Get SD status
+        gcode_M27();
         break;
-      case 28: //M28 - Start SD write
-        if(sdactive){
-          char* npos = 0;
-          file.close();
-          sdmode = false;
-          starpos = (strchr(strchr_pointer + 4,'*'));
-          if(starpos != NULL){
-            npos = strchr(cmdbuffer[bufindr], 'N');
-            strchr_pointer = strchr(npos,' ') + 1;
-            *(starpos-1) = '\0';
-          }
-          if (!file.open(&root, strchr_pointer+4, O_CREAT | O_APPEND | O_WRITE | O_TRUNC)) {
-            SerialMgr.cur()->print("open failed, File: ");
-            SerialMgr.cur()->print(strchr_pointer + 4);
-            SerialMgr.cur()->print(".");
-          }else{
-            savetosd = true;
-            SerialMgr.cur()->print("Writing to file: ");
-            SerialMgr.cur()->println(strchr_pointer + 4);
-          }
-        }
+      case 28: // M28 - Start SD write
+        gcode_M28();
         break;
-      case 29: //M29 - Stop SD write
-        //processed in write to file routine above
-        //savetosd = false;
+      case 29: // M29 - Stop SD write
+        gcode_M29();
         break;
 #endif  // ifdef SDSUPPORT
 
@@ -1141,7 +964,7 @@ inline void process_commands()
       case 239: // M239	Short Beep x 1
         V3_I2C_Command( V3_SHORT_BEEP, true ) ;             // sends 239, Short Beep
         break;
-      case 240: // M240 - Stores Z_MAX_LENGTH_M240 in EEPROM or Get Z_MAX_LENGTH_M240 from EEPROM
+      case 240:                                             // M240 - Stores Z_MAX_LENGTH_M240 in EEPROM or Get Z_MAX_LENGTH_M240 from EEPROM
         gcode_M240();
       break;
 #endif  // ifdef V3
@@ -1199,8 +1022,322 @@ void ClearToSend() {
   SerialMgr.cur()->println("ok");
 }
 
+/**************************************************
+ ***************** GCode Handlers *****************
+ **************************************************/
+
+////////////////////////////////
+// G0_G1 - Ask for status
+////////////////////////////////
+
+inline void gcode_G0_G1() {
+#if (defined DISABLE_CHECK_DURING_ACC) || (defined DISABLE_CHECK_DURING_MOVE) || (defined DISABLE_CHECK_DURING_TRAVEL)
+  manage_heater();
+#endif
+  get_coordinates(); // For X Y Z E F
+  prepare_move();
+  previous_millis_cmd = millis();
+  //ClearToSend();
+}
+
+////////////////////////////////
+// G4 dwell
+////////////////////////////////
+
+inline void gcode_G4() { 
+  unsigned long codenum = 0; //throw away variable
+  if(code_seen('P')) {
+    codenum = code_value(); // milliseconds to wait
+  }
+  if(code_seen('S')) {
+    codenum = code_value() * 1000; // seconds to wait
+  }
+  codenum += millis();  // keep track of when we started waiting
+  while(millis()  < codenum ){
+    manage_heater();
+  }
+}
+
+////////////////////////////////
+// G28 Home all Axis one at a time
+////////////////////////////////
+
+inline void gcode_G28() {
+#ifdef V3 // V3 specific code
+  V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  delay(2000);                                                  // wait for beeps end   
+#endif   // ifdef V3
+  saved_feedrate = feedrate;
+  for(int i=0; i < NUM_AXIS; i++) {
+    destination[i] = current_position[i];
+  }
+  feedrate = 0;
+
+  home_all_axis = !((code_seen(axis_codes[0])) || (code_seen(axis_codes[1])) || (code_seen(axis_codes[2])));
+
+  if((home_all_axis) || (code_seen(axis_codes[0]))) {
+    if((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
+      current_position[0] = 0;
+      destination[0] = 1.5 * X_MAX_LENGTH * X_HOME_DIR;
+      feedrate = homing_feedrate[0];
+      prepare_move();
+      
+      current_position[0] = 0;
+      destination[0] = -5 * X_HOME_DIR;
+      prepare_move();
+      
+      destination[0] = 10 * X_HOME_DIR;
+      prepare_move();
+      
+      //for X offset 20160329
+      if(X_OFFSET > 0){
+        destination[0] = X_OFFSET;
+        prepare_move();
+      }
+      
+      current_position[0] = (X_HOME_DIR == -1) ? 0 : X_MAX_LENGTH;
+      destination[0] = current_position[0];
+      feedrate = 0;
+    }
+  }
+  
+  if((home_all_axis) || (code_seen(axis_codes[1]))) {
+    if((Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
+      current_position[1] = 0;
+      destination[1] = 1.5 * Y_MAX_LENGTH * Y_HOME_DIR;
+      feedrate = homing_feedrate[1];
+      prepare_move();
+      
+      current_position[1] = 0;
+      destination[1] = -5 * Y_HOME_DIR;
+      prepare_move();
+      
+      destination[1] = 10 * Y_HOME_DIR;
+      prepare_move();
+      
+      //for Y offset 20160329
+      if(Y_OFFSET > 0){
+        destination[1] = Y_OFFSET;
+        prepare_move();
+      }
+      
+      current_position[1] = (Y_HOME_DIR == -1) ? 0 : Y_MAX_LENGTH;
+      destination[1] = current_position[1];
+      feedrate = 0;
+    }
+  }
+  
+  if((home_all_axis) || (code_seen(axis_codes[2]))) {
+    if((Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
+      current_position[2] = 0;
+      destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;
+      feedrate = homing_feedrate[2];
+      prepare_move();
+      
+      current_position[2] = 0;
+      destination[2] = -2 * Z_HOME_DIR;
+      prepare_move();
+          
+      destination[2] = 10 * Z_HOME_DIR;
+      prepare_move();
+            
+      current_position[2] = (Z_HOME_DIR == -1) ? (float)byteToint(EEPROM.read(Z_ADJUST_BYTE))/100 : Z_MAX_LENGTH_M240;
+      //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
+      //destination[2] = current_position[2];
+      feedrate = 0;
+    }
+  }
+        
+  feedrate = saved_feedrate;
+  previous_millis_cmd = millis();
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+#endif // ifdef V3
+}
+
+////////////////////////////////
+// G92 - Set current position to coordinates given
+////////////////////////////////
+
+inline void gcode_G92() {
+  for(int i=0; i < NUM_AXIS; i++) {
+    if(code_seen(axis_codes[i])) current_position[i] = code_value();  
+  }
+}
 
 
+////////////////////////////////
+// M4 - Ask for status
+////////////////////////////////
+
+inline void gcode_M4() {
+  SerialMgr.cur()->print("S:");
+  SerialMgr.cur()->print(status);
+  SerialMgr.cur()->print(", ");
+  SerialMgr.cur()->println(status_str[status]);
+  if(status == STATUS_ERROR) {
+    SerialMgr.cur()->print("EC:");
+    SerialMgr.cur()->print(error_code);
+    SerialMgr.cur()->print(", ");
+    SerialMgr.cur()->println(error_code_str[error_code]);
+  }
+}
+
+////////////////////////////////
+// M5 - Reset errors
+////////////////////////////////
+
+inline void gcode_M5() { 
+  status = STATUS_OK;
+  error_code = ERROR_CODE_NO_ERROR;
+}
+
+
+#ifdef SDSUPPORT
+
+////////////////////////////////
+// M20 - list SD card
+////////////////////////////////
+
+inline void gcode_M20() {
+  SerialMgr.cur()->println("Begin file list");
+  root.ls();
+  SerialMgr.cur()->println("End file list");
+}
+
+////////////////////////////////
+// M21 - init SD card
+////////////////////////////////
+
+inline void gcode_M21() { 
+  sdmode = false;
+  initsd();
+}
+
+////////////////////////////////
+// M22 - release SD card
+////////////////////////////////
+
+inline void gcode_M22() {
+  sdmode = false;
+  sdactive = false;
+}
+
+////////////////////////////////
+//M23 - Select file
+////////////////////////////////
+
+inline void gcode_M23() {
+  char *starpos = NULL;
+  if(sdactive){
+    sdmode = false;
+    file.close();
+    starpos = (strchr(strchr_pointer + 4,'*'));
+    if(starpos!=NULL) {
+      *(starpos-1)='\0';
+    }
+    if(file.open(&root, strchr_pointer + 4, O_READ)) {
+      SerialMgr.cur()->print("File opened:");
+      SerialMgr.cur()->print(strchr_pointer + 4);
+      SerialMgr.cur()->print(" Size:");
+      SerialMgr.cur()->println(file.fileSize());
+      sdpos = 0;
+      filesize = file.fileSize();
+      SerialMgr.cur()->println("File selected");
+    } else {
+      SerialMgr.cur()->println("file.open failed");
+    }
+  }
+}
+
+////////////////////////////////
+// M24 - Start SD print
+////////////////////////////////
+
+inline void gcode_M24() {
+  if(sdactive){
+    sdmode = true;
+  }
+}
+
+////////////////////////////////
+// M25 - Pause SD print
+////////////////////////////////
+
+inline void gcode_M25() {
+  if(sdmode){
+    sdmode = false;
+  }
+}
+
+////////////////////////////////
+// M26 - Set SD index
+////////////////////////////////
+
+inline void gcode_M26() {
+  if(sdactive && code_seen('S')){
+    sdpos = code_value_long();
+    file.seekSet(sdpos);
+  }
+}
+
+////////////////////////////////
+// M27 - Get SD status
+////////////////////////////////
+
+inline void gcode_M27() {
+  if(sdactive){
+    SerialMgr.cur()->print("SD printing byte ");
+    SerialMgr.cur()->print(sdpos);
+    SerialMgr.cur()->print("/");
+    SerialMgr.cur()->println(filesize);
+  }else{
+    SerialMgr.cur()->println("Not SD printing");
+  }
+}
+        
+////////////////////////////////
+// M28 - Start SD write
+////////////////////////////////
+
+inline void gcode_M28() {
+  char *starpos = NULL;
+  if(sdactive){
+    char* npos = 0;
+    file.close();
+    sdmode = false;
+    starpos = (strchr(strchr_pointer + 4,'*'));
+    if(starpos != NULL){
+      npos = strchr(cmdbuffer[bufindr], 'N');
+      strchr_pointer = strchr(npos,' ') + 1;
+      *(starpos-1) = '\0';
+    }
+    if(!file.open(&root, strchr_pointer+4, O_CREAT | O_APPEND | O_WRITE | O_TRUNC)) {
+      SerialMgr.cur()->print("open failed, File: ");
+      SerialMgr.cur()->print(strchr_pointer + 4);
+      SerialMgr.cur()->print(".");
+    }else{
+      savetosd = true;
+      SerialMgr.cur()->print("Writing to file: ");
+      SerialMgr.cur()->println(strchr_pointer + 4);
+    }
+  }
+}
+
+////////////////////////////////
+// M29 - Stop SD write
+////////////////////////////////
+
+inline void gcode_M29() {
+  //processed in write to file routine above
+  //savetosd = false;
+}
+
+#endif  // ifdef SDSUPPORT
 
 ////////////////////////////////
 // M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
