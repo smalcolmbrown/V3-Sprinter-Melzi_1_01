@@ -1,4 +1,4 @@
-# V3-Sprinter-Melzi-Play
+# V3-Sprinter-Melzi_1_01
 The original Eaglemoss V3 3D printer firmware cleaned up and modified. 
 
 arduino 0023 is required for the build and upload.
