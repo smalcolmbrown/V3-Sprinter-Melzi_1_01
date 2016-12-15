@@ -8,7 +8,7 @@ added a function to handle the V3 I2C device and the necessay defines
 
 All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required
 
-Nominally called version 1.01
+Nominally called Version 1.01
 
 look here for descriptions of gcodes: http://reprap.org/wiki/G-code
 
