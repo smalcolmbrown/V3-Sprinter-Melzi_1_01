@@ -13,7 +13,7 @@ Nominally called version 1.01
 look here for descriptions of gcodes: http://reprap.org/wiki/G-code
 
 Implemented Codes
--------------------
+
 G0  - Coordinated Movement X Y Z E
 G1  - Coordinated Movement X Y Z E
 G4  - Dwell S<seconds> or P<milliseconds>
