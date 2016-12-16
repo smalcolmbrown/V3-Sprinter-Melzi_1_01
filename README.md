@@ -1,14 +1,24 @@
 # V3-Sprinter-Melzi_1_01
 The original Eaglemoss V3 3D printer firmware cleaned up and modified. 
 
-arduino 0023 is required for the build and upload.
+Nominally called Version 1.01
 
-Almost all V3 specific and all V3 specific variables have been moved to two new files unsurpringly called V3.cpp and V3.h
+Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+
+based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi
+V3 parts http://rp3d.com/ 
+
+Licence: GPL
+
+Arduino 0023 is required for the build and upload.
+
+Almost all V3 specific code and all V3 specific variables have been moved to two new files unsurpringly called V3.cpp and V3.h
 added a function to handle the V3 I2C device and the necessay defines 
 
 All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required
 
-Nominally called Version 1.01
+Some primatives for an I2C Alpha numeric LCD added
+
 
 look here for descriptions of gcodes: http://reprap.org/wiki/G-code
 
