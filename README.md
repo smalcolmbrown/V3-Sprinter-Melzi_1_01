@@ -22,7 +22,7 @@ Some primatives for an I2C Alpha numeric LCD added
 
 look here for descriptions of gcodes: http://reprap.org/wiki/G-code
 
-Implemented Codes
+Implemented G Codes
 
 G0  - Coordinated Movement X Y Z E
 G1  - Coordinated Movement X Y Z E
@@ -32,7 +32,8 @@ G90 - Use Absolute Coordinates
 G91 - Use Relative Coordinates
 G92 - Set current position to cordinates given
 
-RepRap and Custom M Codes
+RepRap and Custom G Codes
+
 M20  - List SD card
 M21  - Init SD card
 M22  - Release SD card
@@ -57,7 +58,7 @@ M106 - Fan on
 M107 - Fan off
 M109 - Wait for extruder current temp to reach target temp.
 M114 - Display current position
-M115	- Capabilities string
+M115 - Capabilities string
 M140 - Set bed target temp
 M190 - Wait for bed current temp to reach target temp.
 M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
@@ -65,7 +66,8 @@ M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 M203 - Adjust Z height
 M205 - Advanced settings
 
-V3 mods for non standard M Codes
+V3 specific non standard G Codes
+
 M211 - sends 211 to V3_I2C device, extruder Red LED on
 M212 - sends 212 to V3_I2C device, extruder Red LED flashing
 M213 - sends 213 to V3_I2C device, extruder Green LED on
@@ -93,9 +95,10 @@ M234 - sends 234 to V3_I2C device, Long Beep x 1 ( 3 sec)
 M235 - sends 235 to V3_I2C device, Beep every sec, 3 min.
 M236 - sends 236 to V3_I2C device, Beep Off
 M237 - Hood Switch Enable
-M238	- Hood Switch Disable
+M238 - Hood Switch Disable
 M239 - sends 239 to V3_I2C device, Short Beep
-M240 - set Z_MAX_LENGTH_M240
-end of V3 mods
+M240 - Get Z_MAX_LENGTH_M240 from EEPRON, Set Z_MAX_LENGTH_M240 and save to EEPROM
+
+End of V3 specific G Codes
 
 M301 - Set PID parameters
