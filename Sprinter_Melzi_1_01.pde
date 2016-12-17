@@ -167,6 +167,10 @@ float axis_diff[NUM_AXIS] = {0, 0, 0, 0};
 float Z_MAX_LENGTH_M240 = 120.00;
 
 
+#if FAN_PIN > -1
+  bool bFanOn = false;
+#endif
+
               
 
 // comm variables
@@ -284,6 +288,8 @@ unsigned long stepper_inactive_time = 0;
       }
   }
 #endif
+
+
 
 #ifdef V3 // V3 specific code
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1475,6 +1481,7 @@ inline void gcode_M106() {
   } else {
     WRITE(FAN_PIN, HIGH);
   }
+  bFanOn = true;
 }
 
 ////////////////////////////////
@@ -1484,6 +1491,7 @@ inline void gcode_M106() {
 inline void gcode_M107() {
   analogWrite(FAN_PIN, 0);
   WRITE(FAN_PIN, LOW);
+  bFanOn = false;
 }
 #endif
 
