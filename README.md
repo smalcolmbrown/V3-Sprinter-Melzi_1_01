@@ -20,21 +20,7 @@ All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in 
 
 I2C_LCD needs F Malpartida's NewLiquidCrystal library. Ddownload the repository from https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads and put it in your documents/arduino/libraries folder and restart your ide.
 
-You need to modify libuary file LiquidCrystal_I2C_ByVac.h
-
-From:
-
-#include <Arduino.h>
-
-To:
-
-#if (ARDUINO <  100)
-#include <WProgram.h>
-#else
-#include <Arduino.h>
-#endif
-
-To get the program to compile in Arduino 0023 
+You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to compile in Arduino 0023 
 
 2016/12/19 Added:
 I2C_lcd.h to contain the I2C lcd specific declarations.
