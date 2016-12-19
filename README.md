@@ -18,12 +18,30 @@ added a function to handle the V3 I2C device and the necessay defines
 
 All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required
 
+I2C_LCD needs F Malpartida's NewLiquidCrystal library. Ddownload the repository from https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads and put it in your documents/arduino/libraries folder and restart your ide.
+
+You need to modify libuary file LiquidCrystal_I2C_ByVac.h
+
+From:
+
+#include <Arduino.h>
+
+To:
+
+#if (ARDUINO <  100)
+#include <WProgram.h>
+#else
+#include <Arduino.h>
+#endif
+
+To get the program to compile in Arduino 0023 
+
 2016/12/19 Added:
-I2C_lcd.h to contain the I2C lcd specific declarations
-I2C_lcd.cpp to contain the I2C lcd specific functions etc
-global int btt to store the target heated bed temperature in degrees C
-global int ett to store the extrude traget temprature in degrees C
-global bool bFanOn to store fan status: true = on, false = off
-added a call to SplashScreen() to setup
-added call to StatusScreen() to funtion gcode_M190() to update status screen whist waiting for the bed to get to temperature
-added call to StatusScreen() to funtion wait_for_temp() to update status screen whist waiting for the extruder to get to temperature
+I2C_lcd.h to contain the I2C lcd specific declarations.
+I2C_lcd.cpp to contain the I2C lcd specific functions etc.
+global int btt to store the target heated bed temperature in degrees C.
+global int ett to store the extrude traget temprature in degrees C.
+global bool bFanOn to store fan status: true = on, false = off.
+added a call to SplashScreen() to setup.
+added call to StatusScreen() to funtion gcode_M190() to update status screen whist waiting for the bed to get to temperature.
+added call to StatusScreen() to funtion wait_for_temp() to update status screen whist waiting for the extruder to get to temperature.
