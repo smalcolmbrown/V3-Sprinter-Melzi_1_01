@@ -13,6 +13,17 @@
 // download the repository from here and put it in your documents/arduino/libraries folder and restart your ide 
 // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
 // adaptations needed to work with arduino version 0023
+/*
+LiquidCrystal_I2C_ByVac.h
+
+change from 
+#include <Arduino.h>
+to
+#include <WProgram.h>
+#else
+#include <Arduino.h>
+#endif
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
