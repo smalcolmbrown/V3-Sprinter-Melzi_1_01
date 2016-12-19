@@ -2,32 +2,7 @@
 #define CONFIGURATION_H
 
 // comment out if no I2C display
-//#define MALSOFT_I2C_DISPLAY
-
-#ifdef MALSOFT_I2C_DISPLAY
-  // comment out the option that is not used
-  //#define PCF8574
-  #define PCF8574A
-
-  #ifdef PCF8574
-    #define I2C_ADDR    0x2f  // Define I2C Address for PCF8574 port expander
-  #endif
-  #ifdef PCF8574A
-    #define I2C_ADDR    0x3f  // Define I2C Address for PCF8574A port expander
-  #endif
-  #define BACKLIGHT_PIN  3
-  #define En_pin  2
-  #define Rw_pin  1
-  #define Rs_pin  0
-  #define D4_pin  4
-  #define D5_pin  5
-  #define D6_pin  6
-  #define D7_pin  7
-
-  #define  LED_OFF  0
-  #define  LED_ON  1
-#endif
-
+#define MALSOFT_I2C_DISPLAY
 
 // Uncomment ONE of the next three lines - the one for your RepRap machine
 #define V3

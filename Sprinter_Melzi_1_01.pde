@@ -18,6 +18,7 @@
 #endif
 
 #ifdef MALSOFT_I2C_DISPLAY
+  #include "I2C_lcd.h"
   #include <LCD.h>
   #include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
   // download the repository from here and put it in your documents/arduino/libraries folder and restart your ide 
@@ -195,7 +196,13 @@ int target_raw = 0;
 int current_raw = 0;
 int target_bed_raw = 0;
 int current_bed_raw = 0;
-int tt = 0, bt = 0;
+
+int tt = 0 ;       // Extruder temperature in C
+int bt = 0 ;       // Heated Bed temperature in C
+int ett = 0 ;      // Extruder target temperature in C
+int btt = 0 ;      // Heated Bed target temperature in C
+
+
 #ifdef PIDTEMP
   int temp_iState = 0;
   int temp_dState = 0;
@@ -503,8 +510,13 @@ void setup()
 
 #endif
 
+#ifdef V3  // V3 specific code
   Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();
+#endif
 
+#ifdef MALSOFT_I2C_DISPLAY
+  SplashScreen();
+#endif
 }
 
 
@@ -701,13 +713,7 @@ inline void process_commands()
   char *starpos = NULL;
 
 #ifdef MALSOFT_I2C_DISPLAY
-  int iNewBedTemperature = GetBedTemperature();
-  int iNewExtruderTemperature = GetExtruderTemperature();
-  if ((iNewBedTemperature != iOldBedTemprature ) ¦¦ (iNewExtruderTemperature !=iOldExtruderTemperature)) {
-    update_LCD_Temperature();
-    iOldBedTemprature = iNewBedTemperature ;
-    iOldExtruderTemperature = iNewExtruderTemperature;
-  }
+  StatusScreen();
 #endif
 
   if(code_seen('G')) {
@@ -1405,7 +1411,8 @@ inline void gcode_M104() {
   V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;             // nozzle orange flashing
 #endif    // ifdef V3
   if (code_seen('S')) {
-    target_raw = temp2analogh(code_value());
+    ett = code_value();
+    target_raw = temp2analogh(ett);
   }
   if (error_code == ERROR_CODE_HOTEND_TEMPERATURE) {
     wait_for_temp(); //if we have had a nozzle error, we should wait even though not wait command
@@ -1505,7 +1512,8 @@ inline void gcode_M109() {
   V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;            // nozzle orange flashing
 #endif // ifdef V3
   if (code_seen('S')) 
-    target_raw = temp2analogh(code_value() - nzone);
+    ett = code_value();
+    target_raw = temp2analogh(ett - nzone);
   wait_for_temp();
 #ifdef V3
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
@@ -1583,7 +1591,8 @@ inline void gcode_M140() {
 
 #if TEMP_1_PIN > -1 || defined BED_USES_AD595
   if (code_seen('S')) {
-    target_bed_raw = temp2analogBed(code_value());
+    btt = code_value();
+    target_bed_raw = temp2analogBed(btt);
   }
 #endif  // if TEMP_1_PIN > -1 || defined BED_USES_AD595
 #ifdef V3
@@ -1605,7 +1614,8 @@ inline void gcode_M190() {
 #endif // ifdef V3
 #if TEMP_1_PIN > -1
   if (code_seen('S')) {
-    target_bed_raw = temp2analogh(code_value());
+    btt = code_value();
+    target_bed_raw = temp2analogh(btt);
   }
   codenum = millis(); 
   while(current_bed_raw < target_bed_raw) {
@@ -1616,6 +1626,9 @@ inline void gcode_M190() {
       SerialMgr.cur()->print( tt );
       SerialMgr.cur()->print(" B:");
       SerialMgr.cur()->println( analog2temp(current_bed_raw) ); 
+#ifdef MALSOFT_I2C_DISPLAY
+      StatusScreen();                                            // update the bed temperature
+#endif
       codenum = millis(); 
     }
     manage_heater();
@@ -2210,9 +2223,12 @@ void wait_for_temp() {
 #endif
   codenum = millis(); 
   while ((current_raw < target_raw) && (status == STATUS_OK)) {
-    if( (millis() - codenum) > 1000 ) {        //Print Temp Reading every 1 second while heating up.
+    if( (millis() - codenum) > 1000 ) {                          // Print Temp Reading every 1 second while heating up.
       SerialMgr.cur()->print("T:");
       SerialMgr.cur()->println( analog2temp(current_raw) ); 
+#ifdef MALSOFT_I2C_DISPLAY
+      StatusScreen();                                            // update the LCD bed temperature
+#endif
       codenum = millis(); 
     }
     manage_heater();
