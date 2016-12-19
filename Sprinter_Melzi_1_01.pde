@@ -19,11 +19,6 @@
 
 #ifdef MALSOFT_I2C_DISPLAY
   #include "I2C_lcd.h"
-  #include <LCD.h>
-  #include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
-  // download the repository from here and put it in your documents/arduino/libraries folder and restart your ide 
-  // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
-  // adaptations needed to work with arduino version 0023
 #endif
 
 #ifdef SDSUPPORT
