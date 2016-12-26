@@ -18,7 +18,7 @@ added a function to handle the V3 I2C device and the necessay defines
 
 All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required
 
-I2C_LCD needs F Malpartida's NewLiquidCrystal library. Ddownload the repository from https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads and put it in your documents/arduino/libraries folder and restart your ide.
+I2C_LCD needs F Malpartida's NewLiquidCrystal library. Download the repository from https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads and put it in your documents/arduino/libraries folder and restart your ide.
 
 You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to compile in Arduino 0023 
 
