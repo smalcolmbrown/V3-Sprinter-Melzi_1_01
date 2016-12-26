@@ -6,13 +6,24 @@
 // By:        Suusi Malcolm-Brown
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+#include "enumcodes.h"
 #include "I2C_lcd.h"
 #include <LCD.h>
 #include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
 // download the repository from here and put it in your documents/arduino/libraries folder and restart your ide 
 // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
 // adaptations needed to work with arduino version 0023
+/*
+LiquidCrystal_I2C_ByVac.h
+
+change from 
+#include <Arduino.h>
+to
+#include <WProgram.h>
+#else
+#include <Arduino.h>
+#endif
+*/
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -28,13 +39,13 @@ void ConvertleadingSpacesToZeros( char* source );
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define ERROR_CODE_NO_ERROR 0
-#define ERROR_CODE_HOTEND_TEMPERATURE 1
-#define ERROR_CODE_BED_TEMPERATURE 2
+//#define ERROR_CODE_NO_ERROR 0
+//#define ERROR_CODE_HOTEND_TEMPERATURE 1
+//#define ERROR_CODE_BED_TEMPERATURE 2
 
-#define STATUS_OK 0
-#define STATUS_SD 1
-#define STATUS_ERROR 2
+//#define STATUS_OK 0
+//#define STATUS_SD 1
+//#define STATUS_ERROR 2
 
 
 #define NUM_AXIS 4

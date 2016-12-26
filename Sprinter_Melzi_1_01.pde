@@ -9,6 +9,7 @@
 //#include "pins.h"
 #include "Configuration.h"
 #include "Sprinter.h"
+#include "Enumcodes.h"
 #include "SerialManager.h"
 #include <EEPROM.h>
 #include <Wire.h>
@@ -19,6 +20,22 @@
 
 #ifdef MALSOFT_I2C_DISPLAY
   #include "I2C_lcd.h"
+  #include <LCD.h>
+  #include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
+  // download the repository from here and put it in your documents/arduino/libraries folder and restart your ide 
+  // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
+  // adaptations needed to work with arduino version 0023
+/*
+LiquidCrystal_I2C_ByVac.h
+
+change from 
+#include <Arduino.h>
+to
+#include <WProgram.h>
+#else
+#include <Arduino.h>
+#endif
+*/
 #endif
 
 #ifdef SDSUPPORT
@@ -197,6 +214,9 @@ int bt = 0 ;       // Heated Bed temperature in C
 int ett = 0 ;      // Extruder target temperature in C
 int btt = 0 ;      // Heated Bed target temperature in C
 
+const char* status_str[]         = { "Ok", "SD", "Error"};
+const char* error_code_str[]     = { "No Error", "Hotend", "Bed" };
+const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_00/", "1.01", "Vector 3 3D Printer", "1" };
 
 #ifdef PIDTEMP
   int temp_iState = 0;
@@ -1537,9 +1557,24 @@ inline void gcode_M114() {
 ////////////////////////////////
 
 inline void gcode_M115() {
+
+  SerialMgr.cur()->print("FIRMWARE_NAME:");
+  SerialMgr.cur()->print(pszFirmware[FIRMWARE_NAME]);
+  SerialMgr.cur()->print(" FIRMWARE_URL:");
+  SerialMgr.cur()->print(pszFirmware[FIRMWARE_URL]);
+  SerialMgr.cur()->print(" PROTOCOL_VERSION:");
+  SerialMgr.cur()->print(pszFirmware[FIRMWARE_VERSION]);
+  SerialMgr.cur()->print(" MACHINE_TYPE:");
+  SerialMgr.cur()->print(pszFirmware[FIRMWARE_MACHINENAME]);
+  SerialMgr.cur()->print(" EXTRUDER_COUNT:");
+  SerialMgr.cur()->print(pszFirmware[FIRMWARE_EXTRUDERS]);
+  SerialMgr.cur()->print("UUID:");
+  SerialMgr.cur()->println(uuid);
+/*
   //SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
   SerialMgr.cur()->print("FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http://rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:");
   SerialMgr.cur()->println(uuid);
+*/
 }
 
 ////////////////////////////////
