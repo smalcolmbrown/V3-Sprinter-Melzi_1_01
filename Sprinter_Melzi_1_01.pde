@@ -31,9 +31,10 @@ LiquidCrystal_I2C_ByVac.h
 change from 
 #include <Arduino.h>
 to
-#include <WProgram.h>
+#if (ARDUINO <  100)
+  #include <WProgram.h>
 #else
-#include <Arduino.h>
+  #include <Arduino.h>
 #endif
 */
 #endif
