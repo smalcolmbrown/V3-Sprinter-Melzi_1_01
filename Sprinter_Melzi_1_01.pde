@@ -745,7 +745,8 @@ inline void process_commands()
       case 28: // G28 - Home all Axis
         gcode_G28();
         break;
-/*      case 29:
+/*
+      case 29:
         saved_feedrate = feedrate;
         if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
           current_position[2] = 0;
@@ -772,7 +773,8 @@ inline void process_commands()
           //destination[2] = current_position[2];
           feedrate = 0;
         }
-        break;*/
+        break;
+*/
       case 90: // G90 - Use Absolute Coordinates
         relative_mode = false;
         break;
