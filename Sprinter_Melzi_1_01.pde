@@ -747,7 +747,7 @@ inline void process_commands()
         gcode_G28();
         break;
       case 29:
-      case 30:
+      case 30:  // G30 - Single Z-Probe
         gcode_G30();
         break;
       case 90: // G90 - Use Absolute Coordinates
