@@ -105,7 +105,7 @@ const int Y_MAX_LENGTH = 140;
 const int Z_MAX_LENGTH = 130;
 #endif
 
-/*#define Z_INCREMENT 0.05*/
+#define Z_INCREMENT 0.05
 
 //// MOVEMENT SETTINGS
 const int NUM_AXIS = 4; // The axis order in all axis related arrays is X, Y, Z, E
@@ -945,7 +945,7 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #define E_STEP_PIN         1
 #define E_DIR_PIN          0
 
-/*#define PROBE_PIN          11*/
+#define PROBE_PIN          11
 
 #define LED_PIN            27
 
