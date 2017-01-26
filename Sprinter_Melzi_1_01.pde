@@ -1170,11 +1170,19 @@ inline void gcode_G28() {
 ////////////////////////////////
 
 inline void gcode_G30() {
-  saved_feedrate = feedrate;
+
+#ifdef V3 // V3 specific code
+  V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  delay(2000);                                                  // wait for beeps end   
+#endif   // ifdef V3
+  saved_feedrate = feedrate;                                    // save the current feed rate
+                                                                // for the V3 Z_HOME_DIR = 1 meaning the endstop is at MAX
   if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
     current_position[2] = 0;
-    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;
-    feedrate = homing_feedrate[2];
+    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 
+    feedrate = homing_feedrate[2];                              // 350 set in Configuration.h
     prepare_move();
           
     //move up in small increments until switch makes
@@ -1204,6 +1212,13 @@ inline void gcode_G30() {
   to do: 
   Q. why save a feed rate if you don't restore it?
 */
+  feedrate = saved_feedrate;
+  previous_millis_cmd = millis();
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+#endif // ifdef V3
 }
 
 ////////////////////////////////
