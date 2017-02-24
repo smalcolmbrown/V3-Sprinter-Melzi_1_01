@@ -533,6 +533,7 @@ void setup()
 
 #ifdef MALSOFT_I2C_DISPLAY
   SplashScreen();
+  StatusScreen();
 #endif
 }
 
@@ -1181,7 +1182,7 @@ inline void gcode_G30() {
                                                                 // for the V3 Z_HOME_DIR = 1 meaning the endstop is at MAX
   if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
     current_position[2] = 0;
-    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 
+    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 1.5 * 130 * -1 = -195
     feedrate = homing_feedrate[2];                              // 350 set in Configuration.h
     prepare_move();
           
@@ -1193,8 +1194,8 @@ inline void gcode_G30() {
     while(READ(PROBE_PIN) == true && z<50){
       SerialMgr.cur()->print("ZMIN=");
       SerialMgr.cur()->println(READ(PROBE_PIN));
-      destination[2] = current_position[2] - Z_INCREMENT * Z_HOME_DIR;
-      prepare_move();
+      destination[2] = current_position[2] - Z_INCREMENT * Z_HOME_DIR;  // .05 * -1
+      prepare_move();                                            // cure
       z++;
     }
             
