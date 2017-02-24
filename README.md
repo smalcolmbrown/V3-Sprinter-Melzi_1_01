@@ -28,9 +28,14 @@ I2C_lcd.cpp to contain the I2C lcd specific functions etc.
 global int btt to store the target heated bed temperature in degrees C.
 global int ett to store the extrude traget temprature in degrees C.
 global bool bFanOn to store fan status: true = on, false = off.
-added a call to SplashScreen() to setup.
+added a call to SplashScreen() to setup().
 added call to StatusScreen() to funtion gcode_M190() to update status screen whist waiting for the bed to get to temperature.
 added call to StatusScreen() to funtion wait_for_temp() to update status screen whist waiting for the extruder to get to temperature.
 
 2017/01/22 Added:
 enabled the code for G29 / G30 G Code Currently residing in the LCD-modifications branch
+
+2017/02/24 Added:
+Added StatusScreen() to setup()
+Fixed bug in UUID on the LCD SplashScreen() by changing char uuid[] = "0000..." to char pointer uuid = "0000..."
+Merged LCD and master branches
