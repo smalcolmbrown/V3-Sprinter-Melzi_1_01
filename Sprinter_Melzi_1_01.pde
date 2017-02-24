@@ -53,6 +53,7 @@ to
 // G1  - Coordinated Movement X Y Z E
 // G4  - Dwell S<seconds> or P<milliseconds>
 // G28 - Home all Axis
+// G30 - Single Z-Probe
 // G90 - Use Absolute Coordinates
 // G91 - Use Relative Coordinates
 // G92 - Set current position to cordinates given
@@ -463,10 +464,10 @@ void setup()
   #if Z_MAX_PIN > -1
     SET_INPUT(Z_MAX_PIN); 
   #endif
-/*  #if PROBE_PIN > -1
+  #if PROBE_PIN > -1
     SET_INPUT(PROBE_PIN);
   #endif
-*/
+
   #endif
 
   #if (FAN_PIN > -1) 
@@ -745,36 +746,10 @@ inline void process_commands()
       case 28: // G28 - Home all Axis
         gcode_G28();
         break;
-/*
       case 29:
-        saved_feedrate = feedrate;
-        if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
-          current_position[2] = 0;
-          destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;
-          feedrate = homing_feedrate[2];
-          prepare_move();
-          
-          //move up in small increments until switch makes
-          int z=0;
-          current_position[2] = 0;
-          SerialMgr.cur()->print("ZMIN=");
-          SerialMgr.cur()->println(READ(PROBE_PIN));
-          while(READ(PROBE_PIN) == true && z<50){
-            SerialMgr.cur()->print("ZMIN=");
-            SerialMgr.cur()->println(READ(PROBE_PIN));
-            destination[2] = current_position[2] - Z_INCREMENT * Z_HOME_DIR;
-            prepare_move();
-            z++;
-          }
-            
-          SerialMgr.cur()->print("Z=");
-          SerialMgr.cur()->println(current_position[2]);
-          //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
-          //destination[2] = current_position[2];
-          feedrate = 0;
-        }
+      case 30:  // G30 - Single Z-Probe
+        gcode_G30();
         break;
-*/
       case 90: // G90 - Use Absolute Coordinates
         relative_mode = false;
         break;
@@ -1180,6 +1155,63 @@ inline void gcode_G28() {
     }
   }
         
+  feedrate = saved_feedrate;
+  previous_millis_cmd = millis();
+#ifdef V3  // V3 specific code
+  V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+#endif // ifdef V3
+}
+
+
+////////////////////////////////
+// G30 -  Single Z-Probe
+////////////////////////////////
+
+inline void gcode_G30() {
+
+#ifdef V3 // V3 specific code
+  V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
+  V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  delay(2000);                                                  // wait for beeps end   
+#endif   // ifdef V3
+  saved_feedrate = feedrate;                                    // save the current feed rate
+                                                                // for the V3 Z_HOME_DIR = 1 meaning the endstop is at MAX
+  if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
+    current_position[2] = 0;
+    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 
+    feedrate = homing_feedrate[2];                              // 350 set in Configuration.h
+    prepare_move();
+          
+    //move up in small increments until switch makes
+    int z=0;
+    current_position[2] = 0;
+    SerialMgr.cur()->print("ZMIN=");
+    SerialMgr.cur()->println(READ(PROBE_PIN));
+    while(READ(PROBE_PIN) == true && z<50){
+      SerialMgr.cur()->print("ZMIN=");
+      SerialMgr.cur()->println(READ(PROBE_PIN));
+      destination[2] = current_position[2] - Z_INCREMENT * Z_HOME_DIR;
+      prepare_move();
+      z++;
+    }
+            
+    SerialMgr.cur()->print("Z=");
+    SerialMgr.cur()->println(current_position[2]);
+/*
+    to do: 
+    Save this value into the EEPROM
+*/
+    //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
+    //destination[2] = current_position[2];
+    feedrate = 0;
+  }
+/* 
+  to do: 
+  Q. why save a feed rate if you don't restore it?
+*/
   feedrate = saved_feedrate;
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
