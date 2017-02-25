@@ -39,3 +39,7 @@ enabled the code for G29 / G30 G Code Currently residing in the LCD-modification
 Added StatusScreen() to setup()
 Fixed bug in UUID on the LCD SplashScreen() by changing char uuid[] = "0000..." to char pointer uuid = "0000..."
 Merged LCD and master branches
+
+2017/02/25 Added:
+fixed bug in M190 so LCD displays increasing temperature
+fixed bug in status strings.
