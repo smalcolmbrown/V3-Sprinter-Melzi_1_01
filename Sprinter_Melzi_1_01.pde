@@ -183,7 +183,7 @@ float Z_MAX_LENGTH_M240 = 120.00;
 
 
 #if FAN_PIN > -1
-  bool bFanOn = false;
+  bool bFanOn = true;
 #endif
 
               
@@ -216,9 +216,9 @@ int bt = 0 ;       // Heated Bed temperature in C
 int ett = 0 ;      // Extruder target temperature in C
 int btt = 0 ;      // Heated Bed target temperature in C
 
-const char* status_str[]         = { "Ok", "SD", "Error"};
+const char* status_str[]         = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* error_code_str[]     = { "No Error", "Hotend", "Bed" };
-const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_00/", "1.01", "Vector 3 3D Printer", "1" };
+const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", "1.01", "Vector 3 3D Printer", "1" };
 
 #ifdef PIDTEMP
   int temp_iState = 0;
@@ -1659,6 +1659,9 @@ inline void gcode_M140() {
   if (code_seen('S')) {
     btt = code_value();
     target_bed_raw = temp2analogBed(btt);
+#ifdef MALSOFT_I2C_DISPLAY
+    StatusScreen();                                            // update the bed temperature
+#endif
   }
 #endif  // if TEMP_1_PIN > -1 || defined BED_USES_AD595
 #ifdef V3
@@ -1691,7 +1694,8 @@ inline void gcode_M190() {
       SerialMgr.cur()->print("T:");
       SerialMgr.cur()->print( tt );
       SerialMgr.cur()->print(" B:");
-      SerialMgr.cur()->println( analog2temp(current_bed_raw) ); 
+      bt=analog2temp(current_bed_raw);
+      SerialMgr.cur()->println( bt ); 
 #ifdef MALSOFT_I2C_DISPLAY
       StatusScreen();                                            // update the bed temperature
 #endif
