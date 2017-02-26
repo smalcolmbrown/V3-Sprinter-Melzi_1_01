@@ -75,10 +75,10 @@ char  szT[41] ;                                // workspace for float to string 
 bool  bNewStatusScreen = true;
 float faOldPosition[NUM_AXIS] = { -1, -1, -1, 0.0};
 int   iPrinterState = STATE_IDLE;		   	   // printer state
-const char* pszPrinterState[] = {	"Idle",
-									"Heating",
-									"Printing",
-									"Done" };
+const char* pszPrinterState[] = { "Idle    ",
+                                  "Heating ",
+                                  "Printing",
+                                  "Done    " };
 
 LiquidCrystal_I2C  lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
 
@@ -101,7 +101,7 @@ void PrinterState( ){
 			// If the extruder temperature is within 5 degrees of the extruder target
 			// temperature then change state, otherwise do nothing. The bed temperature
 			// does not matter as some do not use a heated bed.
-			if( tt >= (ett -5)){
+			if( tt >= (ett -5) && (ett != 0 )){
 				iPrinterState = STATE_PRINTING;
 			}
 			break;
