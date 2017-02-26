@@ -27,21 +27,30 @@ to
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// local declarations
+// defines
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void ConvertleadingSpacesToZeros( char* source );
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// local variables
-//
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define NUM_AXIS 4
 #define NUM_DIGITS 7
 #define NUM_PRECISION 1
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// local function declarations
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ConvertleadingSpacesToZeros( char* source );
+void PrinterState();
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// extenal variables
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 extern float current_position[] ;              // hook to X,Y,Z and E positions
 extern bool bFanOn ;                           // hook to fan status false = off true = on
 extern int tt ;                                // hook to Extruder temperature in C
@@ -55,12 +64,59 @@ extern const char* error_code_str[] ;          // hook to error strings
 extern const char* pszFirmware[] ;             // hook to Firmware strings
 extern const char* uuid ;                      // hook to error UUID string
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// local variables and classes
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 char  szTemp[41];                              // temp work aria for sprintf
 char  szT[41] ;                                // workspace for float to string conversions
 bool  bNewStatusScreen = true;
 float faOldPosition[NUM_AXIS] = { -1, -1, -1, 0.0};
+int   iPrinterState = STATE_IDLE;		   	   // printer state
+const char* pszPrinterState[] = { "Idle    ",
+                                  "Heating ",
+                                  "Printing",
+                                  "Done    " };
 
 LiquidCrystal_I2C  lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// void PrinterState()
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+void PrinterState( ){
+	switch( iPrinterState){
+		case STATE_IDLE:
+			// If the bed or extruder temperature is set to anything other than
+			// zero then we are heating: change state, otherwise do nothing.
+			if ( ett || btt) {
+				iPrinterState = STATE_HEATING;
+			}
+			break;
+		case STATE_HEATING:
+			// If the extruder temperature is within 5 degrees of the extruder target
+			// temperature then change state, otherwise do nothing. The bed temperature
+			// does not matter as some do not use a heated bed.
+			if( tt >= (ett -5) && (ett != 0 )){
+				iPrinterState = STATE_PRINTING;
+			}
+			break;
+		case STATE_PRINTING:
+			// We are printing if the target temperature drops to Zero then we have 
+			// finished the job change state otherwise do nothing.
+			if ( !ett ) {
+				iPrinterState = STATE_DONE;
+			}
+			break;
+		case STATE_DONE:
+			// we have finished the job nothing left to do.
+			break;
+	}
+}
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +146,7 @@ void StatusScreen(){
   lcd.print( szTemp );
 
   // do fourth line
-  
+  PrinterState( );
   lcd.setCursor(0,3);
   if( status == STATUS_ERROR ){
     if(error_code){
@@ -99,7 +155,8 @@ void StatusScreen(){
     }
   } else {
     // no error
-    sprintf( szTemp, "%s: %s", pszFirmware[FIRMWARE_NAME], status_str[status]);
+    sprintf( szTemp, "%s: %s", pszFirmware[FIRMWARE_NAME], pszPrinterState[iPrinterState]);
+//    sprintf( szTemp, "%s: %s", pszFirmware[FIRMWARE_NAME], status_str[status]);
     lcd.print( szTemp );
   }
 }

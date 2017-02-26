@@ -19,13 +19,13 @@ enum StatusCodes {
     STATUS_ABORT 
   };
 
-  enum ErrorCodes { 
+enum ErrorCodes { 
     ERROR_CODE_NO_ERROR = 0, 
     ERROR_CODE_HOTEND_TEMPERATURE, 
     ERROR_CODE_BED_TEMPERATURE 
   };
 
-  enum Firmware {
+enum Firmware {
     FIRMWARE_NAME = 0,
     FIRMWARE_URL,
     FIRMWARE_VERSION,
@@ -33,4 +33,10 @@ enum StatusCodes {
     FIRMWARE_EXTRUDERS
   };
   
+enum PrinterCodes {
+	STATE_IDLE = 0,
+	STATE_HEATING,
+	STATE_PRINTING,
+	STATE_DONE
+  };
 #endif
