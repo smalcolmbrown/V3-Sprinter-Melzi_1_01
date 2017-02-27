@@ -44,6 +44,6 @@ Merged LCD and master branches
 fixed bug in M190 so LCD displays increasing temperature
 fixed bug in status strings.
 
-2017/02/26 Added: Displaying printer state on LCD "Sprinter: Idle", "Sprinter: Heating", "Sprinter: Printing, "Sprinter: Done"
+2017/02/26 Added: Displaying printer state on LCD "Sprinter: Idle", "Sprinter: Heating", "Sprinter: Printing", "Sprinter: Done"
 
 2017/02/27 Bug Fix: fixed Bug in displaying printer state on the LCD. 
