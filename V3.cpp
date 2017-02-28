@@ -130,7 +130,6 @@ void check_PauseID() {
 // this bit bit commented out by eaglemoss / reprap pro coder 
 // thank the stars imagine 3 mins of beeping!
 //
-/*
 
   if( (HSW_Enable == HOODSWITCH_ENABLED) && ((PauseID & HOODSWITCH_BIT) == HOODSWITCH_OPEN) ){ 
     
@@ -145,6 +144,7 @@ void check_PauseID() {
     V3_I2C_Command( V3_BEEP_OFF, false ) ;                        // beep off
     V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
   }  // end of if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x01) )
+/*
               */
 
 // Front Button Switch		

@@ -155,7 +155,7 @@ void StatusScreen(){
     }
   } else {
     // no error
-    sprintf( szTemp, "%s: %s", pszFirmware[FIRMWARE_NAME], pszPrinterState[iPrinterState]);
+    sprintf( szTemp, "%s: %s", pszFirmware[FIRMWARE_MACHINENAME], pszPrinterState[iPrinterState]);
 //    sprintf( szTemp, "%s: %s", pszFirmware[FIRMWARE_NAME], status_str[status]);
     lcd.print( szTemp );
   }
@@ -168,12 +168,13 @@ void StatusScreen(){
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SplashScreen() {
+  int i ;
   lcd.begin (20,4);  // initialize the lcd
   lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
   lcd.setBacklight(LED_ON);
   lcd.clear();
   lcd.home();
-  lcd.setCursor(0,0); 
+  lcd.setCursor(10-(strlen(pszFirmware[FIRMWARE_MACHINENAME])/2) ,0); 
   lcd.print( pszFirmware[FIRMWARE_MACHINENAME] );
   sprintf(szTemp, "V %s Dev", pszFirmware[FIRMWARE_VERSION] );
   lcd.setCursor(10-(strlen(szTemp)/2),1);
