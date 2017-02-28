@@ -553,7 +553,7 @@ void loop() {
 //  SerialMgr.cur()->println("ok");   
 
 #ifdef V3  // V3 specific code
-  if( (buflen<3) && (PauseID == 0x03) && (FSW_status == 1) ) {
+  if( (buflen<3) && (PauseID == V3_SWITCHES_MASK ) && (FSW_status == 1) ) {
 #else      // non V3 Code
   if( buflen<3 ) {
 #endif   // ifdef V3

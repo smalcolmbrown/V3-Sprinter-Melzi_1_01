@@ -103,100 +103,79 @@ void Write_Z_MAX_LENGTH_M240_ToEEPROM(float fZ_Max_Length) {
 void check_PauseID() {
   
   if((millis() - previous_millis_PauseID) < 100 ) {               //check the PauseID every 100mS
-    
     return;                                                       // return if less than 100 mS has elapsed
-    
   }
-  // 100 mS has elapsed since the last button check
   previous_millis_PauseID = millis();                             // update previous with current millis()
-  
+                                                                  // 100 mS has elapsed since the last button check
+
   V3_I2C_Command( V3_HOODSWITCH_ENABLE, false ) ;                 // Hood Switch Enable
 //  SerialMgr.cur()->println("M237 OK");
-  //char b = 0x03;
+                                                                  //char b = b011 ;
   Wire.requestFrom(0x48, 1);                                      // request 1 bytes from slave device #0x48
 
-  while(Wire.available()) {
-    // slave may send less than requested
+  while(Wire.available()) {                                       // slave may send less than requested
     char c = Wire.receive();                                      // receive a byte as character
-//    SerialMgr.cur()->println(c, HEX);                           // print the character
-    PauseID = c & 0x03;                                           // mask off unwanted bits
+//    SerialMgr.cur()->println(c, HEX);                             // print the character
+//    PauseID = c & 0x03;                                           // mask off unwanted bits
+    PauseID = c & V3_SWITCHES_MASK;                               // mask off unwanted bits
   }
 
-  if (HSW_Enable == 0x00){                                        // if hood switch is disabled
-    
-    PauseID = PauseID | 0x01;                                     // then set it in software
-    
-  }
+  if (HSW_Enable == HOODSWITCH_DISABLED){                         // if hood switch is disabled
+//    PauseID = PauseID | 0x01;                                     // then set it in software
+    PauseID = PauseID | HOODSWITCH_BIT;                           // then set it in software
+   }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// this bit bit commented out by eaglemoss coder thank the stars 
-// imagine 3 mins of beeping!
+// this bit bit commented out by eaglemoss / reprap pro coder 
+// thank the stars imagine 3 mins of beeping!
 //
-
 /*
-  if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x00) ){      // M212, M223, M235; front red flashing, nozzle red flashing, Beep every sec, 3 min.
-  
+
+  if( (HSW_Enable == HOODSWITCH_ENABLED) && ((PauseID & HOODSWITCH_BIT) == HOODSWITCH_OPEN) ){ 
+    
     V3_I2C_Command( V3_NOZZLE_RED_FLASH, false ) ;                // nozzel red flashing
     V3_I2C_Command( V3_BUTTON_RED_FLASH, false ) ;                // front red flashing
     V3_I2C_Command( V3_BEEP_FOR_3_MIN, false ) ;                  // Beep every sec, 3 min.
-    
-  }
-  
-  if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x01) ){      // M226, M236, M217; front blue, beep off, nozzle white
-    
+  }  // end of if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x00) )
+	  
+  if( (HSW_Enable == HOODSWITCH_ENABLED) && ((PauseID & HOODSWITCH_BIT) == HOODSWITCH_CLOSED) ){
+	
     V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // front blue
     V3_I2C_Command( V3_BEEP_OFF, false ) ;                        // beep off
     V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-    
- }
+  }  // end of if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x01) )
               */
 
-// Front Switch		
+// Front Button Switch		
 // Long Press: “Emergency Stop” to Main Chip.
 // Short Press:”Pause” to Main chip.
-                                                                  // Long Press: “Emergency Stop” to Main Chip.
-                    
-  if (FSW_Counter > 30){                                          // FSW_Counter = 31; 
     
+  if( FSW_Counter > FSW_COUNTER_MAX){                             // FSW_Counter = 31; 
     EmergencyStop();                                              // forever stop 
-
   }    // end of if (FSW_Counter > 30)
-                            
-// Short Press:”Pause” to Main chip.
-                                                                  // Short Press: ”Pause” to Main chip.                            
   
-  if( (FSW_Counter > 5) && ( FSW_Counter <= 30 ) ) {
-    
+  if( (FSW_Counter > FSW_COUNTER_MIN) && ( FSW_Counter <= FSW_COUNTER_MAX ) ) {
     V3_I2C_Command( V3_SHORT_BEEP, false ) ;                      // beep short x1
-                              
-    if ( (PauseID & 0x02) == 0x02 ) {                             // released the Front Switch
-      
+    if( (PauseID & FRONT_BUTTON_BIT) == FRONT_BUTTON_RELEASED ) { // Front Button Switch Released
 //      PauseID = ~PauseID;
       SerialMgr.cur()->println("Pause/Unpause");
-      
       FSW_status = ~FSW_status;
-      FSW_Counter = 0;   
+      FSW_Counter = 0;                                            // reset press time counter
     }    // end of if ( (PauseID & 0x02) == 0x02 )
-
   }    // end of if( (FSW_Counter > 5) && ( FSW_Counter <= 30 ) )
-
+ 
   //else PauseID = 0x03;
-                            
-  if( FSW_Counter <= 5){
-    if ( (PauseID & 0x02) == 0x02 ){                              // released the Front Switch
-      FSW_Counter = 0;
+ 
+  if( FSW_Counter <= FSW_COUNTER_MIN){
+    if( (PauseID & FRONT_BUTTON_BIT) == FRONT_BUTTON_RELEASED ){  // Front Switch released  
+      FSW_Counter = 0;                                            // Reset front button counter
     }    // end of if ( (PauseID & 0x02) == 0x02 )
   }    // end of if( FSW_Counter <= 5)
   
-  // if the front button is pressed increment the button pressed time counter
-  
-  if ( (PauseID & 0x02) == 0 ){
-    
-    FSW_Counter++;
-    
+  if( (PauseID & FRONT_BUTTON_BIT) == FRONT_BUTTON_PRESSED ){     // Front Switch pressed 
+    FSW_Counter++;                                                // increment the button pressed time counter
 //    PauseID = 0x03;
-    
   }    // end of if ( (PauseID & 0x02) == 0 )
   
 }

@@ -53,8 +53,22 @@
 #define V3_HOODSWITCH_ENABLE   237    // Hood Switch Enable
 #define V3_HOODSWITCH_DISABLE  238    // Hood Switch Disable
 
+#define V3_SWITCHES_MASK       3      // only the lowest two digits are valid switches
 
+#define HOODSWITCH_OPEN        0      // Printer Hood is open
+#define HOODSWITCH_CLOSED      1      // Printer Hood is closed
+#define HOODSWITCH_ENABLED     1      // true if enabled
+#define HOODSWITCH_DISABLED    0      // false if disabled
+#define HOODSWITCH_BIT         1      // hoodswitch switch state is in bit 0
 
+// Front Button Switch 
+
+#define FRONT_BUTTON_PRESSED   0      // Front Button is pressed
+#define FRONT_BUTTON_RELEASED  2      // Front Button is released
+#define FRONT_BUTTON_BIT       2      // Front Button state is in bit 1
+
+#define FSW_COUNTER_MIN        5      //
+#define FSW_COUNTER_MAX        30     //
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
