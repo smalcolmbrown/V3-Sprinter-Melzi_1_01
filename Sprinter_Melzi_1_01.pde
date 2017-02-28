@@ -2295,7 +2295,8 @@ void wait_for_temp() {
   while ((current_raw < target_raw) && (status == STATUS_OK)) {
     if( (millis() - codenum) > 1000 ) {                          // Print Temp Reading every 1 second while heating up.
       SerialMgr.cur()->print("T:");
-      SerialMgr.cur()->println( analog2temp(current_raw) ); 
+	  tt = analog2temp(current_raw);
+      SerialMgr.cur()->println( tt ); 
 #ifdef MALSOFT_I2C_DISPLAY
       StatusScreen();                                            // update the LCD bed temperature
 #endif
