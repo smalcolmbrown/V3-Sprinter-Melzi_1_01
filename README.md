@@ -52,3 +52,4 @@ Fixed Bug in displaying printer state on the LCD.
 
 2017/02/28 Added:
 Made the check_PauseID() function in V3.cpp more readable through a series of defines in V3.h
+Fixed bug in M109 that was preventing the LCD from displaying the extruder Temperature as it rose from ambient to target temperature.
