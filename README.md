@@ -53,3 +53,6 @@ Fixed Bug in displaying printer state on the LCD.
 2017/02/28 Added:
 Made the check_PauseID() function in V3.cpp more readable through a series of defines in V3.h
 Fixed bug in M109 that was preventing the LCD from displaying the extruder Temperature as it rose from ambient to target temperature.
+Changed printer name from "Vector 3 3D printer" to "Vector 3"
+fixed centering bug in SplashScreen() 
+Displaying printer state on LCD to "Vector 3: Idle", "Vector 3: Heating", "Vector 3: Printing", "Vector 3: Done"
