@@ -59,6 +59,8 @@ to
 // G92 - Set current position to cordinates given
 
 // RepRap and Custom M Codes
+// M4   - Query Status. (V3 only)
+// M5   - Reset Status and Clears Error flag. (V3 only)
 // M20  - List SD card
 // M21  - Init SD card
 // M22  - Release SD card
@@ -747,10 +749,11 @@ inline void process_commands()
       case 28: // G28 - Home all Axis
         gcode_G28();
         break;
-      case 29:
+#ifdef HAS_BED_PROBE
       case 30:  // G30 - Single Z-Probe
         gcode_G30();
         break;
+#endif  // ifdef HAS_BED_PROBE
       case 90: // G90 - Use Absolute Coordinates
         relative_mode = false;
         break;
@@ -1165,12 +1168,21 @@ inline void gcode_G28() {
 #endif // ifdef V3
 }
 
+#ifdef HAS_BED_PROBE
 
 ////////////////////////////////
 // G30 -  Single Z-Probe
+//   * Usage:
+//   *   G30 <X#> <Y#> <S#>
+//   *     X = Probe X position (default=current probe position)
+//   *     Y = Probe Y position (default=current probe position)
+//
 ////////////////////////////////
 
 inline void gcode_G30() {
+float fX_Probe;
+float fY_Probe;
+float fZ_Height;
 
 #ifdef V3 // V3 specific code
   V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
@@ -1178,42 +1190,26 @@ inline void gcode_G30() {
   V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
   delay(2000);                                                  // wait for beeps end   
 #endif   // ifdef V3
-  saved_feedrate = feedrate;                                    // save the current feed rate
-                                                                // for the V3 Z_HOME_DIR = 1 meaning the endstop is at MAX
-  if (PROBE_PIN > -1 && Z_HOME_DIR==-1){
-    current_position[2] = 0;
-    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 1.5 * 130 * -1 = -195
-    feedrate = homing_feedrate[2];                              // 350 set in Configuration.h
-    prepare_move();
-          
-    //move up in small increments until switch makes
-    int z=0;
-    current_position[2] = 0;
-    SerialMgr.cur()->print("ZMIN=");
-    SerialMgr.cur()->println(READ(PROBE_PIN));
-    while(READ(PROBE_PIN) == true && z<50){
-      SerialMgr.cur()->print("ZMIN=");
-      SerialMgr.cur()->println(READ(PROBE_PIN));
-      destination[2] = current_position[2] - Z_INCREMENT * Z_HOME_DIR;  // .05 * -1
-      prepare_move();                                            // cure
-      z++;
-    }
-            
-    SerialMgr.cur()->print("Z=");
-    SerialMgr.cur()->println(current_position[2]);
+
+  if (PROBE_PIN > -1 ){                                         // we have a Z Height Probe.
+    
+    saved_feedrate = feedrate;                                  // save the current feed rate
+	
+	// set the correct X and Y position if set in the G Code
+	
+    fX_Probe = code_seen('X') ? (float)code_value() : current_position[0] ;
+    fY_Probe = code_seen('Y') ? (float)code_value() : current_position[1] ;
+	
+    fZ_Height = probe_XY_point(fX_Probe, fY_Probe) ;       // get the Z height
+	
 /*
     to do: 
     Save this value into the EEPROM
 */
     //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
     //destination[2] = current_position[2];
-    feedrate = 0;
+   feedrate = saved_feedrate;
   }
-/* 
-  to do: 
-  Q. why save a feed rate if you don't restore it?
-*/
-  feedrate = saved_feedrate;
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
@@ -1221,6 +1217,60 @@ inline void gcode_G30() {
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
 #endif // ifdef V3
 }
+
+
+////////////////////////////////
+// float probe_XY_point(const float fX_Probe, const float fY_Probe )
+//
+// fX_Probe - the X position to probe Z height
+// fY_Probe - the Y position to probe Z height
+//
+// returns the Bed height @ point fX_Probe, fY_Probe
+////////////////////////////////
+
+float probe_XY_point(const float fX_Probe, const float fY_Probe ){
+
+  // first take the bed down to the Z_MAX Endstop
+  //  and the required X and Y position
+  
+  current_position[2] = 0;
+  destination[0] = fX_Probe + X_PROBE_OFFSET_FROM_EXTRUDER,
+  destination[1] = fY_Probe + Y_PROBE_OFFSET_FROM_EXTRUDER;
+  destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 1.5 * 130 * 1 = 195 for the V3
+  feedrate = homing_feedrate[2];                              // 350 set in Configuration.h for the V3
+  prepare_move();
+  
+  // now we are at Z_MAX
+  
+  if( Z_HOME_DIR == 1) {
+  
+    // we have to move the platform up towards the probe so not many Z steps are needed
+    // Z_MAX_LENGTH - 10mm is a good start
+	
+    destination[2] = current_position[2] - (Z_MAX_LENGTH - Z_CLEARANCE_BETWEEN_PROBES) ;   
+    prepare_move();
+  } else {
+    current_position[2] = 0;
+  }
+	
+  //now move up in small increments until switch makes
+	
+  SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
+  SerialMgr.cur()->println(READ(PROBE_PIN));
+  int z=0;
+  while(READ(PROBE_PIN) == true && z < ((Z_HOME_DIR == -1) ? 50 : 250)){
+    SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
+    SerialMgr.cur()->println(READ(PROBE_PIN));
+    destination[2] = current_position[2] - (Z_INCREMENT * Z_HOME_DIR) ;
+	
+    prepare_move();                                            // do the move
+    z++;                                                       // increment the limit counter
+  }
+  
+  return current_position[2];
+}
+
+#endif // HAS_BED_PROBE
 
 ////////////////////////////////
 // G92 - Set current position to coordinates given
