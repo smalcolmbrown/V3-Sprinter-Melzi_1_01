@@ -56,3 +56,6 @@ Fixed bug in M109 that was preventing the LCD from displaying the extruder Tempe
 Changed printer name from "Vector 3 3D printer" to "Vector 3"
 fixed centering bug in SplashScreen() 
 Displaying printer state on LCD to "Vector 3: Idle", "Vector 3: Heating", "Vector 3: Printing", "Vector 3: Done"
+
+2017/07/14 Added:
+Added M42 function works on M42 A1 S1 syntax as per Bill and M42 P30 S1 as per reprap wikki. A V3 melzi specific version of Klimet's code 
