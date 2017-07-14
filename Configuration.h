@@ -4,6 +4,9 @@
 // comment out if no I2C display
 #define MALSOFT_I2C_DISPLAY
 
+// comment out of no M42 support
+#define M42_SUPPORT
+
 // Uncomment ONE of the next three lines - the one for your RepRap machine
 #define V3
 
@@ -38,7 +41,8 @@
 // X, Y, Z, E steps per unit - String with extruder
 //float axis_steps_per_unit[] = {78.82, 78.82,78.82,99.6150}; //V3-Z-belt
 //float axis_steps_per_unit[] = {78.82, 78.82,400,99.6150}; //V3-Z-screw
-float axis_steps_per_unit[] = {78.82, 78.82,2560,99.6150}; //V3-Z-screw2
+//float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150}; //V3-Z-screw2
+float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150}; //V3-Z-screw2
 
 //// Endstop Settings
 //#define ENDSTOPPULLUPS 1 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
@@ -62,7 +66,7 @@ const bool ENDSTOPS_INVERTING = true; //set to true to invert the logic of the e
 	#define BLUETOOTH_SERIAL Serial1
 #endif
 
-
+// catch all for the V3 
 #ifndef V3
   #error Uncomment one of #define V3 at the start of the file Configuration.h
 #endif
@@ -154,6 +158,23 @@ int pid_i_max = 80;//130;//125;
 double Kp = 2;//1.10;
 double Ki = 0.01;
 double Kd = 20.0;//0.01;
+#endif
+
+
+
+//-----------------------------------------------------------------------
+//// SETTINGS FOR Z PROBE FUNCTION (Command G30)
+//-----------------------------------------------------------------------
+
+// Comment out (using // at the start of the line) to disable Bed Probe support:
+#define HAS_BED_PROBE 1
+#ifdef HAS_BED_PROBE
+#define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]
+#define Y_PROBE_OFFSET_FROM_EXTRUDER 10  // Y offset: -front +behind [the nozzle]
+#define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
+
+#define Z_CLEARANCE_BETWEEN_PROBES   10  // Z Clearance between probe points
+
 #endif
 
 //-----------------------------------------------------------------------
@@ -946,7 +967,9 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #define E_STEP_PIN         1
 #define E_DIR_PIN          0
 
-#define PROBE_PIN          11
+#define PROBE_PIN          11     // TX1 on V3
+//#define PROBE_PIN          29    //29 on Melzi1284p A2
+
 
 #define LED_PIN            27
 

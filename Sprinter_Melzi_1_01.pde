@@ -71,6 +71,7 @@ to
 // M27  - Report SD print status
 // M28  - Start SD write (M28 filename.g)
 // M29  - Stop SD write does not do anything.
+// M42  - Switch I/O pin
 // M80  - Turn on Power Supply
 // M81  - Turn off Power Supply
 // M82  - Set E codes absolute (default)
@@ -137,6 +138,10 @@ extern int FSW_Counter ;       // = 0; //rp3d.com Front Switch Counter
 extern int FSW_status ;        // = 1; //rp3d.com Front Switch Status
 // unsigned long previous_millis_PauseID;
 #endif
+
+// M42 related vairables
+int OUT_PIN =0;
+int pin_status = 0;
 
 //Printer status variables
 int status = STATUS_OK; //
@@ -810,6 +815,12 @@ inline void process_commands()
         break;
 #endif  // ifdef SDSUPPORT
 
+#ifdef M42_SUPPORT
+      case 42: // M42 - Switch I/O pin
+        gcode_M42();
+        break;
+#endif  // ifdef M42_SUPPORT
+
 #if (PS_ON_PIN > -1)
       case 80: // M81 - ATX Power On
         SET_OUTPUT(PS_ON_PIN); //GND
@@ -1451,6 +1462,57 @@ inline void gcode_M29() {
 }
 
 #endif  // ifdef SDSUPPORT
+
+#ifdef M42_SUPPORT
+
+////////////////////////////////
+// M42 - Switch I/O pin - Thanx Bill and Kliment
+//
+//       M42 A(pin number) S(0=off 1=on)
+//      (A1 to A4)
+//      eg. M42 A1 S1 This turns pin A1 on.
+//      eg. M42 A1 S0 This turns pin A1 off
+//
+//      or
+//
+//      M42 P(pin number) S(1=on 0=off)
+//      eg. M42 P30 S1 This turns pin A1 on.
+//      eg. M42 P30 S0 This turns pin A1 off
+//
+//      Pins definitions:
+//      A1=30, A2=29, A3=28, A4=27
+//      Pin A4 = LED_PIN
+////////////////////////////////
+
+inline void gcode_M42() {
+  int pin_number;
+  code_seen ( 'S' );
+  pin_status =code_value();
+  if( code_seen ( 'A' )) {     
+    
+    pin_number = 31 - code_value() ;
+    if (pin_number <27 || pin_number >30) {
+      pin_number = -1;
+    }
+    
+  } else if( code_seen('P') && pin_status >= 0 && pin_status <= 255) {
+    pin_number = code_value();
+    if (pin_number <27 || pin_number >30) {  // only pins A1 A2 A3 A4 allowed on the V3
+      pin_number = -1;
+    }
+    
+  } else {    // neither P or A specified so LED_PIN is switched (27)
+    pin_number = LED_PIN;
+  }
+
+  if (pin_number > -1) {              
+    pinMode(pin_number, OUTPUT);
+    digitalWrite(pin_number, pin_status);
+    //analogWrite(pin_number, pin_status);
+  }
+}
+
+#endif  // ifdef M42_SUPPORT
 
 ////////////////////////////////
 // M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
