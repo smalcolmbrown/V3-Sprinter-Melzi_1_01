@@ -1,12 +1,6 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-// comment out if no I2C display
-#define MALSOFT_I2C_DISPLAY
-
-// comment out of no M42 support
-#define M42_SUPPORT
-
 // Uncomment ONE of the next three lines - the one for your RepRap machine
 #define V3
 
@@ -160,32 +154,35 @@ double Ki = 0.01;
 double Kd = 20.0;//0.01;
 #endif
 
-
-
 //-----------------------------------------------------------------------
-//// SETTINGS FOR Z PROBE FUNCTION (Command G30)
+//// SETTINGS FOR Z PROBE FUNCTION (Command G29 and G30)
 //-----------------------------------------------------------------------
 
 // Comment out (using // at the start of the line) to disable Bed Probe support:
 #define HAS_BED_PROBE 1
-#ifdef HAS_BED_PROBE
-#define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]
-#define Y_PROBE_OFFSET_FROM_EXTRUDER 10  // Y offset: -front +behind [the nozzle]
-#define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
 
-#define Z_CLEARANCE_BETWEEN_PROBES   10  // Z Clearance between probe points
+#ifdef HAS_BED_PROBE
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 10  // Y offset: -front +behind [the nozzle]
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
+
+  #define Z_CLEARANCE_BETWEEN_PROBES   10  // Z Clearance between probe points
 
 #endif
 
 //-----------------------------------------------------------------------
-//// SETTINGS FOR ARC FUNCTION (Command G2/G2)
+//// SETTINGS FOR Malsoft I2C LCD 
 //-----------------------------------------------------------------------
 
-// Arc interpretation settings:
-//Step to split a cirrcle in small Lines 
-#define MM_PER_ARC_SEGMENT 1
-//After this count of steps a new SIN / COS caluclation is startet to correct the circle interpolation
-#define N_ARC_CORRECTION 25
+// comment out if no I2C display
+#define MALSOFT_I2C_DISPLAY
+
+//-----------------------------------------------------------------------
+//// SETTINGS FOR M42  - Switch I/O pin (Command M42)
+//-----------------------------------------------------------------------
+
+// comment out of no M42 support
+#define M42_SUPPORT
 
 
 //M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
@@ -949,23 +946,33 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #endif
 #endif
 
+//x axis pins
+
 #define X_STEP_PIN         15
 #define X_DIR_PIN          21
 #define X_MIN_PIN          18
-#define X_MAX_PIN           -2
+#define X_MAX_PIN          -2
+
+//y axis pins
 
 #define Y_STEP_PIN         22
 #define Y_DIR_PIN          23
 #define Y_MIN_PIN          19
 #define Y_MAX_PIN          -1
 
+//z axis pins
+
 #define Z_STEP_PIN         3
 #define Z_DIR_PIN          2
 #define Z_MIN_PIN          -1
 #define Z_MAX_PIN          20
 
+//extruder pins
+
 #define E_STEP_PIN         1
 #define E_DIR_PIN          0
+
+
 
 #define PROBE_PIN          11     // TX1 on V3
 //#define PROBE_PIN          29    //29 on Melzi1284p A2
