@@ -1,17 +1,17 @@
-Eaglemoss Vector 3 Technical Guide
+# Eaglemoss Vector 3 Firmware Technical Guide
 
-Contents
+## Contents
 
-1. Supported G Codes
+### 1. Supported G Codes
 
-2. Main board pin out
-
-
+### 2. Main board pin out
 
 
-Section 1 Supported G Codes.
 
-The following G Codes have been implemented
+
+# Section 1 Supported G Codes.
+
+## The following G Codes have been implemented
 
 G0  -> G1
 G1  - Coordinated Movement X Y Z E
@@ -22,7 +22,7 @@ G90 - Use Absolute Coordinates
 G91 - Use Relative Coordinates
 G92 - Set current position to cordinates given
 
-RepRap and Custom M Codes
+## RepRap and Custom M Codes
 
 M4   - Query Status.                       (V3 only)
 M5   - Reset Status and Clears Error flag. (V3 only)
@@ -90,9 +90,9 @@ M239 - sends 239 to V3_I2C device, Short Beep
 M240 - set Z_MAX_LENGTH_M240
 M301 - set PID parameter
 
-Section 2 The pin asignments
+# Section 2 The pin asignments
 
-2.a Pin definition for the Melzi
+## 2.a Pin definition for the Melzi
 
    ATMEL ATMEGA644/ATMEGA1284 / SANGUINO
   
