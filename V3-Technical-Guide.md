@@ -24,7 +24,7 @@ G92 - Set current position to cordinates given
 
 RepRap and Custom M Codes
 
-M4   - Query Status. (V3 only)
+M4   - Query Status.                       (V3 only)
 M5   - Reset Status and Clears Error flag. (V3 only)
 M20  - List SD card
 M21  - Init SD card
@@ -41,8 +41,7 @@ M80  - Turn on Power Supply
 M81  - Turn off Power Supply
 M82  - Set E codes absolute (default)
 M83  - Set E codes relative while in Absolute Coordinates (G90) mode
-M84  - Disable steppers until next move, 
-       or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
+M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 M92  - Set axis_steps_per_unit - same syntax as G92
 M104 - Set extruder target temp
@@ -51,7 +50,7 @@ M106 - Fan on
 M107 - Fan off
 M109 - Wait for extruder current temp to reach target temp.
 M114 - Display current position
-M115	- Capabilities string
+M115 - Capabilities string
 M119 - Report endstops status.
 M140 - Set bed target temp
 M190 - Wait for bed current temp to reach target temp.
@@ -86,7 +85,7 @@ M234 - sends 234 to V3_I2C device, Long Beep x 1 ( 3 sec)
 M235 - sends 235 to V3_I2C device, Beep every sec, 3 min.
 M236 - sends 236 to V3_I2C device, Beep Off
 M237 - Hood Switch Enable
-M238	- Hood Switch Disable
+M238 - Hood Switch Disable
 M239 - sends 239 to V3_I2C device, Short Beep
 M240 - set Z_MAX_LENGTH_M240
 M301 - set PID parameter
