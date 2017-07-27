@@ -13,10 +13,10 @@
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // MEGA/RAMPS up to 1.2  = 3,
 // RAMPS 1.3 = 33
-// Gen6 = 5, 
+// Gen6 = 5,
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above, and Melzi = 62
-#define MOTHERBOARD 62 
+#define MOTHERBOARD 62
 
 //// Thermistor settings:
 // 1 is 100k thermistor
@@ -35,7 +35,6 @@
 // X, Y, Z, E steps per unit - String with extruder
 //float axis_steps_per_unit[] = {78.82, 78.82,78.82,99.6150}; //V3-Z-belt
 //float axis_steps_per_unit[] = {78.82, 78.82,400,99.6150}; //V3-Z-screw
-//float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150}; //V3-Z-screw2
 float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150}; //V3-Z-screw2
 
 //// Endstop Settings
@@ -97,13 +96,12 @@ const bool INVERT_E_DIR = true;
 const bool min_software_endstops = false; //If true, axis won't move to coordinates less than zero.
 const bool max_software_endstops = true;  //If true, axis won't move to coordinates greater than the defined lengths below.
 
-
+#ifdef V3
 const int X_MAX_LENGTH = 140;
 const int Y_MAX_LENGTH = 140;
 const int Z_MAX_LENGTH = 130;
+#endif
 
-
-#define Z_INCREMENT 0.05
 
 //// MOVEMENT SETTINGS
 const int NUM_AXIS = 4; // The axis order in all axis related arrays is X, Y, Z, E
@@ -123,7 +121,7 @@ bool axis_relative_modes[] = {false, false, false, false};
 
 // Comment this to disable ramp acceleration
 #define RAMP_ACCELERATION 1
-  
+
 //// Acceleration settings
 #ifdef RAMP_ACCELERATION
 // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
@@ -135,7 +133,7 @@ long max_travel_acceleration_units_per_sq_second[] = {500,500,50,500}; // X, Y, 
 #endif
 
 // Machine UUID
-// This may be useful if you have multiple machines and wish to identify them by using the M115 command. 
+// This may be useful if you have multiple machines and wish to identify them by using the M115 command.
 // By default we set it to zeros.
 //char uuid[] = "00000000-0000-0000-0000-000000000000";
 char *uuid = "00000000-0000-0000-0000-000000000000";
@@ -162,11 +160,13 @@ double Kd = 20.0;//0.01;
 #define HAS_BED_PROBE 1
 
 #ifdef HAS_BED_PROBE
-  #define X_PROBE_OFFSET_FROM_EXTRUDER 10  // X offset: -left  +right  [of the nozzle]
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER 10  // Y offset: -front +behind [the nozzle]
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0   // Z offset: -below +above  [the nozzle]
+  #define Z_INCREMENT 0.05                  // increments for probing Z Height
+  #define Z_NEGETIVE_TRIGGER 1              // Z probe: 1 if a Negetive Pulse, 0 if a Positive Pulse on trigger
+  #define X_PROBE_OFFSET_FROM_EXTRUDER 45   // X offset: -left  +right  [of the nozzle]
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER -10  // Y offset: -front +behind [the nozzle]
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0    // Z offset: -below +above  [the nozzle]
 
-  #define Z_CLEARANCE_BETWEEN_PROBES   10  // Z Clearance between probe points
+  #define Z_CLEARANCE_BETWEEN_PROBES   10   // Z Clearance between probe points
 
 #endif
 
@@ -222,7 +222,8 @@ int nzone = 5;//2;
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
-#define MAXTEMP 300
+#define MAXTEMP 270
+#define MAXTEMPBED 130
 
 // Select one of these only to define how the nozzle temp is read.
 #define HEATER_USES_THERMISTOR
@@ -246,6 +247,7 @@ int nzone = 5;//2;
 
 // Thermistor lookup table for RepRap Temperature Sensor Boards (http://reprap.org/wiki/Thermistor)
 // Made with the online thermistor table generator by nathan7 at http://calculator.josefprusa.cz/
+// new table from july 2017 V3 firmware update
 // r0: 100000
 // t0: 25
 // r1: 0
@@ -254,106 +256,106 @@ int nzone = 5;//2;
 // max adc: 1023
 #define NUMTEMPS 100
 short temptable[NUMTEMPS][2] = {
-   {1, 500},
-   {8, 300},
-   {11, 288},
-   {18, 254},
-   {27, 234},
-   {30, 220},
-   {52, 192},
-   {60, 182},
-   {77, 175},
-   {84, 167},
-   {91, 162},
-   {99, 160},
-   {109, 157},
-   {119, 153},
-   {130, 151},
-   {142, 148},
-   {155, 146},
-   {170, 141},
-   {187, 137},
-   {181, 132},
-   {191, 120},
-   {201, 117},
-   {211, 115},
-   {221, 113},
-   {231, 112},
-   {241, 110},
-   {251, 109},
-   {261, 108},
-   {271, 107},
-   {281, 106},
-   {291, 105},
-   {301, 104},
-   {311, 103},
-   {321, 102},
-   {331, 101},
-   {341, 100},
-   {351, 99},
-   {361, 98},
-   {371, 97},
-   {381, 96},
-   {391, 95},
-   {401, 94},
-   {411, 93},
-   {421, 92},
-   {431, 91},
-   {441, 90},
-   {451, 89},
-   {461, 88},
-   {471, 87},
-   {481, 86},
-   {491, 85},
-   {501, 84},
-   {511, 83},
-   {521, 82},
-   {531, 81},
-   {541, 80},
-   {551, 79},
-   {561, 78},
-   {571, 77},
-   {581, 76},
-   {591, 75},
-   {601, 74},
-   {611, 73},
-   {621, 72},
-   {631, 71},
-   {641, 70},
-   {651, 69},
-   {661, 68},
-   {671, 67},
-   {691, 65},
-   {701, 63},
-   {711, 62},
-   {721, 61},
-   {731, 59},
-   {741, 58},
-   {751, 57},
-   {761, 55},
-   {771, 54},
-   {781, 52},
-   {791, 51},
-   {801, 49},
-   {811, 48},
-   {821, 46},
-   {831, 45},
-   {841, 43},
-   {851, 41},
-   {861, 40},
-   {871, 38},
-   {881, 36},
-   {891, 34},
-   {901, 32},
-   {911, 29},
-   {921, 27},
-   {931, 24},
-   {941, 22},
-   {951, 19},
-   {961, 15},
-   {971, 11},
-   {981, 7},
-   {991, 2},
+	{	1	,	500	},
+	{	12	,	300	},
+	{	14	,	288	},
+	{	23	,	254	},
+	{	31	,	234	},
+	{	40	,	220	},
+	{	66	,	192	},
+	{	80	,	182	},
+	{	92	,	175	},
+	{	109	,	167	},
+	{	120	,	162	},
+	{	124	,	160	},
+	{	131	,	157	},
+	{	142	,	153	},
+	{	147	,	151	},
+	{	156	,	148	},
+	{	163	,	146	},
+	{	181	,	141	},
+	{	196	,	137	},
+	{	218	,	132	},
+	{	278	,	120	},
+	{	295	,	117	},
+	{	307	,	115	},
+	{	319	,	113	},
+	{	325	,	112	},
+	{	338	,	110	},
+	{	345	,	109	},
+	{	352	,	108	},
+	{	359	,	107	},
+	{	366	,	106	},
+	{	373	,	105	},
+	{	380	,	104	},
+	{	387	,	103	},
+	{	394	,	102	},
+	{	401	,	101	},
+	{	409	,	100	},
+	{	416	,	99	},
+	{	424	,	98	},
+	{	432	,	97	},
+	{	439	,	96	},
+	{	447	,	95	},
+	{	455	,	94	},
+	{	462	,	93	},
+	{	470	,	92	},
+	{	478	,	91	},
+	{	486	,	90	},
+	{	494	,	89	},
+	{	502	,	88	},
+	{	511	,	87	},
+	{	519	,	86	},
+	{	527	,	85	},
+	{	535	,	84	},
+	{	543	,	83	},
+	{	552	,	82	},
+	{	560	,	81	},
+	{	568	,	80	},
+	{	576	,	79	},
+	{	585	,	78	},
+	{	593	,	77	},
+	{	601	,	76	},
+	{	610	,	75	},
+	{	618	,	74	},
+	{	626	,	73	},
+	{	634	,	72	},
+	{	643	,	71	},
+	{	651	,	70	},
+	{	659	,	69	},
+	{	667	,	68	},
+	{	675	,	67	},
+	{	691	,	65	},
+	{	707	,	63	},
+	{	714	,	62	},
+	{	722	,	61	},
+	{	737	,	59	},
+	{	744	,	58	},
+	{	752	,	57	},
+	{	766	,	55	},
+	{	773	,	54	},
+	{	787	,	52	},
+	{	794	,	51	},
+	{	807	,	49	},
+	{	814	,	48	},
+	{	826	,	46	},
+	{	833	,	45	},
+	{	845	,	43	},
+	{	856	,	41	},
+	{	862	,	40	},
+	{	872	,	38	},
+	{	883	,	36	},
+	{	892	,	34	},
+	{	902	,	32	},
+	{	915	,	29	},
+	{	923	,	27	},
+	{	935	,	24	},
+	{	942	,	22	},
+	{	952	,	19	},
+	{	963	,	15	},
+	{	973	,	11	},
+	{	981	,	7	},
+	{	990	,	2	},
 };
 // Thermistor lookup table for RS thermistor 198-961
 // Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
@@ -750,106 +752,106 @@ const short bedtemptable[BNUMTEMPS][2] = {
 // max adc: 1023
 #define BNUMTEMPS 100
 const short bedtemptable[BNUMTEMPS][2] = {
-   {1, 549},
-   {11, 274},
-   {21, 228},
-   {31, 204},
-   {41, 188},
-   {51, 176},
-   {61, 166},
-   {71, 159},
-   {81, 152},
-   {91, 146},
-   {101, 141},
-   {111, 137},
-   {121, 133},
-   {131, 131},
-   {141, 129},
-   {151, 127},
-   {161, 125},
-   {171, 123},
-   {181, 120},
-   {191, 119},
-   {201, 117},
-   {211, 115},
-   {221, 113},
-   {231, 112},
-   {241, 110},
-   {251, 109},
-   {261, 108},
-   {271, 107},
-   {281, 106},
-   {291, 105},
-   {301, 104},
-   {311, 103},
-   {321, 102},
-   {331, 101},
-   {341, 100},
-   {351, 99},
-   {361, 98},
-   {371, 97},
-   {381, 96},
-   {391, 95},
-   {401, 94},
-   {411, 93},
-   {421, 92},
-   {431, 91},
-   {441, 90},
-   {451, 89},
-   {461, 88},
-   {471, 87},
-   {481, 86},
-   {491, 85},
-   {501, 84},
-   {511, 83},
-   {521, 82},
-   {531, 81},
-   {541, 80},
-   {551, 79},
-   {561, 78},
-   {571, 77},
-   {581, 76},
-   {591, 75},
-   {601, 74},
-   {611, 73},
-   {621, 72},
-   {631, 71},
-   {641, 70},
-   {651, 69},
-   {661, 68},
-   {671, 67},
-   {681, 66},
-   {691, 65},
-   {701, 63},
-   {711, 62},
-   {721, 61},
-   {731, 59},
-   {741, 58},
-   {751, 57},
-   {761, 55},
-   {771, 54},
-   {781, 52},
-   {791, 51},
-   {801, 49},
-   {811, 48},
-   {821, 46},
-   {831, 45},
-   {841, 43},
-   {851, 41},
-   {861, 40},
-   {871, 38},
-   {881, 36},
-   {891, 34},
-   {901, 32},
-   {911, 29},
-   {921, 27},
-   {931, 24},
-   {941, 22},
-   {951, 19},
-   {961, 15},
-   {971, 11},
-   {981, 7},
-   {991, 2},
+	{	1	,	500	},
+	{	12	,	300	},
+	{	14	,	288	},
+	{	23	,	254	},
+	{	31	,	234	},
+	{	40	,	220	},
+	{	66	,	192	},
+	{	80	,	182	},
+	{	92	,	175	},
+	{	109	,	167	},
+	{	120	,	162	},
+	{	124	,	160	},
+	{	131	,	157	},
+	{	142	,	153	},
+	{	147	,	151	},
+	{	156	,	148	},
+	{	163	,	146	},
+	{	181	,	141	},
+	{	196	,	137	},
+	{	218	,	132	},
+	{	278	,	120	},
+	{	295	,	117	},
+	{	307	,	115	},
+	{	319	,	113	},
+	{	325	,	112	},
+	{	338	,	110	},
+	{	345	,	109	},
+	{	352	,	108	},
+	{	359	,	107	},
+	{	366	,	106	},
+	{	373	,	105	},
+	{	380	,	104	},
+	{	387	,	103	},
+	{	394	,	102	},
+	{	401	,	101	},
+	{	409	,	100	},
+	{	416	,	99	},
+	{	424	,	98	},
+	{	432	,	97	},
+	{	439	,	96	},
+	{	447	,	95	},
+	{	455	,	94	},
+	{	462	,	93	},
+	{	470	,	92	},
+	{	478	,	91	},
+	{	486	,	90	},
+	{	494	,	89	},
+	{	502	,	88	},
+	{	511	,	87	},
+	{	519	,	86	},
+	{	527	,	85	},
+	{	535	,	84	},
+	{	543	,	83	},
+	{	552	,	82	},
+	{	560	,	81	},
+	{	568	,	80	},
+	{	576	,	79	},
+	{	585	,	78	},
+	{	593	,	77	},
+	{	601	,	76	},
+	{	610	,	75	},
+	{	618	,	74	},
+	{	626	,	73	},
+	{	634	,	72	},
+	{	643	,	71	},
+	{	651	,	70	},
+	{	659	,	69	},
+	{	667	,	68	},
+	{	675	,	67	},
+	{	691	,	65	},
+	{	707	,	63	},
+	{	714	,	62	},
+	{	722	,	61	},
+	{	737	,	59	},
+	{	744	,	58	},
+	{	752	,	57	},
+	{	766	,	55	},
+	{	773	,	54	},
+	{	787	,	52	},
+	{	794	,	51	},
+	{	807	,	49	},
+	{	814	,	48	},
+	{	826	,	46	},
+	{	833	,	45	},
+	{	845	,	43	},
+	{	856	,	41	},
+	{	862	,	40	},
+	{	872	,	38	},
+	{	883	,	36	},
+	{	892	,	34	},
+	{	902	,	32	},
+	{	915	,	29	},
+	{	923	,	27	},
+	{	935	,	24	},
+	{	942	,	22	},
+	{	952	,	19	},
+	{	963	,	15	},
+	{	973	,	11	},
+	{	981	,	7	},
+	{	990	,	2	},
 };
 
 // Thermistor lookup table for RS thermistor 198-961
@@ -936,7 +938,7 @@ const short bedtemptable[BNUMTEMPS][2] = {
 ****************************************************************************************/
 #if MOTHERBOARD == 62
 #define MOTHERBOARD 6
-#define SANGUINOLOLU_V_1_2 
+#define SANGUINOLOLU_V_1_2
 #endif
 #if MOTHERBOARD == 6
 #define KNOWN_BOARD 1
@@ -951,7 +953,7 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #define X_STEP_PIN         15
 #define X_DIR_PIN          21
 #define X_MIN_PIN          18
-#define X_MAX_PIN          -2
+#define X_MAX_PIN           -2
 
 //y axis pins
 
@@ -972,15 +974,14 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #define E_STEP_PIN         1
 #define E_DIR_PIN          0
 
-
+// Z height probe
 
 #define PROBE_PIN          11     // TX1 on V3
 //#define PROBE_PIN          29    //29 on Melzi1284p A2
 
-
 #define LED_PIN            27
 
-#define FAN_PIN            4 
+#define FAN_PIN            4
 
 #define PS_ON_PIN          -1
 #define KILL_PIN           -1
