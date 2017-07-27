@@ -59,3 +59,6 @@ Displaying printer state on LCD to "Vector 3: Idle", "Vector 3: Heating", "Vecto
 
 2017/07/14 Added:
 Added M42 function works on M42 A1 S1 syntax as per Bill and M42 P30 S1 as per reprap wikki. A V3 melzi specific version of Klimet's code 
+
+2017/07/27 Added:
+Added functionality from the latest firmware update from Eaglemoss as modified by Chris Holland. Changes include over temperature detection for both hot end and the heated bed and improved thermistor tables
