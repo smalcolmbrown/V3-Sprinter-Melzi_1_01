@@ -166,7 +166,7 @@ double Kd = 20.0;//0.01;
   #define Y_PROBE_OFFSET_FROM_EXTRUDER -10  // Y offset: -front +behind [the nozzle]
   #define Z_PROBE_OFFSET_FROM_EXTRUDER 0    // Z offset: -below +above  [the nozzle]
 
-  #define Z_CLEARANCE_BETWEEN_PROBES   10   // Z Clearance between probe points
+  #define Z_CLEARANCE_BETWEEN_PROBES   5    // Z Clearance between probe points
 
 #endif
 

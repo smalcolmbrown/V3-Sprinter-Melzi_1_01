@@ -1208,11 +1208,22 @@ float fZ_Height;
   if (PROBE_PIN > -1 ){                                         // we have a Z Height Probe.
     
     saved_feedrate = feedrate;                                  // save the current feed rate
-	
-	// set the correct X and Y position if set in the G Code
-	
+    feedrate = homing_feedrate[2];                              // 350 set in Configuration.h for the V3
+
+    // save the X Y axis points to probe if set in the G Code
+    
     fX_Probe = code_seen('X') ? (float)code_value() : current_position[0] ;
     fY_Probe = code_seen('Y') ? (float)code_value() : current_position[1] ;
+    
+    // before we do anything else we must zero the axis
+    destination[0] = 0,
+    destination[1] = 0;
+    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 1.5 * 130 * 1 = 195 for the V3
+    prepare_move();
+
+    // we are now at zero on all axis
+    // set the correct X and Y position
+	
 	
     fZ_Height = probe_XY_point(fX_Probe, fY_Probe) ;           // get the Z height
 	
@@ -1247,42 +1258,58 @@ float fZ_Height;
 
 float probe_XY_point(const float fX_Probe, const float fY_Probe ){
 
-  // first take the bed down to the Z_MAX Endstop
-  //  and the required X and Y position
+  // set probe X Y position
   
   current_position[2] = 0;
   destination[0] = fX_Probe + X_PROBE_OFFSET_FROM_EXTRUDER,
   destination[1] = fY_Probe + Y_PROBE_OFFSET_FROM_EXTRUDER;
-  destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 1.5 * 130 * 1 = 195 for the V3
-  feedrate = homing_feedrate[2];                              // 350 set in Configuration.h for the V3
-  prepare_move();
   
+  // confine to the heated bed
+
+  destination[0] = constrain(destination[0], 0.0 , (float)X_MAX_LENGTH);  // X axis
+  destination[1] = constrain(destination[1], 0.0 , (float)Y_MAX_LENGTH);  // Y axis
+
   // now we are at Z_MAX
+  // we have to move the platform up towards the probe so not many Z steps are needed
+  // Z_MAX_LENGTH - 5mm is a good start the required X and Y position
   
   if( Z_HOME_DIR == 1) {
-  
-    // we have to move the platform up towards the probe so not many Z steps are needed
-    // Z_MAX_LENGTH - 10mm is a good start
-	
     destination[2] = current_position[2] - (Z_MAX_LENGTH - Z_CLEARANCE_BETWEEN_PROBES) ;   
-    prepare_move();
   } else {
+    // to do code for other type of probe
     current_position[2] = 0;
   }
+  prepare_move();                                              // do the move
+
+#ifdef MALSOFT_I2C_DISPLAY
+  StatusScreen();                                              // display X Y Z
+#endif
 	
-  //now move up in small increments until switch makes
-	
-  SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
-  SerialMgr.cur()->println(READ(PROBE_PIN));
+  // set the limits for the number of calibration steps
+  
   int z=0;
-  int iZ_Stop = (Z_HOME_DIR == -1) ? 50 : ((Z_CLEARANCE_BETWEEN_PROBES / Z_INCREMENT )+10) ;
-  while((READ(PROBE_PIN) == Z_NEGETIVE_TRIGGER) && (z < iZ_Stop) ){
-    SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
-    SerialMgr.cur()->println(READ(PROBE_PIN));
+  int iZ_Stop = (Z_HOME_DIR == -1) ? 50 : ((Z_CLEARANCE_BETWEEN_PROBES/Z_INCREMENT)+10) ;
+
+  // now move up in small increments until switch makes
+  // 
+  boolean bProbeState = READ(PROBE_PIN);                          // read the probe state
+  SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
+  SerialMgr.cur()->println(bProbeState);
+  
+  while( (bProbeState == Z_NEGETIVE_TRIGGER) && (z < iZ_Stop) ){
+    
+    // probe not triggered advance z probe height
+    
     destination[2] = current_position[2] - (Z_INCREMENT * Z_HOME_DIR) ;
-	
     prepare_move();                                            // do the move
+    delay(100);                                                // pause to cater for trigger delay
+    bProbeState = READ(PROBE_PIN);                             // read the probe state
+    SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
+    SerialMgr.cur()->println(bProbeState);
     z++;                                                       // increment the limit counter
+#ifdef MALSOFT_I2C_DISPLAY
+    StatusScreen();                                            // display X Y Z
+#endif
   }
   
   return current_position[2];
