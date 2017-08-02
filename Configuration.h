@@ -163,7 +163,7 @@ double Kd = 20.0;//0.01;
   #define Z_INCREMENT 0.05                  // increments for probing Z Height
   #define Z_NEGETIVE_TRIGGER 1              // Z probe: 1 if a Negetive Pulse, 0 if a Positive Pulse on trigger
   #define X_PROBE_OFFSET_FROM_EXTRUDER 45   // X offset: -left  +right  [of the nozzle]
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER -10  // Y offset: -front +behind [the nozzle]
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER 10   // Y offset: -front +behind [the nozzle]
   #define Z_PROBE_OFFSET_FROM_EXTRUDER 0    // Z offset: -below +above  [the nozzle]
 
   #define Z_CLEARANCE_BETWEEN_PROBES   5    // Z Clearance between probe points
@@ -183,6 +183,13 @@ double Kd = 20.0;//0.01;
 
 // comment out of no M42 support
 #define M42_SUPPORT
+
+//-----------------------------------------------------------------------
+//// SETTINGS FOR M499  - Force Error mode(Command M499)
+//-----------------------------------------------------------------------
+
+// comment out of no M499 support (only used to test BBB() error reporting)
+//#define M499_SUPPORT
 
 
 //M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.

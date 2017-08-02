@@ -22,7 +22,9 @@ enum StatusCodes {
 enum ErrorCodes { 
     ERROR_CODE_NO_ERROR = 0, 
     ERROR_CODE_HOTEND_TEMPERATURE, 
-    ERROR_CODE_BED_TEMPERATURE 
+    ERROR_CODE_BED_TEMPERATURE, 
+    ERROR_CODE_HOTEND_TEMPERATURE_HIGH, 
+    ERROR_CODE_BED_TEMPERATURE_HIGH
   };
 
 enum Firmware {
@@ -34,9 +36,9 @@ enum Firmware {
   };
   
 enum PrinterCodes {
-	STATE_IDLE = 0,
-	STATE_HEATING,
-	STATE_PRINTING,
-	STATE_DONE
+    STATE_IDLE = 0,
+    STATE_HEATING,
+    STATE_PRINTING,
+    STATE_DONE
   };
 #endif

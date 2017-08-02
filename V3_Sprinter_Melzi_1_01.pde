@@ -129,6 +129,7 @@ to
 
 // M301 - Set PID parameters
 
+// M499 - forces printer into error mode for resting only comment out in Configuration.h for production release
 
 #ifdef V3 // V3 specific code
 //0x03, 0x01, 0x10
@@ -224,7 +225,7 @@ int ett = 0 ;      // Extruder target temperature in C
 int btt = 0 ;      // Heated Bed target temperature in C
 
 const char* status_str[]         = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
-const char* error_code_str[]     = { "No Error", "Hotend", "Bed" };
+const char* error_code_str[]     = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
 const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", "1.01", "Vector 3", "1" };
 
 #ifdef PIDTEMP
@@ -996,7 +997,14 @@ inline void process_commands()
       case 301: // M301 - Set PID parameters
         gcode_M301();
         break;
-#endif //PIDTEMP
+#endif // PIDTEMP
+
+#ifdef M499_SUPPORT
+      case 499:
+        gcode_M499() ;
+        break;
+#endif // M499_SUPPORT
+
       default:
         ClearToSend();        
         return;
@@ -1098,77 +1106,77 @@ inline void gcode_G28() {
   }
   feedrate = 0;
 
-  home_all_axis = !((code_seen(axis_codes[0])) || (code_seen(axis_codes[1])) || (code_seen(axis_codes[2])));
+  home_all_axis = !((code_seen(axis_codes[X_AXIS])) || (code_seen(axis_codes[Y_AXIS])) || (code_seen(axis_codes[Z_AXIS])));
 
-  if((home_all_axis) || (code_seen(axis_codes[0]))) {
+  if((home_all_axis) || (code_seen(axis_codes[X_AXIS]))) {
     if((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
-      current_position[0] = 0;
+      current_position[X_AXIS] = 0;
       destination[0] = 1.5 * X_MAX_LENGTH * X_HOME_DIR;
-      feedrate = homing_feedrate[0];
+      feedrate = homing_feedrate[X_AXIS];
       prepare_move();
       
-      current_position[0] = 0;
-      destination[0] = -5 * X_HOME_DIR;
+      current_position[X_AXIS] = 0;
+      destination[X_AXIS] = -5 * X_HOME_DIR;
       prepare_move();
       
-      destination[0] = 10 * X_HOME_DIR;
+      destination[X_AXIS] = 10 * X_HOME_DIR;
       prepare_move();
       
       //for X offset 20160329
       if(X_OFFSET > 0){
-        destination[0] = X_OFFSET;
+        destination[X_AXIS] = X_OFFSET;
         prepare_move();
       }
       
-      current_position[0] = (X_HOME_DIR == -1) ? 0 : X_MAX_LENGTH;
-      destination[0] = current_position[0];
+      current_position[X_AXIS] = (X_HOME_DIR == -1) ? 0 : X_MAX_LENGTH;
+      destination[X_AXIS] = current_position[X_AXIS];
       feedrate = 0;
     }
   }
   
-  if((home_all_axis) || (code_seen(axis_codes[1]))) {
+  if((home_all_axis) || (code_seen(axis_codes[Y_AXIS]))) {
     if((Y_MIN_PIN > -1 && Y_HOME_DIR==-1) || (Y_MAX_PIN > -1 && Y_HOME_DIR==1)){
-      current_position[1] = 0;
+      current_position[Y_AXIS] = 0;
       destination[1] = 1.5 * Y_MAX_LENGTH * Y_HOME_DIR;
-      feedrate = homing_feedrate[1];
+      feedrate = homing_feedrate[Y_AXIS];
       prepare_move();
       
-      current_position[1] = 0;
-      destination[1] = -5 * Y_HOME_DIR;
+      current_position[Y_AXIS] = 0;
+      destination[Y_AXIS] = -5 * Y_HOME_DIR;
       prepare_move();
       
-      destination[1] = 10 * Y_HOME_DIR;
+      destination[Y_AXIS] = 10 * Y_HOME_DIR;
       prepare_move();
       
       //for Y offset 20160329
       if(Y_OFFSET > 0){
-        destination[1] = Y_OFFSET;
+        destination[Y_AXIS] = Y_OFFSET;
         prepare_move();
       }
       
-      current_position[1] = (Y_HOME_DIR == -1) ? 0 : Y_MAX_LENGTH;
-      destination[1] = current_position[1];
+      current_position[Y_AXIS] = (Y_HOME_DIR == -1) ? 0 : Y_MAX_LENGTH;
+      destination[Y_AXIS] = current_position[Y_AXIS];
       feedrate = 0;
     }
   }
   
-  if((home_all_axis) || (code_seen(axis_codes[2]))) {
+  if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
     if((Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
-      current_position[2] = 0;
-      destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;
-      feedrate = homing_feedrate[2];
+      current_position[Z_AXIS] = 0;
+      destination[Z_AXIS] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;
+      feedrate = homing_feedrate[Z_AXIS];
       prepare_move();
       
-      current_position[2] = 0;
-      destination[2] = -2 * Z_HOME_DIR;
+      current_position[Z_AXIS] = 0;
+      destination[Z_AXIS] = -2 * Z_HOME_DIR;
       prepare_move();
           
-      destination[2] = 10 * Z_HOME_DIR;
+      destination[Z_AXIS] = 10 * Z_HOME_DIR;
       prepare_move();
             
-      current_position[2] = (Z_HOME_DIR == -1) ? (float)byteToint(EEPROM.read(Z_ADJUST_BYTE))/100 : Z_MAX_LENGTH_M240;
-      //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
-      //destination[2] = current_position[2];
+      current_position[Z_AXIS] = (Z_HOME_DIR == -1) ? (float)byteToint(EEPROM.read(Z_ADJUST_BYTE))/100 : Z_MAX_LENGTH_M240;
+      //current_position[Z_AXIS] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
+      //destination[Z_AXIS] = current_position[Z_AXIS];
       feedrate = 0;
     }
   }
@@ -1190,6 +1198,7 @@ inline void gcode_G28() {
 //   *   G30 <X#> <Y#> <S#>
 //   *     X = Probe X position (default=current probe position)
 //   *     Y = Probe Y position (default=current probe position)
+//   *     S = Save Value (default Value is saved, if S=-1 then value is not saved)
 //
 ////////////////////////////////
 
@@ -1197,6 +1206,7 @@ inline void gcode_G30() {
 float fX_Probe;
 float fY_Probe;
 float fZ_Height;
+int   iS_Param; 
 
 #ifdef V3 // V3 specific code
   V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
@@ -1205,38 +1215,52 @@ float fZ_Height;
   delay(2000);                                                  // wait for beeps end   
 #endif   // ifdef V3
 
-  if (PROBE_PIN > -1 ){                                         // we have a Z Height Probe.
-    
-    saved_feedrate = feedrate;                                  // save the current feed rate
-    feedrate = homing_feedrate[2];                              // 350 set in Configuration.h for the V3
-
-    // save the X Y axis points to probe if set in the G Code
-    
-    fX_Probe = code_seen('X') ? (float)code_value() : current_position[0] ;
-    fY_Probe = code_seen('Y') ? (float)code_value() : current_position[1] ;
-    
-    // before we do anything else we must zero the axis
-    destination[0] = 0,
-    destination[1] = 0;
-    destination[2] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 1.5 * 130 * 1 = 195 for the V3
-    prepare_move();
+//    // before we do anything else we must zero the axis
+//    destination[X_AXIS] = 0,
+//    destination[Y_AXIS] = 0;
+//    destination[Z_AXIS] = 1.5 * Z_MAX_LENGTH * Z_HOME_DIR;           // 1.5 * 130 * 1 = 195 for the V3
+//    prepare_move();
 
     // we are now at zero on all axis
     // set the correct X and Y position
+
+  if (PROBE_PIN > -1 ){                                         // we have a Z Height Probe.
+    
+    saved_feedrate = feedrate;                                  // save the current feed rate
+//    feedrate = homing_feedrate[Z_AXIS];                              // 350 set in Configuration.h for the V3
+
+    // save the X Y axis points to probe if set in the G Code
+    
+    fX_Probe = code_seen('X') ? (float)code_value() : current_position[X_AXIS] ;
+    fY_Probe = code_seen('Y') ? (float)code_value() : current_position[Y_AXIS] ;
+    iS_Param = code_seen('S') ? (int)code_value() : 1;
+    
+  // confine Z probe to the to the heated bed
+
+    fX_Probe = constrain(fX_Probe + X_PROBE_OFFSET_FROM_EXTRUDER, (float)X_PROBE_OFFSET_FROM_EXTRUDER + 1 , (float)(X_MAX_LENGTH - 10));  // X axis
+    fY_Probe = constrain(fY_Probe + Y_PROBE_OFFSET_FROM_EXTRUDER, (float)Y_PROBE_OFFSET_FROM_EXTRUDER + 1 , (float)(Y_MAX_LENGTH - 10));  // Y axis
 	
-	
-    fZ_Height = probe_XY_point(fX_Probe, fY_Probe) ;           // get the Z height
+    fZ_Height = probe_XY_point(fX_Probe, fY_Probe) ;            // get the Z height
 	
 /*
-    to do: 
-    Save this value into the EEPROM
-    Write_Z_MAX_LENGTH_M240_ToEEPROM(fZ_Height);               // 数据拆分 - Save Data in eeprom
-    Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   // 数据还原 - Now read data from eeprom and set variable
-*/
+//  to do: 
+//  Save this value into the EEPROM
+  */
+    if (iS_Param != -1) {
+      Write_Z_MAX_LENGTH_M240_ToEEPROM(fZ_Height);                // 数据拆分 - Save Data in eeprom
+      Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();    // 数据还原 - Now read data from eeprom and set variable
+    }
 
-    //current_position[2] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
-    //destination[2] = current_position[2];
-   feedrate = saved_feedrate;
+    //current_position[Z_AXIS] = (Z_HOME_DIR == -1) ? 0 : Z_MAX_LENGTH;
+    //destination[Z_AXIS] = current_position[Z_AXIS];
+  feedrate = saved_feedrate;                                    // restore the feed rate
+                                                                
+  SerialMgr.cur()->print("Bed X: ");                            // tell the controling software 
+  SerialMgr.cur()->print(fX_Probe + 0.0001);                    // the result
+  SerialMgr.cur()->print(" Y: ");
+  SerialMgr.cur()->print(fY_Probe + 0.0001);
+  SerialMgr.cur()->print(" Z: ");
+  SerialMgr.cur()->println(fZ_Height + 0.0001);
   }
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
@@ -1260,24 +1284,20 @@ float probe_XY_point(const float fX_Probe, const float fY_Probe ){
 
   // set probe X Y position
   
-  current_position[2] = 0;
-  destination[0] = fX_Probe + X_PROBE_OFFSET_FROM_EXTRUDER,
-  destination[1] = fY_Probe + Y_PROBE_OFFSET_FROM_EXTRUDER;
+  destination[X_AXIS] = fX_Probe;
+  destination[Y_AXIS] = fY_Probe;
   
-  // confine to the heated bed
-
-  destination[0] = constrain(destination[0], 0.0 , (float)X_MAX_LENGTH);  // X axis
-  destination[1] = constrain(destination[1], 0.0 , (float)Y_MAX_LENGTH);  // Y axis
-
   // now we are at Z_MAX
   // we have to move the platform up towards the probe so not many Z steps are needed
   // Z_MAX_LENGTH - 5mm is a good start the required X and Y position
-  
+
+  current_position[Z_AXIS] = 0;
+
   if( Z_HOME_DIR == 1) {
-    destination[2] = current_position[2] - (Z_MAX_LENGTH - Z_CLEARANCE_BETWEEN_PROBES) ;   
+    destination[Z_AXIS] = current_position[Z_AXIS] - (Z_MAX_LENGTH - Z_CLEARANCE_BETWEEN_PROBES) ;   
   } else {
     // to do code for other type of probe
-    current_position[2] = 0;
+//    current_position[Z_AXIS] = 0;
   }
   prepare_move();                                              // do the move
 
@@ -1293,26 +1313,26 @@ float probe_XY_point(const float fX_Probe, const float fY_Probe ){
   // now move up in small increments until switch makes
   // 
   boolean bProbeState = READ(PROBE_PIN);                          // read the probe state
-  SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
-  SerialMgr.cur()->println(bProbeState);
-  
+//  SerialMgr.cur()->print( "Z = " );
+//  SerialMgr.cur()->println( current_position[Z_AXIS] ) ;
   while( (bProbeState == Z_NEGETIVE_TRIGGER) && (z < iZ_Stop) ){
     
     // probe not triggered advance z probe height
     
-    destination[2] = current_position[2] - (Z_INCREMENT * Z_HOME_DIR) ;
+    destination[Z_AXIS] = current_position[Z_AXIS] - (Z_INCREMENT * Z_HOME_DIR) ;
     prepare_move();                                            // do the move
-    delay(100);                                                // pause to cater for trigger delay
     bProbeState = READ(PROBE_PIN);                             // read the probe state
-    SerialMgr.cur()->print((Z_HOME_DIR == -1) ? "ZMIN=" : "ZMAX=" );
-    SerialMgr.cur()->println(bProbeState);
+//    SerialMgr.cur()->print( "Z = " );
+//    SerialMgr.cur()->println( current_position[Z_AXIS] ) ;
     z++;                                                       // increment the limit counter
 #ifdef MALSOFT_I2C_DISPLAY
     StatusScreen();                                            // display X Y Z
 #endif
   }
   
-  return current_position[2];
+  // probe now triggered 
+    
+  return (current_position[Z_AXIS]*-1);                        // convert the negative number to a positive one
 }
 
 #endif // HAS_BED_PROBE
@@ -1974,6 +1994,24 @@ inline void gcode_M301(){
 }
 
 #endif //PIDTEMP
+
+#ifdef M499_SUPPORT
+
+////////////////////////////////
+// M499 - Force Error Code
+////////////////////////////////
+
+inline void gcode_M499() {
+   if( code_seen('E')) {
+     status  = STATUS_ERROR;
+     error_code = constrain(code_value(),1,4);
+     BBB();
+   }
+}
+        
+#endif // M499_SUPPORT
+
+
 
 inline void get_coordinates() {
   for(int i=0; i < NUM_AXIS; i++) {
@@ -2771,48 +2809,138 @@ void log_ulong_array(char* message, unsigned long value[], int array_lenght) {
 }
 #endif
 
-void BBB(){
-  // BBB short beep x3 chris 2017-04-01
-  while(1){
-    pinMode(HEATER_0_PIN, OUTPUT);
-    pinMode(HEATER_1_PIN, OUTPUT);
-    target_bed_raw = 0; target_raw = 0;//stop hotend heater, bed
-    digitalWrite(HEATER_0_PIN,LOW);digitalWrite(HEATER_1_PIN,LOW);//stop hotend heater, bed
-    Wire.beginTransmission(0x48);
-    Wire.send(239);
-    Wire.endTransmission();
-    disable_x(); disable_y(); disable_z(); disable_e();//stop motors
-    analogWrite(FAN_PIN, 0); WRITE(FAN_PIN, LOW);//stop fan
-    // SerialMgr.cur()->println("BBB, Temperature Sensor Error.");
+//////////////////////////////////////////////////////////////////////////
+//
+// ErrorBeeps ( iNumBeeps) 
+// 
+// Suusi M-M 2017/08/01
+//
+//////////////////////////////////////////////////////////////////////////
+
+void ErrorBeeps (int iNumBeeps) {
+  for (int i = 1 ; i <= iNumBeeps; i++) {
+    V3_I2C_Command( V3_SHORT_BEEP, false ) ;                      // beep short x1
+    delay(1000);                                                  // 1 second delay
   }
 }
 
+//////////////////////////////////////////////////////////////////////////
+//
+// ErrorBleepCodes() 
+//
+// If this is called then we are in trouble. There are 4 error codes:
+// HOTEND low temperture  - 1 Long beep followed by 1 short beep
+// BED low temperture     - 1 long beep followed by 2 short beeps
+// HOTEND high temperture - 1 long beep followed by 3 short beeps
+// BED high temperture    - 1 long beep followed by 4 short beeps
+// Suusi M-M 2017/08/01
+//
+//////////////////////////////////////////////////////////////////////////
+
+void ErrorBleepCodes(){
+  delay(1000);
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                          // beep long
+  delay(2000);
+  
+  switch( error_code ) {
+    case ERROR_CODE_HOTEND_TEMPERATURE:
+      ErrorBeeps ( 1 );
+      break;
+    case ERROR_CODE_BED_TEMPERATURE:
+      ErrorBeeps ( 2 );
+      break;
+    case ERROR_CODE_HOTEND_TEMPERATURE_HIGH:
+      ErrorBeeps ( 3 );
+      break;
+    case ERROR_CODE_BED_TEMPERATURE_HIGH:
+      ErrorBeeps ( 4 );
+    default:
+      break;
+  }
+#ifdef MALSOFT_I2C_DISPLAY
+  StatusScreen();                                                 // display X Y Z and error on LCD
+#endif
+  SerialMgr.cur()->print("EC:");
+  SerialMgr.cur()->print(error_code);
+  SerialMgr.cur()->print(", ");
+  SerialMgr.cur()->println(error_code_str[error_code]);
+  delay(2000);                                                    // delay 2 seconds
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+// BBB() 
+// 
+// switches everything off and loops forever
+// new with the firmware update 2017/04/01
+//
+//////////////////////////////////////////////////////////////////////////
+
+void BBB(){
+  // BBB short beep x3 chris 2017-04-01
+  while(1){
+                                                                  // loop forever
+    pinMode(HEATER_0_PIN, OUTPUT);
+    pinMode(HEATER_1_PIN, OUTPUT);
+    target_bed_raw = 0;                                           // stop bed heater
+    target_raw = 0;                                               // stop hotend heater
+    digitalWrite(HEATER_0_PIN,LOW);                               // stop hotend heater
+    digitalWrite(HEATER_1_PIN,LOW);                               // stop bed heater 
+    
+//    V3_I2C_Command( V3_SHORT_BEEP, false ) ;                      // beep short x1
+    ErrorBleepCodes();                                            // give an audiabe clue to the error
+
+    disable_x(); disable_y(); disable_z(); disable_e();           //stop motors
+    analogWrite(FAN_PIN, 0); WRITE(FAN_PIN, LOW);                 //stop fan
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+// check_heater() 
+//
+// Check the Extruder and Bed are within safe limits
+//
+// calls  BBB() if there is an error
+//
+// new with the firmware update 2017/04/01
+//
+//////////////////////////////////////////////////////////////////////////
+
 void check_heater(){
-  // nozzle
+  // check the nozzle temparatue is within safe limits
   current_raw = analogRead(TEMP_0_PIN);
-  current_raw = 1023 - current_raw;   // NTC
-  if(current_raw <= minttemp)
-  {
+  current_raw = 1023 - current_raw;                               // NTC
+  if(current_raw <= minttemp) {
+                                                                  // Temperature below MINTEMP 
     status = STATUS_ERROR;
     error_code = ERROR_CODE_HOTEND_TEMPERATURE;
-    target_raw = 0;
-    BBB();
+    target_raw = 0;                                               // switch off the Extruder target
+    BBB();                                                        // call the error handler
   }
   if(current_raw >= maxttemp) {
-    target_raw = 0;
-    BBB();
+                                                                   // Temperature above MAXTEMP 
+    status = STATUS_ERROR;
+    error_code = ERROR_CODE_HOTEND_TEMPERATURE_HIGH;
+    target_raw = 0;                                               // switch off the Extruder target
+    BBB();                                                        // call the error handler
   }
 
-  //bed
+  // check the bed temparature is within the safe limits
   current_bed_raw = analogRead(TEMP_1_PIN);
-  current_bed_raw = 1023 - current_bed_raw;   // NTC
-  if(current_bed_raw <= minttemp)
-  {
-    target_bed_raw = 0;
+  current_bed_raw = 1023 - current_bed_raw;                       // NTC
+  if(current_bed_raw <= minttemp) {
+                                                                  // bed temperature below MINTEMP
+    status = STATUS_ERROR;
+    error_code = ERROR_CODE_BED_TEMPERATURE;
+    target_bed_raw = 0;                                           // switch off the Extruder target
     BBB();
   }
   if(current_bed_raw >= maxbtemp) {
-    target_bed_raw = 0;
+                                                                  // bed temparature above MAXTEMPBED
+    status = STATUS_ERROR;
+    error_code = ERROR_CODE_BED_TEMPERATURE_HIGH;
+    target_bed_raw = 0;                                           // switch off the Extruder target
     BBB();
   }
 
