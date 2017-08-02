@@ -2811,24 +2811,10 @@ void log_ulong_array(char* message, unsigned long value[], int array_lenght) {
 
 //////////////////////////////////////////////////////////////////////////
 //
-// ErrorBeeps ( iNumBeeps) 
-// 
-// Suusi M-M 2017/08/01
-//
-//////////////////////////////////////////////////////////////////////////
-
-void ErrorBeeps (int iNumBeeps) {
-  for (int i = 1 ; i <= iNumBeeps; i++) {
-    V3_I2C_Command( V3_SHORT_BEEP, false ) ;                      // beep short x1
-    delay(1000);                                                  // 1 second delay
-  }
-}
-
-//////////////////////////////////////////////////////////////////////////
-//
 // ErrorBleepCodes() 
 //
-// If this is called then we are in trouble. There are 4 error codes:
+// If this is called then we are in trouble. 
+// There are 4 error codes:
 // HOTEND low temperture  - 1 Long beep followed by 1 short beep
 // BED low temperture     - 1 long beep followed by 2 short beeps
 // HOTEND high temperture - 1 long beep followed by 3 short beeps
@@ -2838,25 +2824,15 @@ void ErrorBeeps (int iNumBeeps) {
 //////////////////////////////////////////////////////////////////////////
 
 void ErrorBleepCodes(){
-  delay(1000);
+  
   V3_I2C_Command( V3_LONG_BEEP, false ) ;                          // beep long
   delay(2000);
   
-  switch( error_code ) {
-    case ERROR_CODE_HOTEND_TEMPERATURE:
-      ErrorBeeps ( 1 );
-      break;
-    case ERROR_CODE_BED_TEMPERATURE:
-      ErrorBeeps ( 2 );
-      break;
-    case ERROR_CODE_HOTEND_TEMPERATURE_HIGH:
-      ErrorBeeps ( 3 );
-      break;
-    case ERROR_CODE_BED_TEMPERATURE_HIGH:
-      ErrorBeeps ( 4 );
-    default:
-      break;
+  for (int i = 1 ; i <= error_code ; i++) {
+    V3_I2C_Command( V3_SHORT_BEEP, false ) ;                      // beep short x1
+    delay(1000);                                                  // 1 second delay
   }
+  
 #ifdef MALSOFT_I2C_DISPLAY
   StatusScreen();                                                 // display X Y Z and error on LCD
 #endif
@@ -2864,6 +2840,7 @@ void ErrorBleepCodes(){
   SerialMgr.cur()->print(error_code);
   SerialMgr.cur()->print(", ");
   SerialMgr.cur()->println(error_code_str[error_code]);
+  
   delay(2000);                                                    // delay 2 seconds
 }
 
@@ -2878,6 +2855,11 @@ void ErrorBleepCodes(){
 
 void BBB(){
   // BBB short beep x3 chris 2017-04-01
+  // sorry chris i dont think so the code you used was for 1 short beep
+  // but in practice it was 1 continus beep due to the ininte loop
+                                                              
+  V3_I2C_Command( V3_NOZZLE_RED_FLASH, false ) ;                  // nozzle RGB LED Red Flashing
+  V3_I2C_Command( V3_BUTTON_RED_FLASH, false ) ;                  // button RGB LED Red Flashing
   while(1){
                                                                   // loop forever
     pinMode(HEATER_0_PIN, OUTPUT);
@@ -2889,7 +2871,7 @@ void BBB(){
     
 //    V3_I2C_Command( V3_SHORT_BEEP, false ) ;                      // beep short x1
     ErrorBleepCodes();                                            // give an audiabe clue to the error
-
+    
     disable_x(); disable_y(); disable_z(); disable_e();           //stop motors
     analogWrite(FAN_PIN, 0); WRITE(FAN_PIN, LOW);                 //stop fan
   }
