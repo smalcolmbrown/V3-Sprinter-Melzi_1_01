@@ -35,6 +35,19 @@
     #define I2C_ADDR    0x3f  // Define I2C Address for PCF8574A port expander
   #endif
 
+// 
+  #define LCD_WIDTH 20
+  #define LCD_HEIGHT 4
+  
+// custom charecter defines
+  #define LCD_DEGREE_CHAR 1
+  #define LCD_THERMOMETER 2
+  #define LCD_BEDTEMP_CHAR 3
+  #define LCD_FAN_L_CHAR 4
+  #define LCD_FAN_R_CHAR 5
+  #define LCD_CLOCK_CHAR 6
+  #define LCD_FEEDRATE_CHAR 7
+
   #define BACKLIGHT_PIN  3
   #define En_pin  2
   #define Rw_pin  1
@@ -46,6 +59,7 @@
 
   #define  LED_OFF  0
   #define  LED_ON  1
+
 
   void SplashScreen();
   void StatusScreen();

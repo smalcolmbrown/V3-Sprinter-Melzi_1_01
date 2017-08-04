@@ -19,9 +19,10 @@ LiquidCrystal_I2C_ByVac.h
 change from 
 #include <Arduino.h>
 to
-#include <WProgram.h>
+#if (ARDUINO <  100)
+  #include <WProgram.h>
 #else
-#include <Arduino.h>
+  #include <Arduino.h>
 #endif
 */
 
@@ -35,6 +36,7 @@ to
 #define NUM_AXIS 4
 #define NUM_DIGITS 7
 #define NUM_PRECISION 1
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -52,7 +54,8 @@ void PrinterState();
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern float current_position[] ;              // hook to X,Y,Z and E positions
-extern bool bFanOn ;                           // hook to fan status false = off true = on
+extern int fanSpeeds[] ;                       // hook to fan speed 0 = off, 255 = full on
+extern int feedrate;                           // hook to feedrate
 extern int tt ;                                // hook to Extruder temperature in C
 extern int bt ;                                // hook to Heated Bed temperature in C
 extern int ett ;                               // hook to Extruder target temperature in C
@@ -70,6 +73,12 @@ extern const char* uuid ;                      // hook to error UUID string
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+long day = 86400000; // 86400000 milliseconds in a day
+long hour = 3600000; // 3600000 milliseconds in an hour
+long minute = 60000; // 60000 milliseconds in a minute
+long second =  1000; // 1000 milliseconds in a second
+
+int   iMazFeedrate = 0;
 char  szTemp[41];                              // temp work aria for sprintf
 char  szT[41] ;                                // workspace for float to string conversions
 bool  bNewStatusScreen = true;
@@ -82,6 +91,107 @@ const char* pszPrinterState[] = { "Idle    ",
 
 LiquidCrystal_I2C  lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
 
+byte byDegree[8] = {      B01100,
+                          B10010,
+                          B10010,
+                          B01100,
+                          B00000,
+                          B00000,
+                          B00000,
+                          B00000 };
+
+byte byThermometer[8] = { B00100,
+                          B01010,
+                          B01010,
+                          B01010,
+                          B01010,
+                          B10001,
+                          B10001,
+                          B01110 };
+                                
+byte byBedTemp[8] = {     B00000,
+                          B11111,
+                          B10101,
+                          B10001,
+                          B10101,
+                          B11111,
+                          B00000,
+                          B00000 };
+
+byte byFanLeft[8] = {     B11111,
+                          B10011,
+                          B11001,
+                          B11100,
+                          B11100,
+                          B11001,
+                          B10011,
+                          B11111 };
+
+byte byFanRight[8] = {    B11111,
+                          B11001,
+                          B10001,
+                          B00111,
+                          B00111,
+                          B10001,
+                          B11001,
+                          B11111 };                          
+
+byte byFeedRate[8] = {    B11100,
+                          B10000,
+                          B11000,
+                          B10111,
+                          B00101,
+                          B00110,
+                          B00101,
+                          B00000 };
+
+byte byClock[8] = {       B00000,
+                          B01110,
+                          B10011,
+                          B10101,
+                          B10001,
+                          B01110,
+                          B00000,
+                          B00000  };
+                          
+byte byCorner[4][8] = { {
+      B00000,
+      B00000,
+      B00000,
+      B00000,
+      B00001,
+      B00010,
+      B00100,
+      B00100
+    }, {
+      B00000,
+      B00000,
+      B00000,
+      B11100,
+      B11100,
+      B01100,
+      B00100,
+      B00100
+    }, {
+      B00100,
+      B00010,
+      B00001,
+      B00000,
+      B00000,
+      B00000,
+      B00000,
+      B00000
+    }, {
+      B00100,
+      B01000,
+      B10000,
+      B00000,
+      B00000,
+      B00000,
+      B00000,
+      B00000
+    } };
+                          
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // void PrinterState()
@@ -140,10 +250,30 @@ void StatusScreen(){
   DisplayAxisPosition( 2 );                          // Axis Y position
 
   // do third line
+#ifdef LCD_DISPLAY_FAN
+    lcd.setCursor( 0, 2 ); 
+    sprintf( szTemp, "%c%c%d%c", LCD_FAN_L_CHAR, LCD_FAN_R_CHAR, ((fanSpeeds[0]*100)/255), 37 );
+    lcd.print( szTemp );
+#else
+    lcd.setCursor( 0, 2 ); 
+    sprintf( szTemp, "%c%3d%c ", LCD_FEEDRATE_CHAR, ((feedrate*100)/7800), 37 );
+    lcd.print( szTemp );
+    
+#endif // LCD_DISPLAY_FAN
+#define LCD_CLOCK
+#ifdef LCD_CLOCK
+  // do the elapsed time clock
+  lcd.setCursor( 14, 2 );
+  long timeNow = millis();
+ 
+  int iDays = timeNow / day ;                                //number of days
+  int iHours = (timeNow % day) / hour;                       //the remainder from days division (in milliseconds) divided by hours, this gives the full hours
+  int iMinutes = ((timeNow % day) % hour) / minute ;         //and so on...
+  int iSeconds = (((timeNow % day) % hour) % minute) / second;
   
-  lcd.setCursor( 0, 2 ); 
-  sprintf( szTemp, "Fan %s", (bFanOn)? "On " : "Off" );
+  sprintf( szTemp, "%c%02d:%02d", LCD_CLOCK_CHAR, iHours, iMinutes);
   lcd.print( szTemp );
+#endif
 
   // do fourth line
   PrinterState( );
@@ -168,24 +298,42 @@ void StatusScreen(){
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
 void SplashScreen() {
-  int i ;
-  lcd.begin (20,4);  // initialize the lcd
+
+  char szDashes[] = "-------------------------------------";
+  int iLen = max(strlen(pszFirmware[FIRMWARE_NAME]), strlen(pszFirmware[FIRMWARE_MACHINENAME])) + 2 ;
+  szDashes[iLen] = 0;
+  
+  lcd.begin (LCD_WIDTH, LCD_HEIGHT);                  // initialize the lcd
   lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
   lcd.setBacklight(LED_ON);
   lcd.clear();
   lcd.home();
-  lcd.setCursor(10-(strlen(pszFirmware[FIRMWARE_MACHINENAME])/2) ,0); 
-  lcd.print( pszFirmware[FIRMWARE_MACHINENAME] );
-  sprintf(szTemp, "V %s Dev", pszFirmware[FIRMWARE_VERSION] );
-  lcd.setCursor(10-(strlen(szTemp)/2),1);
-  lcd.print(szTemp);
-  lcd.setCursor(0,2);
-  strncpy( szTemp, uuid, 20) ;
+
+  for (byte i = 1; i < 5; i++)
+    lcd.createChar(i, byCorner[i-1]);
+
+  sprintf( szTemp, "%c%s%c", 1, szDashes, 2 );
+  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,0); 
   lcd.print( szTemp );
-  lcd.setCursor(0,3);
-  strncpy( szTemp, uuid+20, 20) ;
+  sprintf( szTemp,  "| %s |", pszFirmware[FIRMWARE_NAME]) ;
+  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,1); 
+  lcd.print( szTemp );
+  sprintf( szTemp,  "| %s |", pszFirmware[FIRMWARE_MACHINENAME]) ;
+  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,2); 
+  lcd.print( szTemp );
+  sprintf( szTemp, "%c%s%c", 3, szDashes, 4);
+  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,3); 
   lcd.print( szTemp );
   delay(4000);
+  
+  lcd.createChar(LCD_DEGREE_CHAR,byDegree);
+  lcd.createChar(LCD_THERMOMETER,byThermometer); 
+  lcd.createChar(LCD_BEDTEMP_CHAR,byBedTemp);
+  lcd.createChar(LCD_FAN_L_CHAR,byFanLeft);
+  lcd.createChar(LCD_FAN_R_CHAR,byFanRight);
+  lcd.createChar(LCD_CLOCK_CHAR,byClock);
+  lcd.createChar(LCD_FEEDRATE_CHAR,byFeedRate);
+
   bNewStatusScreen = true;
 }
 
@@ -198,12 +346,12 @@ void SplashScreen() {
 void DisplayBedAndExtruderTemparature() {
   // extruder 
   lcd.setCursor( 0, 0 ); 
-  sprintf( szTemp, "%c%d/%d%c     ", 0x5c, tt, ett, 0xdf );
+  sprintf( szTemp, "%c%3d/%d%c     ", LCD_THERMOMETER, tt, ett, LCD_DEGREE_CHAR );
   *(szTemp+10) = 0;               // truncate to 10 letters
   lcd.print( szTemp );
   // heated bed
   lcd.setCursor( 10, 0 ); 
-  sprintf( szTemp, "%c%d/%d%c     ", 0xfc, bt, btt, 0xdf );
+  sprintf( szTemp, "%c%3d/%d%c     ", LCD_BEDTEMP_CHAR, bt, btt, LCD_DEGREE_CHAR );
   *(szTemp+10) = 0;               // truncate to 10 letters
   lcd.print( szTemp );
 }

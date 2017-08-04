@@ -185,12 +185,24 @@ double Kd = 20.0;//0.01;
 #define M42_SUPPORT
 
 //-----------------------------------------------------------------------
+//// SETTINGS FOR EXPERIMENTAL_I2CBUS pinched from Marlin 1.1.0
+//
+// M260 - Send data to a I2C slave device 
+// M261 - Request X bytes from I2C slave device 
+//-----------------------------------------------------------------------
+
+// comment out if no EXPERIMENTAL_I2CBUS
+#define EXPERIMENTAL_I2CBUS
+
+//-----------------------------------------------------------------------
 //// SETTINGS FOR M499  - Force Error mode(Command M499)
 //-----------------------------------------------------------------------
 
-// comment out of no M499 support (only used to test BBB() error reporting)
+// comment out if no M499 support (only used to test BBB() error reporting)
 //#define M499_SUPPORT
 
+// a V3 has two fans extruder and work fan
+#define FAN_COUNT 1
 
 //M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
 int nzone = 5;//2;

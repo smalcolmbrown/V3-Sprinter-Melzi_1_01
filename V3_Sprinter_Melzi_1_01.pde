@@ -43,6 +43,10 @@ to
   #include "SdFat.h"
 #endif
 
+#ifdef EXPERIMENTAL_I2CBUS
+  #include "I2C_Experimental.h"
+#endif
+
 
 // look here for descriptions of gcodes: http://linuxcnc.org/handbook/gcode/g-code.html
 // http://objects.reprap.org/wiki/Mendel_User_Manual:_RepRapGCodes
@@ -127,6 +131,9 @@ to
 // M240 - set Z_MAX_LENGTH_M240
 // end of V3 mods
 
+// M260 - Send data to a I2C slave device 
+// M261 - Request X bytes from I2C slave device 
+
 // M301 - Set PID parameters
 
 // M499 - forces printer into error mode for resting only comment out in Configuration.h for production release
@@ -189,11 +196,13 @@ float axis_diff[NUM_AXIS] = {0, 0, 0, 0};
 #define Z_ADJUST_BYTE 0
 float Z_MAX_LENGTH_M240 = 120.00;
 
-
 #if FAN_PIN > -1
-  bool bFanOn = true;
+  int fanSpeeds[FAN_COUNT] = { 0 };
 #endif
 
+#ifdef EXPERIMENTAL_I2CBUS
+  EI2C_Bus i2c;
+#endif
               
 
 // comm variables
@@ -226,7 +235,7 @@ int btt = 0 ;      // Heated Bed target temperature in C
 
 const char* status_str[]         = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* error_code_str[]     = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
-const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", "1.01", "Vector 3", "1" };
+const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", "1.01.0104", "Vector 3", "1" };
 
 #ifdef PIDTEMP
   int temp_iState = 0;
@@ -482,6 +491,7 @@ void setup()
   #endif
 
   #if (FAN_PIN > -1) 
+    fanSpeeds[0] = FAN_INIT;
     SET_OUTPUT(FAN_PIN);
     WRITE(FAN_PIN,FAN_INIT);
   #endif  
@@ -724,7 +734,6 @@ if(!sdmode || serial_count!=0){
 #endif
 
 }
-
 
 inline float code_value() { return (strtod(&cmdbuffer[bufindr][strchr_pointer - cmdbuffer[bufindr] + 1], NULL)); }
 inline long code_value_long() { return (strtol(&cmdbuffer[bufindr][strchr_pointer - cmdbuffer[bufindr] + 1], NULL, 10)); }
@@ -992,6 +1001,15 @@ inline void process_commands()
         gcode_M240();
       break;
 #endif  // ifdef V3
+
+#ifdef  EXPERIMENTAL_I2CBUS
+      case 260: // M260 -  i2c Send Data
+        gcode_M301();
+        break;
+      case 261: // Mm261 - i2c Request Data
+        gcode_M301();
+        break;
+#endif //   EXPERIMENTAL_I2CBUS
 
 #ifdef PIDTEMP
       case 301: // M301 - Set PID parameters
@@ -1696,26 +1714,35 @@ inline void gcode_M105() {
 // M106: Set Fan Speed
 // *
 // *  S<int>   Speed between 0-255
+// *  P<int>   Fan number
 ////////////////////////////////
 
 inline void gcode_M106() {
-  if (code_seen('S')) {
+
+  uint16_t s = (code_seen('S')) ? constrain( code_value(), 0, 255) : 255;
+  uint16_t p = (code_seen('P')) ? code_value() : 0;
+  if (p < FAN_COUNT) {
+    fanSpeeds[p] = s;
     WRITE(FAN_PIN, HIGH);
-    analogWrite(FAN_PIN, constrain(code_value(),0,255) );
-  } else {
-    WRITE(FAN_PIN, HIGH);
+    analogWrite(FAN_PIN, fanSpeeds[p] );
   }
-  bFanOn = true;
+//  bFanOn = true;
 }
 
 ////////////////////////////////
 // M107: Fan Off
+// *
+// *  P<int>   Fan number
 ////////////////////////////////
 
 inline void gcode_M107() {
-  analogWrite(FAN_PIN, 0);
-  WRITE(FAN_PIN, LOW);
-  bFanOn = false;
+  uint16_t p = (code_seen('P')) ? code_value() : 0;
+  if (p < FAN_COUNT) {
+    fanSpeeds[p] = 0;
+    analogWrite(FAN_PIN, 0);
+    WRITE(FAN_PIN, LOW);
+//   bFanOn = false;
+  }
 }
 #endif
 
@@ -1951,6 +1978,67 @@ inline void gcode_M240() {
     Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();   //数据还原  - read data from eeprom and set variable 
   }
 }
+
+#ifdef EXPERIMENTAL_I2CBUS
+
+  /**
+   * M260: Send data to a I2C slave device
+   *
+   * This is a PoC, the formating and arguments for the GCODE will
+   * change to be more compatible, the current proposal is:
+   *
+   *  M260 A<slave device address base 10> ; Sets the I2C slave address the data will be sent to
+   *
+   *  M260 B<byte-1 value in base 10>
+   *  M260 B<byte-2 value in base 10>
+   *  M260 B<byte-3 value in base 10>
+   *
+   *  M260 S1 ; Send the buffered data and reset the buffer
+   *  M260 R1 ; Reset the buffer without sending data
+   *
+   * Pinched from Marlin 1.1.0 warts and all
+   */
+
+inline void gcode_M260() {
+  
+  // Set the target address
+  if (code_seen('A')) i2c.Address( (byte)constrain(code_value(), 8, 127));
+
+  // Add a new byte to the buffer
+  if (code_seen('B')) i2c.Add( (byte)constrain(code_value(), 0, 256));
+
+  // Flush the buffer to the bus
+  if (code_seen('S')) i2c.Send();
+
+  // Reset and rewind the buffer
+  else if (code_seen('R')) i2c.Reset();
+  
+}
+
+  /**
+   * M261: Request X bytes from I2C slave device
+   *
+   * Usage: M261 A<slave device address base 10> B<number of bytes>
+   *
+   * Pinched from Marlin 1.1.0 warts and all
+   */
+
+inline void gcode_M261() {
+  byte byData;
+  // get the target address to request data from
+  if (code_seen('A')) i2c.Address( (byte)constrain(code_value(), 8, 127));
+  
+  // get the number of bytes to request
+  if (code_seen('B')) byData = constrain(code_value(), 1, EI2C_BUS_BUFFER_SIZE);
+
+  if (i2c.Address() && byData && byData <= EI2C_BUS_BUFFER_SIZE) {
+    i2c.Relay(byData);
+  } else {
+    SerialMgr.cur()->println("Bad i2c request");
+  }
+}
+
+#endif // EXPERIMENTAL_I2CBUS
 
 #ifdef PIDTEMP
 
@@ -2873,7 +2961,9 @@ void BBB(){
     ErrorBleepCodes();                                            // give an audiabe clue to the error
     
     disable_x(); disable_y(); disable_z(); disable_e();           //stop motors
-    analogWrite(FAN_PIN, 0); WRITE(FAN_PIN, LOW);                 //stop fan
+    fanSpeeds[0] = 0;                                             //stop fan
+    analogWrite(FAN_PIN, fanSpeeds[0]);
+    WRITE(FAN_PIN, LOW); 
   }
 }
 
