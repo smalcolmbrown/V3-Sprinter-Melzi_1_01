@@ -1,21 +1,21 @@
 # Eaglemoss Vector 3 Firmware Technical Guide
 # Version 1.01.x
 
-## Contents
-   ### 1. Supported G amd M Codes
-      #### 1.a Supported G Codes
-      These G Codes are the standard ones supported by the Eaglemoss firmware release.
-      #### 1.b New Supported G Codes
-      These G codes have been added since the official Eaglemoss firmware release.
-      #### 1.c Supported Standard RepRap M Codes
-      These M codes are the standard ones supported by the official Eaglemoss firmware release.
-      #### 1.d Unique V3 M Codes
-      These M codes are unique to the official Eaglemoss firmware release.
-      #### 1.e New Supported Standard M Codes
-      #### 1.f New Supported Unofficial M Codes
-   ### 2. Main board pin out
-      #### 2.a Pin definition for the Vector 3
-      #### 2.b Pin assignments on the Vector 3
+# Contents
+## 1. Supported G amd M Codes
+   ### 1.a Supported G Codes
+   These G Codes are the standard ones supported by the Eaglemoss firmware release.
+   ### 1.b New Supported G Codes
+   These G codes have been added since the official Eaglemoss firmware release.
+   ### 1.c Supported Standard RepRap M Codes
+   These M codes are the standard ones supported by the official Eaglemoss firmware release.
+   ### 1.d Unique V3 M Codes
+   These M codes are unique to the official Eaglemoss firmware release.
+   ### 1.e New Supported Standard M Codes
+   ### 1.f New Supported Unofficial M Codes
+## 2. Main board pin out
+   #### 2.a Pin definition for the Vector 3
+   #### 2.b Pin assignments on the Vector 3
 
 
 # Section 1 Supported G and M Codes.
