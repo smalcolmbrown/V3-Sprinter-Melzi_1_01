@@ -14,8 +14,8 @@
 
 ## The following G Codes have been implemented
 
-###G0  - Coordinated Movement X Y Z E Same as G1
-###G1  - Coordinated Movement X Y Z E
+### G0  - Coordinated Movement X Y Z E Same as G1
+### G1  - Coordinated Movement X Y Z E
 G4  - Dwell S<seconds> or P<milliseconds>
 G28 - Home all Axis
 G30 - Single Z-Probe
