@@ -3,7 +3,9 @@
 ## Contents
 ### 1. Supported G amd M Codes
 #### 1.a Supported G Codes
-#### 1.b Supported M Codes
+#### 1.b Supported Standard RepRap M Codes
+#### 1.c Unique V3 M Codes
+#### 1.d Supported Standard M Codes
 ### 2. Main board pin out
 #### 2.a Pin definition for the Vector 3
 #### 2.b Pin assignments on the Vector 3
@@ -14,24 +16,28 @@
 ## The following G Codes have been implemented
 
 ### G0  - Rapid linear Move 
-Same as G1
+   #### Usage
+   G0 and G1 have become merged for efficienccy reasons. For details of **G0** see **G1**
+
 ### G1  - Linear Move
    #### Usage
-   G0 Xnnn Ynnn Znnn Ennn Fnnn Snnn
+   **G0** and **G1** have become merges for efficienccy reasons.
    
-   G1 Xnnn Ynnn Znnn Ennn Fnnn Snnn
+   **G0 Xnnn Ynnn Znnn Ennn Fnnn Snnn**
+   
+   **G1 Xnnn Ynnn Znnn Ennn Fnnn Snnn**
 #### Parameters
    Not all parameters need to be used, but at least one has to be used
 
-   Xnnn The position to move to on the X axis
+   **Xnnn** The position to move to on the X axis
 
-   Ynnn The position to move to on the Y axis
+   **Ynnn** The position to move to on the Y axis
 
-   Znnn The position to move to on the Z axis
+   **Znnn** The position to move to on the Z axis
 
-   Ennn The amount to extrude between the starting point and ending point
+   **Ennn** The amount to extrude between the starting point and ending point
 
-   Fnnn The feedrate per minute of the move between the starting point and ending point (if supplied)
+   **Fnnn** The feedrate per minute of the move between the starting point and ending point (if supplied)
 
 #### Examples
 G0 X12               ; move to 12mm on the X axis
@@ -40,90 +46,91 @@ G0 F1500             ; Set the feedrate to 1500mm/minute
 
 G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis while extruding 22.4mm of material
 
-### G4  - Dwell S<seconds> or P<milliseconds>
-#### Usage
-Pause the machine for a period of time. P for milliseconds and S for seconds
-#### Parameters
-Pnnn Time to wait, in milliseconds
+### G4  - Dwell
+   #### Usage
+   Pause the machine for a period of time. P for milliseconds and S for seconds
+   #### Parameters
+   **Pnnn** Time to wait, in milliseconds
 
-Snnn Time to wait, in seconds 
-#### Example
-G4 P200
+   **Snnn** Time to wait, in seconds 
+   #### Example
+   G4 P200
 ### G28 -  Move to Origin (Home)
-#### Parameters
-This command can be used without any additional parameters.
+   #### Parameters
+   This command can be used without any additional parameters.
 
-X Flag to go back to the X axis origin
+   **X Flag** to go back to the X axis origin
 
-Y Flag to go back to the Y axis origin
+   **Y Flag** to go back to the Y axis origin
 
-Z Flag to go back to the Z axis origin
-#### Examples
-G28     ; Home all axes
+   **Z Flag** to go back to the Z axis origin
+   #### Examples
+   G28     ; Home all axes
 
-G28 X Z ; Home the X and Z axes
+   G28 X Z ; Home the X and Z axes
 ### G30 - Single Z-Probe
-####  Usage
-G30 Pnnn Xnnn Ynnn Znnn Hnnn Snnn
-#### Parameters
-Pnnn Probe point number
+   ####  Usage
+   In its simplest form probes bed at current XY location. Otherwise the bed is probed at the specified location
+   #### Parameters
+   This command can be used without any additional parameters.
 
-Xnnn X coordinate
+   **Xnnn** X coordinate
 
-Ynnn Y coordinate
+   **Ynnn** Y coordinate
 
-Znnn Z coordinate
+   **Znnn** Z coordinate
 
-Snnn Set parameter
-#### Example
-G30                          ; Probe the bed at the current XY position. When the probe is triggered, set the Z coordinate to the probe trigger height.
+   **Snnn** Set parameter
+   #### Example
+   G30                          ; Probe the bed at the current XY position. When the probe is triggered, set the Z coordinate to the probe trigger height.
 
-G30 S-1                      ; Probe the bed at the current XY position. When the probe is triggered, do not adjust the Z coordinate.
+   G30 S-1                      ; Probe the bed at the current XY position. When the probe is triggered, do not savet the Z coordinate.
 
-G30 X20 Y50                  ; Probe the bed at X20 Y50 and save the XY coordinates
+   G30 X20 Y50                  ; Probe the bed at X20 Y50 and save the XY coordinates
 
-G30 X180 Y180 S-1            ; As previous example but just report the height errors
+   G30 X180 Y180 S-1            ; As previous example but just report the height errors
 ### G90 - Use Absolute Coordinates
-#### Example
-G90                          ; All coordinates from now on are absolute relative to the origin of the machine.
-### G91 - Use Relative Coordinates
-#### Example
-G91                          ; All coordinates from now on are relative to the last position. 
+   #### Example
+   G90                          ; All coordinates from now on are absolute relative to the origin of the machine.
+   ### G91 - Use Relative Coordinates
+   #### Example
+   G91                          ; All coordinates from now on are relative to the last position. 
 ### G92 - Set current position to cordinates given
-#### Parameters
-This command can be used without any additional parameters.
+   #### Parameters
+   This command can be used without any additional parameters.
 
-Xnnn new X axis position
+   **Xnnn** new X axis position
 
-Ynnn new Y axis position
+   **Ynnn** new Y axis position
 
-Znnn new Z axis position
+   **Znnn** new Z axis position
 
-Ennn new extruder position
-#### Example
-G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
-## RepRap and Custom M Codes
+   **Ennn** new extruder position
+   #### Example
+   G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
+
+## Supported Standard RepRap M Codes
 
 ### M4   - Query Status.                       (V3 only)
-#### Usage
-Querries the Status
-#### Parameters
-None
-#### Example
-M4                           ; returns machien status and error code if set
-#### Responce
-S<int>,<Verbose Status>      ; if no error
+   #### Usage
+   Querries the Status
+   #### Parameters
+   None
+   #### Example
+   M4                           ; returns machien status and error code if set
+   #### Responce
+   Snnn,Verbose Status          ; if no error
    
-S<int><Error>                ; if error
+   Snnn,Verbose Status          ; if error
    
-EC:<int><Verbose Error
+   EC:nnn,Verbose Error
 ### M5   - Reset Status and Clears Error flag. (V3 only)
-#### Usage
-Resets the status flag and clears error flag if set
-#### Parameters
-None
-#### Example
-M5                           ; Reset Status and Clears Error flag.
+   #### Usage
+   Resets the status flag and clears error flag if set
+   #### Parameters
+   None
+   #### Example
+   M5                           ; Reset Status and Clears Error flag.
 ### M20  - List SD card
 ### M21  - Init SD card
 ### M22  - Release SD card
