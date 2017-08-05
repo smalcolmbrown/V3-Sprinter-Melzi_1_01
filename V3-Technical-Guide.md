@@ -246,7 +246,7 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    #### Parameters
    **Snnn** the Target temperature in degrees C for the extruder   
    #### Example
-   M104 S190 ; sets teh extruder target temparture to 190 degrees C
+   M104 S190 ; sets the extruder target temparture to 190 degrees C
 ### M105 - Read current temp
 ### M106 - Fan on
    ### Useage
@@ -271,7 +271,15 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    **Snnn** the Target temperature in degrees C for the extruder   
    #### Example
    M109 S190 ; Sets the extruder target temparture to 190 degrees C
-### M114 - Display current position
+### M114 - Get Current Position
+   #### useage
+   This causes the RepRap machine to report its current X, Y, Z and E coordinates to the host.
+   #### Parameters
+   None
+   #### Example
+   M114     ; Get Current Position
+   ### Returns
+   X:0.00 Y:0.00 Z:0.00 E:0.00
 ### M115 - Get Firmware Version and Capabilities
    #### useage
    Request the Firmware Version and Capabilities of the current microcontroller The details are returned to the host computer as key:value pairs separated by spaces and terminated with a linefeed.
@@ -284,31 +292,67 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    
    ok PROTOCOL_VERSION:1.01.0104 FIRMWARE_NAME:Sprinter FIRMWARE_URL:https%3A//github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/ MACHINE_TYPE:Vector 3 EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000
 ### M119 - Report endstops status.
-### M140 - Set bed target temp
-### M190 - Wait for bed current temp to reach target temp.
-### M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
-### M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
-### M203 - Adjust Z height
-### M205 - Advanced settings
-
-
-### M301 - set PID parameter
+### M140 - Set Bed Temperature (Fast)
+   #### useage
+   Set the temperature of the Heated bed and return control to the host immediately (i.e. before that temperature has been reached by the heated bed).
+   #### Parameters
+   **Snnn** the Target temperature in degrees C for the heated bed   
+   #### Example
+   M140 S50  ; sets the heated bed target temparture to 50 degrees C
+### M190 - Wait for bed temperature to reach target temp
+   #### useage
+   Sets heated bed Temperature and wait for extruder current temp to reach target temp.
+   #### Parameters
+   **Snnn** the Target temperature in degrees C for the heated bed   
+   #### Example
+   M109 S50 ; Sets the heated bed target temparture to 50 degrees C
+### M201 - Set max printing acceleration
+   #### useage
+   Sets the acceleration that axes can do in units/second^2 for print moves. For consistency with the rest of G Code movement this should be in units/(minute^2), but that gives really silly numbers and one can get lost in all the zeros. So for this we use seconds.
+   #### Parameters
+   **Xnnn** Acceleration for X axis
+   **Ynnn** Acceleration for Y axis
+   **Znnn** Acceleration for Z axis
+   **Ennn** Acceleration for extruder drives
+   #### Example
+   M201 X1000 Y1000 Z100 E2000
+### M202 - Set max travel acceleration
+   #### useage
+   Set max travel acceleration in units/s^2 for travel moves (M202 X1000 Y1000).
+   #### Parameters
+   **Xnnn** Acceleration for X axis
+   **Ynnn** Acceleration for Y axis
+   **Znnn** Acceleration for Z axis
+   **Ennn** Acceleration for extruder drives
+   #### Example
+   M201 X1000 Y1000 Z100 E2000
+### M301 - Set PID parameters
 #### Useage
-   Setting the PID charecteristics 
+   Setting the PID parameters. Reports the current settings.
 #### Parameters
-   Pnnn proportional (Kp)
+   This command can be used without any additional parameters.
    
-   Innn integral (Ki)
+   **Pnnn** proportional (Kp)
    
-   Dnnn derivative (Kd)
+   **Innn** integral (Ki)
    
-   Fnnn pid max
+   **Dnnn** derivative (Kd)
    
-   Znnn nzone
+   **Fnnn** pid max
    
-   Wnnn pid_i_max
-#### Examples
-M301 P1 I2 D3    ; 
+   **Znnn** nzone
+   
+   **Wnnn** pid_i_max
+   #### Examples
+   M301             ;
+   M301 P1 I2 D3    ; 
+   #### Responce
+   Snnn,Verbose Status          ; if no error
+   
+   Snnn,Verbose Status          ; if error
+   
+   EC:nnn,Verbose Error
+
 ## 1.d Unique V3 M Codes
 These unofficial non standard M codes are unique to the official Eaglemoss firmware release.
 ### M4   - Query Status.
@@ -540,7 +584,7 @@ These unofficial non standard M codes are unique to the official Eaglemoss firmw
    #### Parameters
    This command can be used without any additional parameters.
   
-   Znnn the Max Z height
+   **Znnn** the Max Z height
 
    #### Examples
    M240 Z129.2   ; sets the max Z height to 129.2
@@ -573,27 +617,38 @@ These M codes have been added since the official Eaglemoss firmware release.
    M42 A1 S0 ; This turns pin A1 off
    ### Date implementation
    2017/07/16
+### M203 - Record Z adjustment
+   ### Useage
+   This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set, 
+even when the power is turned off and on again.
+   If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
+   If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed. 
+   The maximum adjustment is +/-1.27mm.
+   #### Parameters
+   **Znnn** the Max Z adjustment
+   #### Example: 
+   M203 Z-0.75  ;
 ### M260 - i2c Send Data
    #### Usage
    Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
+   #### Parameters
+   **Annn** The I2C address to send data to
+   
+   **Bnnn** The data to put into the buffer
+   
+   **Snnn** Sends the data in the buffer to the I2C address
    #### Examples
-   M260 A5 B65 S ; Send 'A' to Address 5 now
-   
-   M260 A39      ; Set address to device I2C address 0x27
-
-   M260 B77      ; M
-   
-   M260 B97      ; a
-   
-   M260 B114     ; r
-   
-   M260 B108     ; l
-   
-   M260 B105     ; i
-   
-   M260 B110     ; n
-   
-   M260 S1       ; Send the current buffer
+   M260 A5 B65 S1 ; Send 'A' to Address 5 now...
+   M260 A39       ; Set address to device I2C address 0x27..
+   M260 B83       ; Add 'S' to the buffer...
+   M260 B112      ; Add 'p' to the buffer...
+   M260 B114      ; Add 'r' to the buffer...
+   M260 B108      ; Add 'i' to the buffer...
+   M260 B105      ; Add 'n' to the buffer...
+   M260 B110      ; Add 't' to the buffer...   
+   M260 B110      ; Add 'e' to the buffer...   
+   M260 B110      ; Add 'r' to the buffer...   
+   M260 S1        ; Send the current buffer
    ### Date implemented
    2017/08/04
 ### M261 - i2c Request Data
