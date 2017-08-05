@@ -187,8 +187,24 @@ M5                           ; Reset Status and Clears Error flag.
 ### M238 - Hood Switch Disable
 ### M239 - sends 239 to V3_I2C device, Short Beep
 ### M240 - set Z_MAX_LENGTH_M240
-   ### M260 - 
-   ### m261 - 
+### M260 - i2c Send Data
+#### Usage
+Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
+#### Examples
+M260 A5 B65 S ; Send 'A' to Address 5 now
+M260 A39      ; Set address to device I2C address 0x27
+M260 B77      ; M
+M260 B97      ; a
+M260 B114     ; r
+M260 B108     ; l
+M260 B105     ; i
+M260 B110     ; n
+M260 S1       ; Send the current buffer
+### M261 - i2c Request Data
+   #### Usage
+   Request data from an i2c slave device. This command simply relays the received data to the host.
+#### Example
+   M261 A99 B5 ; Request 5 bytes from Address 99
 ### M301 - set PID parameter
 
 # Section 2 The pin asignments
