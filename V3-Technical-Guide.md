@@ -37,9 +37,20 @@ Fnnn The feedrate per minute of the move between the starting point and ending p
 Snnn Flag to check if an endstop was hit (S1 to check, S0 to ignore, S2 see note, default is S0)1
 #### Examples
 G0 X12               ; move to 12mm on the X axis
+
 G0 F1500             ; Set the feedrate to 1500mm/minute
+
 G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis while extruding 22.4mm of material
+
 ### G4  - Dwell S<seconds> or P<milliseconds>
+#### Usage
+Pause the machine for a period of time.
+#### Parameters
+Pnnn Time to wait, in milliseconds
+
+Snnn Time to wait, in seconds (Only on Repetier, Marlin, Smoothieware, and RepRapFirmware 1.16 and later)
+#### Example
+G4 P200
 ### G28 - Home all Axis
 ### G30 - Single Z-Probe
 ### G90 - Use Absolute Coordinates
