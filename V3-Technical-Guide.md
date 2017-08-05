@@ -17,10 +17,13 @@
    These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
 
 ## 2. Main board pin out
-   #### 2.a Pin definition for the Vector 3
-   #### 2.b Pin assignments on the Vector 3
+   ### 2.a Pin definition for the Vector 3
+   ### 2.b Pin assignments on the Vector 3
 
-
+## 3. Official Eaglemoss Firmware releases
+   ### 3.a 2016/07/01 Firmware release
+   ### 3.b 2017/07/06 Firmware release
+   
 # Section 1 Supported G and M Codes.
 
 ## 1.a Supported G Codes.
@@ -98,7 +101,7 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    #### Example
    G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
 ## 1.b New Supported G Codes
-These G codes have been added sine the official Eaglemoss firmware release.
+These G codes have been added since the official Eaglemoss firmware release.
 ### G30 - Single Z-Probe
    ####  Usage
    In its simplest form probes bed at current XY location. Otherwise the bed is probed at the specified location
@@ -132,7 +135,6 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
 ### M27  - Report SD print status
 ### M28  - Start SD write (M28 filename.g)
 ### M29  - Stop SD write does not do anything.
-### M42  - Switch I/O pin
 ### M80  - Turn on Power Supply
 ### M81  - Turn off Power Supply
 ### M82  - Set E codes absolute (default)
@@ -412,7 +414,32 @@ These unofficial non standard M codes are unique to the official Eaglemoss firmw
    M240          ; returns the max z height from the EEPROM
 ## 1.e New Supported Standard M Codes
 These M codes have been added since the official Eaglemoss firmware release.
-### M260 - i2c Send Data - Since 2017/08/04
+### M42  - Switch I/O pin
+   #### Usage
+   Sets or reads the stored the max Z Height parameter in to the EEPROM
+   #### Parameters
+   There are two distinct syntaxes for this command 1 standard and the other rather non standard both are equally valid
+   #### Syntanx 1 - Standard M code syntax
+   **Pnnn** Pin number - 27(A4), 28(A3), 29(A2) or 30(A1)
+   
+   **Snnn** Pin value  -  0 = off, 1 = on.
+
+   #### Examples
+   M42 M42 P30 S1 This turns pin A1 on.
+   
+   M42 M42 P30 S1 This turns pin A1 on.
+   #### Syntanx 3 - Melzi specific syntax
+   **Annn** Pin number - A1, A2, A3 or A4
+   
+   **Snnn** Pin value  - 0 = off, 1 = on.
+
+   #### Examples
+   M42 A1 S1 ; This turns pin A1 on.
+   
+   M42 A1 S0 ; This turns pin A1 off
+   ### Date implementation
+   2017/07/16
+### M260 - i2c Send Data
    #### Usage
    Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
    #### Examples
@@ -433,14 +460,14 @@ These M codes have been added since the official Eaglemoss firmware release.
    M260 B110     ; n
    
    M260 S1       ; Send the current buffer
-   ### Date implementation
+   ### Date implemented
    2017/08/04
-### M261 - i2c Request Data - Since 2017/08/04
+### M261 - i2c Request Data
    #### Usage
    Request data from an i2c slave device. This command simply relays the received data to the host.
    #### Example
    M261 A99 B5 ; Request 5 bytes from Address 99
-   ### Date implementation
+   ### Date implemented
    2017/08/04
 ## 1.f New Supported Unofficial M Codes
 These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
@@ -452,7 +479,7 @@ These unofficial non standard M codes have been added since the official Eaglemo
    M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit
    M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit
    M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit
-   ### Date implementation
+   ### Date implemented
    2017/08/04
 
 
