@@ -14,14 +14,30 @@
 
 ## The following G Codes have been implemented
 
-### G0  - Coordinated Movement X Y Z E Same as G1
-### G1  - Coordinated Movement X Y Z E
-G4  - Dwell S<seconds> or P<milliseconds>
-G28 - Home all Axis
-G30 - Single Z-Probe
-G90 - Use Absolute Coordinates
-G91 - Use Relative Coordinates
-G92 - Set current position to cordinates given
+### G0  - Rapid linear Move 
+Same as G1
+### G1  - Linear Move
+#### Usage
+G0 Xnnn Ynnn Znnn Ennn Fnnn Snnn
+G1 Xnnn Ynnn Znnn Ennn Fnnn Snnn
+####Parameters
+Not all parameters need to be used, but at least one has to be used
+Xnnn The position to move to on the X axis
+Ynnn The position to move to on the Y axis
+Znnn The position to move to on the Z axis
+Ennn The amount to extrude between the starting point and ending point
+Fnnn The feedrate per minute of the move between the starting point and ending point (if supplied)
+Snnn Flag to check if an endstop was hit (S1 to check, S0 to ignore, S2 see note, default is S0)1
+#### Examples
+G0 X12               ; move to 12mm on the X axis
+G0 F1500             ; Set the feedrate to 1500mm/minute
+G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis while extruding 22.4mm of material
+### G4  - Dwell S<seconds> or P<milliseconds>
+### G28 - Home all Axis
+### G30 - Single Z-Probe
+### G90 - Use Absolute Coordinates
+### G91 - Use Relative Coordinates
+### G92 - Set current position to cordinates given
 
 ## RepRap and Custom M Codes
 
