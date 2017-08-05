@@ -1,20 +1,27 @@
 # Eaglemoss Vector 3 Firmware Technical Guide
+# Version 1.01.x
 
 ## Contents
-### 1. Supported G amd M Codes
-#### 1.a Supported G Codes
-#### 1.b Supported Standard RepRap M Codes
-#### 1.c Unique V3 M Codes
-#### 1.d New Supported Standard M Codes
-### 2. Main board pin out
-#### 2.a Pin definition for the Vector 3
-#### 2.b Pin assignments on the Vector 3
+   ### 1. Supported G amd M Codes
+      #### 1.a Supported G Codes
+      These G Codes are the standard ones supported by the Eaglemoss firmware release.
+      #### 1.b New Supported G Codes
+      These G codes have been added since the official Eaglemoss firmware release.
+      #### 1.c Supported Standard RepRap M Codes
+      These M codes are the standard ones supported by the official Eaglemoss firmware release.
+      #### 1.d Unique V3 M Codes
+      These M codes are unique to the official Eaglemoss firmware release.
+      #### 1.e New Supported Standard M Codes
+      #### 1.f New Supported Unofficial M Codes
+   ### 2. Main board pin out
+      #### 2.a Pin definition for the Vector 3
+      #### 2.b Pin assignments on the Vector 3
 
 
 # Section 1 Supported G and M Codes.
 
 ## 1.a Supported G Codes.
-
+These G Codes are the standard ones supported by the Eaglemoss firmware release.
 ### G0  - Rapid linear Move 
    #### Usage
    G0 and G1 have become merged for efficienccy reasons. For details of **G0** see **G1**
@@ -68,6 +75,27 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    G28     ; Home all axes
 
    G28 X Z ; Home the X and Z axes
+### G90 - Use Absolute Coordinates
+   #### Example
+   G90                          ; All coordinates from now on are absolute relative to the origin of the machine.
+   ### G91 - Use Relative Coordinates
+   #### Example
+   G91                          ; All coordinates from now on are relative to the last position. 
+### G92 - Set current position to cordinates given
+   #### Parameters
+   This command can be used without any additional parameters.
+
+   **Xnnn** new X axis position
+
+   **Ynnn** new Y axis position
+
+   **Znnn** new Z axis position
+
+   **Ennn** new extruder position
+   #### Example
+   G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
+## 1.b New Supported G Codes
+These G codes have been added sine the official Eaglemoss firmware release.
 ### G30 - Single Z-Probe
    ####  Usage
    In its simplest form probes bed at current XY location. Otherwise the bed is probed at the specified location
@@ -89,28 +117,8 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    G30 X20 Y50                  ; Probe the bed at X20 Y50 and save the XY coordinates
 
    G30 X180 Y180 S-1            ; As previous example but just report the height errors
-### G90 - Use Absolute Coordinates
-   #### Example
-   G90                          ; All coordinates from now on are absolute relative to the origin of the machine.
-   ### G91 - Use Relative Coordinates
-   #### Example
-   G91                          ; All coordinates from now on are relative to the last position. 
-### G92 - Set current position to cordinates given
-   #### Parameters
-   This command can be used without any additional parameters.
-
-   **Xnnn** new X axis position
-
-   **Ynnn** new Y axis position
-
-   **Znnn** new Z axis position
-
-   **Ennn** new extruder position
-   #### Example
-   G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
-
-## 1.b Supported Standard RepRap M Codes
-
+## 1.c Supported Standard RepRap M Codes
+These M codes are the standard ones supported by the official Eaglemoss firmware release.
 ### M20  - List SD card
 ### M21  - Init SD card
 ### M22  - Release SD card
@@ -163,9 +171,9 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
 #### Examples
 M301 P1 I2 D3    ; 
 
-## 1.c Unique V3 M Codes
-These M codes are unique to teh Eaglemoss V3 3D printer
-### M4   - Query Status.                       (V3 only)
+## 1.d Unique V3 M Codes
+These M codes are unique to the official Eaglemoss firmware release.
+### M4   - Query Status.
    #### Usage
    Querries the Status
    #### Parameters
@@ -178,7 +186,7 @@ These M codes are unique to teh Eaglemoss V3 3D printer
    Snnn,Verbose Status          ; if error
    
    EC:nnn,Verbose Error
-### M5   - Reset Status and Clears Error flag. (V3 only)
+### M5   - Reset Status and Clears Error flag.
    #### Usage
    Resets the status flag and clears error flag if set
    #### Parameters
@@ -400,8 +408,8 @@ These M codes are unique to teh Eaglemoss V3 3D printer
    M240 Z129.2   ; sets the max Z height to 129.2
    
    M240          ; returns the max z height from the EEPROM
-## 1.d New Supported Standard M Codes
-These M codes have been added since the Eaglemoss originals
+## 1.e New Supported Standard M Codes
+These M codes have been added since the official Eaglemoss firmware release.
 ### M260 - i2c Send Data - Since 2017/08/04
    #### Usage
    Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
@@ -423,11 +431,27 @@ These M codes have been added since the Eaglemoss originals
    M260 B110     ; n
    
    M260 S1       ; Send the current buffer
+   ### Date implementation
+   2017/08/04
 ### M261 - i2c Request Data - Since 2017/08/04
    #### Usage
    Request data from an i2c slave device. This command simply relays the received data to the host.
-#### Example
+   #### Example
    M261 A99 B5 ; Request 5 bytes from Address 99
+   ### Date implementation
+   2017/08/04
+## 1.f New Supported Unofficial M Codes
+These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
+### M499 - Force Error
+   #### Usage
+   Sets the status and error codes for testing error handler and beep codes
+   #### Example
+   M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit
+   M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit
+   M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit
+   M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit
+   ### Date implementation
+   2017/08/04
 
 
 
