@@ -254,8 +254,6 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    #### Parameters
    This command can be used without any additional parameters.
    
-   **Pnnn** Fan number
-   
    **Snnn** Fan speed (0 to 255)
    ### Examples
    M107     ; switch work cooling fan off
@@ -274,7 +272,17 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    #### Example
    M109 S190 ; Sets the extruder target temparture to 190 degrees C
 ### M114 - Display current position
-### M115 - Capabilities string
+### M115 - Get Firmware Version and Capabilities
+   #### useage
+   Request the Firmware Version and Capabilities of the current microcontroller The details are returned to the host computer as key:value pairs separated by spaces and terminated with a linefeed.
+   #### Parameters
+   None.
+   #### Example
+   M115     ; Get Firmware Version and Capabilities
+   ### Returns
+   sample data from firmware:
+   
+   ok PROTOCOL_VERSION:1.01.0104 FIRMWARE_NAME:Sprinter FIRMWARE_URL:https%3A//github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/ MACHINE_TYPE:Vector 3 EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000
 ### M119 - Report endstops status.
 ### M140 - Set bed target temp
 ### M190 - Wait for bed current temp to reach target temp.
