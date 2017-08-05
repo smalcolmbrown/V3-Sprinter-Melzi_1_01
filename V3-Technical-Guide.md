@@ -630,28 +630,45 @@ even when the power is turned off and on again.
    M203 Z-0.75  ;
 ### M260 - i2c Send Data
    #### Usage
-   Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
+   Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x  Does not act as a slave device
    #### Parameters
-   **Annn** The I2C address to send data to...
-   **Bnnn** The data to put into the buffer...
+   **Annn** The I2C address to send data to
+   
+   **Bnnn** The data to put into the buffer
+   
    **Snnn** Sends the data in the buffer to the I2C address
    #### Examples
-   M260 A5 B65 S1 ; Send 'A' to Address 5 now...
-   M260 A39       ; Set address to device I2C address 0x27...
-   M260 B83       ; Add 'S' to the buffer...
-   M260 B112      ; Add 'p' to the buffer...
-   M260 B114      ; Add 'r' to the buffer...
-   M260 B108      ; Add 'i' to the buffer...
-   M260 B105      ; Add 'n' to the buffer...
-   M260 B110      ; Add 't' to the buffer...   
-   M260 B110      ; Add 'e' to the buffer...   
-   M260 B110      ; Add 'r' to the buffer...   
+   M260 A5 B65 S1 ; Send 'A' to Address 5 now
+   
+   M260 A39       ; Set address to device I2C address 0x27
+   
+   M260 B83       ; Add 'S' to the buffer
+   
+   M260 B112      ; Add 'p' to the buffer
+   
+   M260 B114      ; Add 'r' to the buffer
+   
+   M260 B108      ; Add 'i' to the buffer
+   
+   M260 B105      ; Add 'n' to the buffer
+   
+   M260 B110      ; Add 't' to the buffer
+   
+   M260 B110      ; Add 'e' to the buffer
+   
+   M260 B110      ; Add 'r' to the buffer
+   
    M260 S1        ; Send the current buffer
    ### Date implemented
    2017/08/04
 ### M261 - i2c Request Data
    #### Usage
-   Request data from an i2c slave device. This command simply relays the received data to the host.
+   Request data from an i2c slave device. This command simply relays the received data to the host. Does not act as a slave device
+   #### Parameters
+   **Annn** The I2C address to get data from
+   
+   **Bnnn** The number of bytes to request from the I2C address
+   
    #### Example
    M261 A99 B5 ; Request 5 bytes from Address 99
    ### Date implemented
