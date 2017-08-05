@@ -156,28 +156,142 @@ M5                           ; Reset Status and Clears Error flag.
 ### M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 ### M203 - Adjust Z height
 ### M205 - Advanced settings
-### M211 - sends 211 to V3_I2C device, extruder Red LED on
-### M212 - sends 212 to V3_I2C device, extruder Red LED flashing
-### M213 - sends 213 to V3_I2C device, extruder Green LED on
-### M214 - sends 214 to V3_I2C device, extruder Green LED flashing
-### M215 - sends 215 to V3_I2C device, extruder Blue LED on
-### M216 - sends 216 to V3_I2C device, extruder Blue LED flashing
-### M217 - sends 217 to V3_I2C device, extruder White LED on
-### M218 - sends 218 to V3_I2C device, extruder White LED flashing
-### M219 - sends 219 to V3_I2C device, extruder Orange LED on
-### M220 - sends 220 to V3_I2C device, extruder Orange LED flashing
-### M221 - sends 221 to V3_I2C device, extruder Head LED OFF
-### M222 - sends 222 to V3_I2C device, front button LED Red
-### M223 - sends 223 to V3_I2C device, front button LED Red Flashing
-### M224 - sends 224 to V3_I2C device, front button LED Green
-### M225 - sends 225 to V3_I2C device, front button LED Green flashing
-### M226 - sends 226 to V3_I2C device, front button LED Blue
-### M227 - sends 227 to V3_I2C device, front button LED Green flashing
-### M228 - sends 228 to V3_I2C device, front button LED White
+### M211 - Set extruder LED Red LED
+   #### Usage
+   Sets the extruder LED Red. Sends 211 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M211                          ; Set extruder LED Red.
+### M212 - Set extruder LED Red flashing
+   #### Usage
+   Sets the extruder LED Red flashing. Sends 212 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M212                          ; Set extruder LED Red flashing.
+### M213 - Set extruder LED Green
+   #### Usage
+   Sets the extruder LED Green. Sends 213 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M213                          ; Set extruder LED Green.
+### M214 - Set extruder LED Green flashing
+   #### Usage
+   Sets the extruder LED Green flashing. Sends 214 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M214                          ; Set extruder LED Green flashing.
+### M215 - Set extruder LED Blue
+   #### Usage
+   Sets the extruder LED blue. Sends 215 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M215                          ; Set extruder LED blue.
+### M216 - Set extruder LED Blue flashing
+   #### Usage
+   Sets the extruder LED Blue flashing. Sends 216 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M216                          ; Set front button LED Blue flashing.
+### M217 - Set extruder LED White
+   #### Usage
+   Sets the extruder LED white. Sends 217 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M217                          ; Set extruder LED white.
+### M218 - Set extruder LEd White flashing
+   #### Usage
+   Sets the extruder LED White flashing. Sends 218 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M218                          ; Set extruder LED White flashing.
+### M219 - Set extruder LED Orange
+   #### Usage
+   Sets the extruder LED Orange. Sends 219 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M219                          ; Set extruder LED Orange.
+### M220 - Set extruder LED Orange flashing
+   #### Usage
+   Sets the extruder LED Orange flashing. Sends 220 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M220                          ; Set extruder LED Orange flashing.
+### M221 - Set extruder Head LED OFF
+   #### Usage
+   Sets the extruder LED off. Sends 221 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M221                          ; Set extruder LED off.
+### M222 - Set front button LED Red
+   #### Usage
+   Sets the front button LED red. Sends 222 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M222                          ; Set front button LED red.
+### M223 - Set front button LED Red Flashing
+   #### Usage
+   Sets the front button LED Red Flashing. Sends 223 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M223                          ; Set front button LED Red Flashing.
+### M224 - Set front button LED Green
+   #### Usage
+   Sets the front button LED Green. Sends 224 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M224                          ; Set front button LED Green.
+### M225 - Set front button LED Green flashing
+   #### Usage
+   Sets the front button LED Green flashing. Sends 225 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M225                          ; Set front button LED Green flashing.
+### M226 - Set front button LED Blue
+   #### Usage
+   Sets the front button LED blue. Sends 226 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M226                          ; Set front button LED blue.
+### M227 - Set front button LED Blue flashing
+   #### Usage
+   Sets the front button LED blue flashing. Sends 227 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M227                          ; Set front button LED blue flashing.
+### M228 - Set front button LED White
+   #### Usage
+   Sets the front button LED White. Sends 228 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M228                          ; Set front button LED White.
 ### M229 - sends 229 to V3_I2C device, front button LED White flashing
+   #### Usage
+   Sets the front button LED  White flashing. Sends 229 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M229                          ; Set front button LED  White flashing.
 ### M230 - Set front button LED Orange
    #### Usage
-   Sets the front button front LED Orange. Sends 230 to V3_I2C device.
+   Sets the front button LED Orange. Sends 230 to V3_I2C device.
    #### Parameters
    None.
    #### Example 
