@@ -10,9 +10,12 @@
    ### 1.c Supported Standard RepRap M Codes
    These M codes are the standard ones supported by the official Eaglemoss firmware release.
    ### 1.d Unique V3 M Codes
-   These M codes are unique to the official Eaglemoss firmware release.
+   These unofficial non standard M codes are unique to the official Eaglemoss firmware release.
    ### 1.e New Supported Standard M Codes
+   These M codes have been added since the official Eaglemoss firmware release.
    ### 1.f New Supported Unofficial M Codes
+   These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
+
 ## 2. Main board pin out
    #### 2.a Pin definition for the Vector 3
    #### 2.b Pin assignments on the Vector 3
@@ -170,9 +173,8 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    Wnnn pid_i_max
 #### Examples
 M301 P1 I2 D3    ; 
-
 ## 1.d Unique V3 M Codes
-These M codes are unique to the official Eaglemoss firmware release.
+These unofficial non standard M codes are unique to the official Eaglemoss firmware release.
 ### M4   - Query Status.
    #### Usage
    Querries the Status
