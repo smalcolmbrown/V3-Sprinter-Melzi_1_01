@@ -241,10 +241,38 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
 ### M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 ### M92  - Set axis_steps_per_unit - same syntax as G92
 ### M104 - Set extruder target temp
+   #### useage
+   Set the temperature of the extruder to 190 C and return control to the host immediately (i.e. before that temperature has been reached by the extruder).
+   #### Parameters
+   **Snnn** the Target temperature in degrees C for the extruder   
+   #### Example
+   M104 S190 ; sets teh extruder target temparture to 190 degrees C
 ### M105 - Read current temp
 ### M106 - Fan on
+   ### Useage
+   Switches the work cooling fan on
+   #### Parameters
+   This command can be used without any additional parameters.
+   
+   **Pnnn** Fan number
+   
+   **Snnn** Fan speed (0 to 255)
+   ### Examples
+   M107     ; switch work cooling fan off
 ### M107 - Fan off
-### M109 - Wait for extruder current temp to reach target temp.
+   ### Useage
+   Switches the work cooling fan off
+   #### Parameters
+   None
+   ### Examples
+   M107     ; switch work cooling fan off
+### M109 - Set Extruder Temperature and Wait
+   #### useage
+   Sets Extruder Temperature and wait for extruder current temp to reach target temp.
+   #### Parameters
+   **Snnn** the Target temperature in degrees C for the extruder   
+   #### Example
+   M109 S190 ; Sets the extruder target temparture to 190 degrees C
 ### M114 - Display current position
 ### M115 - Capabilities string
 ### M119 - Report endstops status.
