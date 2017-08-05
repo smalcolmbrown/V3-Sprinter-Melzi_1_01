@@ -126,11 +126,57 @@ These G codes have been added since the official Eaglemoss firmware release.
 ## 1.c Supported Standard RepRap M Codes
 These M codes are the standard ones supported by the official Eaglemoss firmware release.
 ### M20  - List SD card
-### M21  - Init SD card
+   ### Useage
+   Sends a directory listing from the SD card to the terminal
+   #### Parameters
+   None
+   ### Examples
+   M20
+   ### returns
+   Begin file list:
+   
+   SQUARE.G
+   
+   ZCARRI~2.GCO
+   
+   End file list
+   
+   ok
+### M21  - Initialise SD card
+   ### Useage
+   The SD card is initialized. If an SD card is loaded when the machine is switched on, this will happen by default. SD card must be initialized for the other SD functions to work.
+   #### Parameters
+   None
+   ### Examples
+   M21      ; initialize the SD card
 ### M22  - Release SD card
+   ### Useage
+   The SD card is Release, so further (accidental) attempts to read from it are guaranteed to fail. Helpful, but not mandatory before removing the card physically.
+   #### Parameters
+   None
+   ### Examples
+   M22      ; released the SD card
 ### M23  - Select SD file (M23 filename.g)
+   ### Useage
+   The file specified as filename.gco (8.3 naming convention is supported) is selected ready for printing.
+   #### Parameters
+   **filename** the filename.gco of the file that you wish to select
+   ### Examples
+   M23 filename.gco      ; select filename.gco on the SD card
 ### M24  - Start/resume SD print
+   ### Useage
+   The machine prints from the file selected with the M23 command. If the print was previously paused with M25, printing is resumed from that point. To restart a file from the beginning, use M23 to reset it, then M24. When this command is used to resume a print that was paused.
+   #### Parameters
+   None
+   ### Examples
+   M24      ; Start/resume SD print
 ### M25  - Pause SD print
+   ### Useage
+   The SD card is initialized. If an SD card is loaded when the machine is switched on, this will happen by default. SD card must be initialized for the other SD functions to work.
+   #### Parameters
+   None
+   ### Examples
+   M25      ; iPause SD print
 ### M26  - Set SD position in bytes (M26 S12345)
 ### M27  - Report SD print status
 ### M28  - Start SD write (M28 filename.g)
@@ -597,3 +643,6 @@ These unofficial non standard M codes have been added since the official Eaglemo
 #define SDPOWER          -1
 #define SDSS          31
 
+# 3. Official Eaglemoss Firmware releases
+   ## 3.a 2016/07/01 Firmware release
+   ## 3.b 2017/07/06 Firmware release
