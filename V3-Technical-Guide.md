@@ -1,7 +1,6 @@
 # Eaglemoss Vector 3 Firmware Technical Guide
 
 ## Contents
-
 ### 1. Supported G amd M Codes
 #### 1.a Supported G Codes
 #### 1.b Supported M Codes
@@ -17,22 +16,22 @@
 ### G0  - Rapid linear Move 
 Same as G1
 ### G1  - Linear Move
-#### Usage
-G0 Xnnn Ynnn Znnn Ennn Fnnn Snnn
-
-G1 Xnnn Ynnn Znnn Ennn Fnnn Snnn
+   #### Usage
+   G0 Xnnn Ynnn Znnn Ennn Fnnn Snnn
+   
+   G1 Xnnn Ynnn Znnn Ennn Fnnn Snnn
 #### Parameters
-Not all parameters need to be used, but at least one has to be used
+   Not all parameters need to be used, but at least one has to be used
 
-Xnnn The position to move to on the X axis
+   Xnnn The position to move to on the X axis
 
-Ynnn The position to move to on the Y axis
+   Ynnn The position to move to on the Y axis
 
-Znnn The position to move to on the Z axis
+   Znnn The position to move to on the Z axis
 
-Ennn The amount to extrude between the starting point and ending point
+   Ennn The amount to extrude between the starting point and ending point
 
-Fnnn The feedrate per minute of the move between the starting point and ending point (if supplied)
+   Fnnn The feedrate per minute of the move between the starting point and ending point (if supplied)
 
 #### Examples
 G0 X12               ; move to 12mm on the X axis
@@ -187,25 +186,60 @@ M5                           ; Reset Status and Clears Error flag.
 ### M238 - Hood Switch Disable
 ### M239 - sends 239 to V3_I2C device, Short Beep
 ### M240 - set Z_MAX_LENGTH_M240
+   #### Usage
+   Sets or reads the stored the max Z Height parameter in to the EEPROM
+   #### Parameters
+   This command can be used without any additional parameters.
+  
+   Znnn the Max Z height
+
+   #### Examples
+   M240 z129.2   ; sets the max Z height to 129.2
+   
+   M240          ; returns the max z height from the EEPROM
 ### M260 - i2c Send Data
-#### Usage
-Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
-#### Examples
-M260 A5 B65 S ; Send 'A' to Address 5 now
-M260 A39      ; Set address to device I2C address 0x27
-M260 B77      ; M
-M260 B97      ; a
-M260 B114     ; r
-M260 B108     ; l
-M260 B105     ; i
-M260 B110     ; n
-M260 S1       ; Send the current buffer
+   #### Usage
+   Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
+   #### Examples
+   M260 A5 B65 S ; Send 'A' to Address 5 now
+   
+   M260 A39      ; Set address to device I2C address 0x27
+
+   M260 B77      ; M
+   
+   M260 B97      ; a
+   
+   M260 B114     ; r
+   
+   M260 B108     ; l
+   
+   M260 B105     ; i
+   
+   M260 B110     ; n
+   
+   M260 S1       ; Send the current buffer
 ### M261 - i2c Request Data
    #### Usage
    Request data from an i2c slave device. This command simply relays the received data to the host.
 #### Example
    M261 A99 B5 ; Request 5 bytes from Address 99
 ### M301 - set PID parameter
+#### Useage
+   Setting the PID charecteristics 
+#### Parameters
+   Pnnn proportional (Kp)
+   
+   Innn integral (Ki)
+   
+   Dnnn derivative (Kd)
+   
+   Fnnn pid max
+   
+   Znnn nzone
+   
+   Wnnn pid_i_max
+#### Examples
+M301 P1 I2 D3    ; 
 
 # Section 2 The pin asignments
 
