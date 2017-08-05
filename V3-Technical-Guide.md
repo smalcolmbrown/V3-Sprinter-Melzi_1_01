@@ -43,7 +43,7 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
 
 ### G4  - Dwell S<seconds> or P<milliseconds>
 #### Usage
-Pause the machine for a period of time.
+Pause the machine for a period of time. P for milliseconds and S for seconds
 #### Parameters
 Pnnn Time to wait, in milliseconds
 
@@ -105,71 +105,91 @@ Ennn new extruder position
 G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
 ## RepRap and Custom M Codes
 
-M4   - Query Status.                       (V3 only)
-M5   - Reset Status and Clears Error flag. (V3 only)
-M20  - List SD card
-M21  - Init SD card
-M22  - Release SD card
-M23  - Select SD file (M23 filename.g)
-M24  - Start/resume SD print
-M25  - Pause SD print
-M26  - Set SD position in bytes (M26 S12345)
-M27  - Report SD print status
-M28  - Start SD write (M28 filename.g)
-M29  - Stop SD write does not do anything.
-M42  - Switch I/O pin
-M80  - Turn on Power Supply
-M81  - Turn off Power Supply
-M82  - Set E codes absolute (default)
-M83  - Set E codes relative while in Absolute Coordinates (G90) mode
-M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
-M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
-M92  - Set axis_steps_per_unit - same syntax as G92
-M104 - Set extruder target temp
-M105 - Read current temp
-M106 - Fan on
-M107 - Fan off
-M109 - Wait for extruder current temp to reach target temp.
-M114 - Display current position
-M115 - Capabilities string
-M119 - Report endstops status.
-M140 - Set bed target temp
-M190 - Wait for bed current temp to reach target temp.
-M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
-M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
-M203 - Adjust Z height
-M205 - Advanced settings
-M211 - sends 211 to V3_I2C device, extruder Red LED on
-M212 - sends 212 to V3_I2C device, extruder Red LED flashing
-M213 - sends 213 to V3_I2C device, extruder Green LED on
-M214 - sends 214 to V3_I2C device, extruder Green LED flashing
-M215 - sends 215 to V3_I2C device, extruder Blue LED on
-M216 - sends 216 to V3_I2C device, extruder Blue LED flashing
-M217 - sends 217 to V3_I2C device, extruder White LED on
-M218 - sends 218 to V3_I2C device, extruder White LED flashing
-M219 - sends 219 to V3_I2C device, extruder Orange LED on
-M220 - sends 220 to V3_I2C device, extruder Orange LED flashing
-M221 - sends 221 to V3_I2C device, extruder Head LED OFF
-M222 - sends 222 to V3_I2C device, front button LED Red
-M223 - sends 223 to V3_I2C device, front button LED Red Flashing
-M224 - sends 224 to V3_I2C device, front button LED Green
-M225 - sends 225 to V3_I2C device, front button LED Green flashing
-M226 - sends 226 to V3_I2C device, front button LED Blue
-M227 - sends 227 to V3_I2C device, front button LED Green flashing
-M228 - sends 228 to V3_I2C device, front button LED White
-M229 - sends 229 to V3_I2C device, front button LED White flashing
-M230 - sends 230 to V3_I2C device, front button front LED Orange
-M231 - sends 231 to V3_I2C device, front button front LED Orange flashing
-M232 - sends 232 to V3_I2C device, front button front LED OFF
-M233 - sends 233 to V3_I2C device, Short Beep x 3
-M234 - sends 234 to V3_I2C device, Long Beep x 1 ( 3 sec)
-M235 - sends 235 to V3_I2C device, Beep every sec, 3 min.
-M236 - sends 236 to V3_I2C device, Beep Off
-M237 - Hood Switch Enable
-M238 - Hood Switch Disable
-M239 - sends 239 to V3_I2C device, Short Beep
-M240 - set Z_MAX_LENGTH_M240
-M301 - set PID parameter
+### M4   - Query Status.                       (V3 only)
+#### Usage
+Querries the Status
+#### Parameters
+None
+#### Example
+M4                           ; returns machien status and error code if set
+#### Responce
+S<int>,<Verbose Status>      ; if no error
+   
+S<int><Error>                ; if error
+   
+EC:<int><Verbose Error
+### M5   - Reset Status and Clears Error flag. (V3 only)
+#### Usage
+Resets the status flag and clears error flag if set
+#### Parameters
+None
+#### Example
+M5                           ; Reset Status and Clears Error flag.
+### M20  - List SD card
+### M21  - Init SD card
+### M22  - Release SD card
+### M23  - Select SD file (M23 filename.g)
+### M24  - Start/resume SD print
+### M25  - Pause SD print
+### M26  - Set SD position in bytes (M26 S12345)
+### M27  - Report SD print status
+### M28  - Start SD write (M28 filename.g)
+### M29  - Stop SD write does not do anything.
+### M42  - Switch I/O pin
+### M80  - Turn on Power Supply
+### M81  - Turn off Power Supply
+### M82  - Set E codes absolute (default)
+### M83  - Set E codes relative while in Absolute Coordinates (G90) mode
+### M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
+### M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
+### M92  - Set axis_steps_per_unit - same syntax as G92
+### M104 - Set extruder target temp
+### M105 - Read current temp
+### M106 - Fan on
+### M107 - Fan off
+### M109 - Wait for extruder current temp to reach target temp.
+### M114 - Display current position
+### M115 - Capabilities string
+### M119 - Report endstops status.
+### M140 - Set bed target temp
+### M190 - Wait for bed current temp to reach target temp.
+### M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
+### M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
+### M203 - Adjust Z height
+### M205 - Advanced settings
+### M211 - sends 211 to V3_I2C device, extruder Red LED on
+### M212 - sends 212 to V3_I2C device, extruder Red LED flashing
+### M213 - sends 213 to V3_I2C device, extruder Green LED on
+### M214 - sends 214 to V3_I2C device, extruder Green LED flashing
+### M215 - sends 215 to V3_I2C device, extruder Blue LED on
+### M216 - sends 216 to V3_I2C device, extruder Blue LED flashing
+### M217 - sends 217 to V3_I2C device, extruder White LED on
+### M218 - sends 218 to V3_I2C device, extruder White LED flashing
+### M219 - sends 219 to V3_I2C device, extruder Orange LED on
+### M220 - sends 220 to V3_I2C device, extruder Orange LED flashing
+### M221 - sends 221 to V3_I2C device, extruder Head LED OFF
+### M222 - sends 222 to V3_I2C device, front button LED Red
+### M223 - sends 223 to V3_I2C device, front button LED Red Flashing
+### M224 - sends 224 to V3_I2C device, front button LED Green
+### M225 - sends 225 to V3_I2C device, front button LED Green flashing
+### M226 - sends 226 to V3_I2C device, front button LED Blue
+### M227 - sends 227 to V3_I2C device, front button LED Green flashing
+### M228 - sends 228 to V3_I2C device, front button LED White
+### M229 - sends 229 to V3_I2C device, front button LED White flashing
+### M230 - sends 230 to V3_I2C device, front button front LED Orange
+### M231 - sends 231 to V3_I2C device, front button front LED Orange flashing
+### M232 - sends 232 to V3_I2C device, front button front LED OFF
+### M233 - sends 233 to V3_I2C device, Short Beep x 3
+### M234 - sends 234 to V3_I2C device, Long Beep x 1 ( 3 sec)
+### M235 - sends 235 to V3_I2C device, Beep every sec, 3 min.
+### M236 - sends 236 to V3_I2C device, Beep Off
+### M237 - Hood Switch Enable
+### M238 - Hood Switch Disable
+### M239 - sends 239 to V3_I2C device, Short Beep
+### M240 - set Z_MAX_LENGTH_M240
+   ### M260 - 
+   ### m261 - 
+### M301 - set PID parameter
 
 # Section 2 The pin asignments
 
