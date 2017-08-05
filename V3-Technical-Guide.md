@@ -630,7 +630,7 @@ even when the power is turned off and on again.
    M203 Z-0.75  ;
 ### M260 - i2c Send Data
    #### Usage
-   Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x  Does not act as a slave device
+   Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x  Does not act as a slave device. Needs the EXPERIMENTAL_I2CBUS define in Confiruation.h
    #### Parameters
    **Annn** The I2C address to send data to
    
@@ -663,7 +663,7 @@ even when the power is turned off and on again.
    2017/08/04
 ### M261 - i2c Request Data
    #### Usage
-   Request data from an i2c slave device. This command simply relays the received data to the host. Does not act as a slave device
+   Request data from an i2c slave device. This command simply relays the received data to the host. Does not act as a slave device. Needs the EXPERIMENTAL_I2CBUS define in Confiruation.h
    #### Parameters
    **Annn** The I2C address to get data from
    
@@ -677,12 +677,17 @@ even when the power is turned off and on again.
 These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
 ### M499 - Force Error
    #### Usage
-   Sets the status and error codes for testing error handler and beep codes
+   Sets the status and error codes for testing error handler and beep codes. Needs the M499_SUPPORT define in Confiruation.h
+   #### Parameters
+   **ennn** The error nimber (1, 2, 3 or 4)
    #### Example
-   M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit...
-   M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit...
-   M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit...
-   M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit...
+   M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit
+   
+   M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit
+   
+   M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit
+   
+   M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit
    ### Date implemented
    2017/08/04
 
