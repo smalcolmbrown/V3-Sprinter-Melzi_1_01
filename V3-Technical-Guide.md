@@ -19,14 +19,21 @@ Same as G1
 ### G1  - Linear Move
 #### Usage
 G0 Xnnn Ynnn Znnn Ennn Fnnn Snnn
+
 G1 Xnnn Ynnn Znnn Ennn Fnnn Snnn
-####Parameters
+#### Parameters
 Not all parameters need to be used, but at least one has to be used
+
 Xnnn The position to move to on the X axis
+
 Ynnn The position to move to on the Y axis
+
 Znnn The position to move to on the Z axis
+
 Ennn The amount to extrude between the starting point and ending point
+
 Fnnn The feedrate per minute of the move between the starting point and ending point (if supplied)
+
 Snnn Flag to check if an endstop was hit (S1 to check, S0 to ignore, S2 see note, default is S0)1
 #### Examples
 G0 X12               ; move to 12mm on the X axis
