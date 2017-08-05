@@ -132,7 +132,7 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    None
    ### Examples
    M20
-   ### returns
+   ### Returns
    Begin file list:
    
    SQUARE.G
@@ -172,15 +172,43 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    M24      ; Start/resume SD print
 ### M25  - Pause SD print
    ### Useage
-   The SD card is initialized. If an SD card is loaded when the machine is switched on, this will happen by default. SD card must be initialized for the other SD functions to work.
+   The machine pauses printing at the current position within the file. To resume printing, use M24. Do not use this code to pause the print in a G-code file, use M226 instead. Prior to pausing,
    #### Parameters
    None
    ### Examples
-   M25      ; iPause SD print
-### M26  - Set SD position in bytes (M26 S12345)
+   M25      ; Pause SD print
+### M26  - Set SD position in bytes
+   ### Useage
+   Set SD position in bytes ().
+   #### Parameters
+   **Snnn** File position in bytes
+   #### Example
+   M26 S12345 ; 
 ### M27  - Report SD print status
-### M28  - Start SD write (M28 filename.g)
-### M29  - Stop SD write does not do anything.
+   ### Useage
+   Marlin and recent forks of RepRapFirmware report the number of bytes processed in this format, which can be processed by Pronterface:
+   #### Parameters
+   None
+   #### Example
+   M27      ; report SD print status
+   ### Returns
+   If Printing: 
+   
+   SD printing byte 2134/235422
+   
+   If not printing:
+   
+   Not SD printing.
+### M28  - Start SD write
+   ### Useage
+   File specified by filename.gco is created (or overwritten if it exists) on the SD card and all subsequent commands sent to the machine are written to that file.
+   #### Parameters
+   **filename** the filename.gco of the file that you wish to select
+   ### Examples
+   M28 filename.gco ; creates a file filename.gco to write data to.
+### M29  - Stop SD write
+   #### Useage
+    Stops the SD card write. Does not do anything.
 ### M80  - Turn on Power Supply
 ### M81  - Turn off Power Supply
 ### M82  - Set E codes absolute (default)
