@@ -5,15 +5,15 @@
 #### 1.a Supported G Codes
 #### 1.b Supported Standard RepRap M Codes
 #### 1.c Unique V3 M Codes
-#### 1.d Supported Standard M Codes
+#### 1.d New Supported Standard M Codes
 ### 2. Main board pin out
 #### 2.a Pin definition for the Vector 3
 #### 2.b Pin assignments on the Vector 3
 
 
-# Section 1 Supported G Codes.
+# Section 1 Supported G and M Codes.
 
-## The following G Codes have been implemented
+## 1.a Supported G Codes.
 
 ### G0  - Rapid linear Move 
    #### Usage
@@ -109,28 +109,8 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    #### Example
    G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
 
-## Supported Standard RepRap M Codes
+## 1.b Supported Standard RepRap M Codes
 
-### M4   - Query Status.                       (V3 only)
-   #### Usage
-   Querries the Status
-   #### Parameters
-   None
-   #### Example
-   M4                           ; returns machien status and error code if set
-   #### Responce
-   Snnn,Verbose Status          ; if no error
-   
-   Snnn,Verbose Status          ; if error
-   
-   EC:nnn,Verbose Error
-### M5   - Reset Status and Clears Error flag. (V3 only)
-   #### Usage
-   Resets the status flag and clears error flag if set
-   #### Parameters
-   None
-   #### Example
-   M5                           ; Reset Status and Clears Error flag.
 ### M20  - List SD card
 ### M21  - Init SD card
 ### M22  - Release SD card
@@ -163,6 +143,48 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
 ### M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 ### M203 - Adjust Z height
 ### M205 - Advanced settings
+
+
+### M301 - set PID parameter
+#### Useage
+   Setting the PID charecteristics 
+#### Parameters
+   Pnnn proportional (Kp)
+   
+   Innn integral (Ki)
+   
+   Dnnn derivative (Kd)
+   
+   Fnnn pid max
+   
+   Znnn nzone
+   
+   Wnnn pid_i_max
+#### Examples
+M301 P1 I2 D3    ; 
+
+## 1.c Unique V3 M Codes
+These M codes are unique to teh Eaglemoss V3 3D printer
+### M4   - Query Status.                       (V3 only)
+   #### Usage
+   Querries the Status
+   #### Parameters
+   None
+   #### Example
+   M4                           ; returns machien status and error code if set
+   #### Responce
+   Snnn,Verbose Status          ; if no error
+   
+   Snnn,Verbose Status          ; if error
+   
+   EC:nnn,Verbose Error
+### M5   - Reset Status and Clears Error flag. (V3 only)
+   #### Usage
+   Resets the status flag and clears error flag if set
+   #### Parameters
+   None
+   #### Example
+   M5                           ; Reset Status and Clears Error flag.
 ### M211 - Set extruder LED Red LED
    #### Usage
    Sets the extruder LED Red. Sends 211 to V3_I2C device.
@@ -378,6 +400,8 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    M240 Z129.2   ; sets the max Z height to 129.2
    
    M240          ; returns the max z height from the EEPROM
+## 1.d New Supported Standard M Codes
+These M codes have been added since the Eaglemoss originals
 ### M260 - i2c Send Data - Since 2017/08/04
    #### Usage
    Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
@@ -404,23 +428,10 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    Request data from an i2c slave device. This command simply relays the received data to the host.
 #### Example
    M261 A99 B5 ; Request 5 bytes from Address 99
-### M301 - set PID parameter
-#### Useage
-   Setting the PID charecteristics 
-#### Parameters
-   Pnnn proportional (Kp)
-   
-   Innn integral (Ki)
-   
-   Dnnn derivative (Kd)
-   
-   Fnnn pid max
-   
-   Znnn nzone
-   
-   Wnnn pid_i_max
-#### Examples
-M301 P1 I2 D3    ; 
+
+
+
+
 
 # Section 2 The pin asignments
 
