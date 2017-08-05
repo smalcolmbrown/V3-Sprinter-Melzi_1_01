@@ -36,9 +36,6 @@ These G Codes are the standard ones supported by the Eaglemoss firmware release.
    #### Usage
    **G0** and **G1** have become merges for efficienccy reasons.
    
-   **G0 Xnnn Ynnn Znnn Ennn Fnnn Snnn**
-   
-   **G1 Xnnn Ynnn Znnn Ennn Fnnn Snnn**
 #### Parameters
    Not all parameters need to be used, but at least one has to be used
 
@@ -61,7 +58,7 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
 
 ### G4  - Dwell
    #### Usage
-   Pause the machine for a period of time. P for milliseconds and S for seconds
+   Pause the machine for a period of time.
    #### Parameters
    **Pnnn** Time to wait, in milliseconds
 
@@ -69,6 +66,8 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    #### Example
    G4 P200
 ### G28 -  Move to Origin (Home)
+   #### Usage
+   When the firmware receives this command, it quickly moves the specified axes (or all axes if none are given) to the endstops, backs away from each endstop by a short distance, and slowly bumps the endstop again to increase positional accuracy. This process, known as "Homing", is required to determine the position of the print carriage(s). Some firmware may even forbid movement away from endstops and other operations until the axes have been homed.
    #### Parameters
    This command can be used without any additional parameters.
 
@@ -82,12 +81,19 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
 
    G28 X Z ; Home the X and Z axes
 ### G90 - Use Absolute Coordinates
+   #### Usage
+   All coordinates from now on are absolute relative to the origin of the machine. (This is the RepRap default.)
    #### Example
    G90                          ; All coordinates from now on are absolute relative to the origin of the machine.
    ### G91 - Use Relative Coordinates
+   #### Usage
+   All coordinates from now on are relative to the last position. Note: RepRapFirmware latest revision firmware uses M83 to set the extruder to relative mode: extrusion is NOT set to relative by ReprapFirmware on G91: only X,Y and Z are set to relative.
    #### Example
    G91                          ; All coordinates from now on are relative to the last position. 
 ### G92 - Set current position to cordinates given
+   #### Usage
+   Allows programming of absolute zero point, by reseting the current position to the values specified. This would set the machine's X coordinate to 10, and the extrude coordinate to 90. No physical motion will occur.
+   A G92 without coordinates will reset all axes to zero.   
    #### Parameters
    This command can be used without any additional parameters.
 
@@ -239,7 +245,25 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    M83      ; Set E codes relative while in Absolute Coordinates
 ### M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 ### M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
-### M92  - Set axis_steps_per_unit - same syntax as G92
+   #### Useage
+   #### Parameters
+   **Snnn** Set inactivity timer for nnn seconds. To disable set S to zero (default)
+### M92  - Set axis_steps_per_unit
+   #### Usage
+   Allows programming of steps per unit (usually mm) for motor drives. These values are reset to firmware defaults on power on, unless saved to EEPROM if available (M500 in Marlin) or in the configuration file (config.g in RepRapFirmware). Very useful for calibration.
+RepRapFirmware will report the current steps/mm if you send M92 without any parameters.  
+   #### Parameters
+   This command can be used without any additional parameters.
+
+   **Xnnn** Steps per unit for the X drive
+
+   **Ynnn** Steps per unit for the Y drive
+
+   **Znnn** Steps per unit for the Z drive
+
+   **Ennn** Steps per unit for the extruder drive
+   #### Example
+   M92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
 ### M104 - Set extruder target temp
    #### useage
    Set the temperature of the extruder to 190 C and return control to the host immediately (i.e. before that temperature has been reached by the extruder).
