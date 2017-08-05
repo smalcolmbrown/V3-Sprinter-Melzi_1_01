@@ -344,7 +344,7 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    
    **Wnnn** pid_i_max
    #### Examples
-   M301             ;
+   M301             ; returnes the 
    M301 P1 I2 D3    ; 
    #### Responce
    Snnn,Verbose Status          ; if no error
@@ -662,10 +662,10 @@ These unofficial non standard M codes have been added since the official Eaglemo
    #### Usage
    Sets the status and error codes for testing error handler and beep codes
    #### Example
-   M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit
-   M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit
-   M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit
-   M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit
+   M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit...
+   M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit...
+   M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit...
+   M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit...
    ### Date implemented
    2017/08/04
 
