@@ -282,7 +282,7 @@ M5                           ; Reset Status and Clears Error flag.
    None.
    #### Example 
    M228                          ; Set front button LED White.
-### M229 - sends 229 to V3_I2C device, front button LED White flashing
+### M229 - Set front button LED White flashing
    #### Usage
    Sets the front button LED  White flashing. Sends 229 to V3_I2C device.
    #### Parameters
