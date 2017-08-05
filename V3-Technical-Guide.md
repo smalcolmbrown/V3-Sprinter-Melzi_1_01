@@ -175,16 +175,76 @@ M5                           ; Reset Status and Clears Error flag.
 ### M227 - sends 227 to V3_I2C device, front button LED Green flashing
 ### M228 - sends 228 to V3_I2C device, front button LED White
 ### M229 - sends 229 to V3_I2C device, front button LED White flashing
-### M230 - sends 230 to V3_I2C device, front button front LED Orange
-### M231 - sends 231 to V3_I2C device, front button front LED Orange flashing
-### M232 - sends 232 to V3_I2C device, front button front LED OFF
-### M233 - sends 233 to V3_I2C device, Short Beep x 3
-### M234 - sends 234 to V3_I2C device, Long Beep x 1 ( 3 sec)
-### M235 - sends 235 to V3_I2C device, Beep every sec, 3 min.
-### M236 - sends 236 to V3_I2C device, Beep Off
-### M237 - Hood Switch Enable
-### M238 - Hood Switch Disable
-### M239 - sends 239 to V3_I2C device, Short Beep
+### M230 - Set front button LED Orange
+   #### Usage
+   Sets the front button front LED Orange. Sends 230 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M230                          ; Set front button LED Orange.
+### M231 - Set front button LED Orange flashing
+   #### Usage
+   Sets the front button LED Orange flashing. Sends 231 to V3_I2C device. 
+   #### Parameters
+   None.
+   #### Example 
+   M231                          ; Set front button LED Orange flashing.
+### M232 - Turn front button front LED OFF
+   #### Usage
+   Turns the front button front LED OFF. Sends 232 to V3_I2C device.
+   #### Parameters
+   None.
+   #### Example 
+   M232                          ; Turn front button front LED OFF.
+### M233 - 3 short beeps
+   #### Usage
+   3 short beeps. Sends 233 to V3_I2C device. 
+   #### Parameters
+   None.
+   #### Example 
+   M233                          ; 3 short beeps.
+### M234 - Long Beep
+   #### Usage
+   One long beep lasting 3 seconds. Sends 234 to V3_I2C device, 
+   #### Parameters
+   None.
+   #### Example 
+   M234                          ; Long beep.
+### M235 - Beep every second for 3 min.
+   #### Usage
+   Beep every second for 3 minuites.
+   #### Parameters
+   None.
+   #### Example 
+   M235                          ; Beep every second for 3 minuites.
+### M236 - Beep Off
+   #### Usage
+   Switches beep off. Sends 236 to V3_I2C device. 
+   #### Parameters
+   None.
+   #### Example 
+   M236                          ; switches beep off
+### M237 - Hood switch warning buzzer enable
+   #### Usage
+   Enables the hood switch buzzer warning.
+   #### Parameters
+   None.
+   #### Example 
+   M237                          ; Enables hood switch buzzer warning
+### M238 - Hood switch warning buzzer disable
+   #### Usage
+   Disables the hood switch buzzer warning.
+   #### Parameters
+   None.
+   #### Example 
+   M238                          ; Disables hood switch buzzer warning
+### M239 - Short Beep
+   #### Usage
+   Short Beep. Sends 239 to V3_I2C device, 
+   #### Parameters
+   None.
+   #### Example 
+   M239                          ; Short beep
 ### M240 - set Z_MAX_LENGTH_M240
    #### Usage
    Sets or reads the stored the max Z Height parameter in to the EEPROM
@@ -194,10 +254,10 @@ M5                           ; Reset Status and Clears Error flag.
    Znnn the Max Z height
 
    #### Examples
-   M240 z129.2   ; sets the max Z height to 129.2
+   M240 Z129.2   ; sets the max Z height to 129.2
    
    M240          ; returns the max z height from the EEPROM
-### M260 - i2c Send Data
+### M260 - i2c Send Data - Since 2017/08/04
    #### Usage
    Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x
    #### Examples
@@ -218,7 +278,7 @@ M5                           ; Reset Status and Clears Error flag.
    M260 B110     ; n
    
    M260 S1       ; Send the current buffer
-### M261 - i2c Request Data
+### M261 - i2c Request Data - Since 2017/08/04
    #### Usage
    Request data from an i2c slave device. This command simply relays the received data to the host.
 #### Example
