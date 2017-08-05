@@ -34,7 +34,6 @@ Ennn The amount to extrude between the starting point and ending point
 
 Fnnn The feedrate per minute of the move between the starting point and ending point (if supplied)
 
-Snnn Flag to check if an endstop was hit (S1 to check, S0 to ignore, S2 see note, default is S0)1
 #### Examples
 G0 X12               ; move to 12mm on the X axis
 
@@ -48,15 +47,62 @@ Pause the machine for a period of time.
 #### Parameters
 Pnnn Time to wait, in milliseconds
 
-Snnn Time to wait, in seconds (Only on Repetier, Marlin, Smoothieware, and RepRapFirmware 1.16 and later)
+Snnn Time to wait, in seconds 
 #### Example
 G4 P200
-### G28 - Home all Axis
-### G30 - Single Z-Probe
-### G90 - Use Absolute Coordinates
-### G91 - Use Relative Coordinates
-### G92 - Set current position to cordinates given
+### G28 -  Move to Origin (Home)
+#### Parameters
+This command can be used without any additional parameters.
 
+X Flag to go back to the X axis origin
+
+Y Flag to go back to the Y axis origin
+
+Z Flag to go back to the Z axis origin
+#### Examples
+G28     ; Home all axes
+
+G28 X Z ; Home the X and Z axes
+### G30 - Single Z-Probe
+####  Usage
+G30 Pnnn Xnnn Ynnn Znnn Hnnn Snnn
+#### Parameters
+Pnnn Probe point number
+
+Xnnn X coordinate
+
+Ynnn Y coordinate
+
+Znnn Z coordinate
+
+Snnn Set parameter
+#### Example
+G30                          ; Probe the bed at the current XY position. When the probe is triggered, set the Z coordinate to the probe trigger height.
+
+G30 S-1                      ; Probe the bed at the current XY position. When the probe is triggered, do not adjust the Z coordinate.
+
+G30 X20 Y50                  ; Probe the bed at X20 Y50 and save the XY coordinates
+
+G30 X180 Y180 S-1            ; As previous example but just report the height errors
+### G90 - Use Absolute Coordinates
+#### Example
+G90                          ; All coordinates from now on are absolute relative to the origin of the machine.
+### G91 - Use Relative Coordinates
+#### Example
+G91                          ; All coordinates from now on are relative to the last position. 
+### G92 - Set current position to cordinates given
+#### Parameters
+This command can be used without any additional parameters.
+
+Xnnn new X axis position
+
+Ynnn new Y axis position
+
+Znnn new Z axis position
+
+Ennn new extruder position
+#### Example
+G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
 ## RepRap and Custom M Codes
 
 M4   - Query Status.                       (V3 only)
