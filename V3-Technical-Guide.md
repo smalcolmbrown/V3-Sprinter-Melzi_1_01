@@ -210,9 +210,33 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    #### Useage
     Stops the SD card write. Does not do anything.
 ### M80  - Turn on Power Supply
+   #### Useage
+   Turns on the ATX power supply from standby mode to fully operational mode. No-op on electronics without standby mode. The code is there, but is inoprative as there is no software control of the V3 power supply.
+   #### Parameters
+   None
+   #### Example
+   M80      ; Turn on Power Supply
 ### M81  - Turn off Power Supply
-### M82  - Set E codes absolute (default)
+   #### Useage
+   Turns off the ATX power supply. Counterpart to M80.  The code is there, but is inoprative as there is no software control of the V3 power supply.
+   #### Parameters
+   None
+   #### Example
+   M81      ; Turn off Power Supply
+### M82  - Set E codes absolute
+   #### Useage
+   Makes the extruder interpret extrusion as absolute positions. This is the default on the V3.
+   #### Parameters
+   None
+   #### Example
+   M82      ; Makes the extruder interpret extrusion as absolute positions.
 ### M83  - Set E codes relative while in Absolute Coordinates (G90) mode
+   #### Useage
+   Makes the extruder interpret extrusion values as relative positions. power supply.
+   #### Parameters
+   None
+   #### Example
+   M83      ; Set E codes relative while in Absolute Coordinates
 ### M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 ### M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 ### M92  - Set axis_steps_per_unit - same syntax as G92
