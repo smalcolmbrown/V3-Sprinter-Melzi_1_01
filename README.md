@@ -59,7 +59,7 @@ Changed printer name from "Vector 3 3D printer" to "Vector 3"
 fixed centering bug in SplashScreen()  
 Displaying printer state on LCD to **"Vector 3: Idle", "Vector 3: Heating", "Vector 3: Printing", "Vector 3: Done"** 
 
-**2017/07/14 Changes:**
+**2017/07/14 Changes:**  
 Added M42 function works on M42 A1 S1 syntax as per Bill and M42 P30 S1 as per reprap wikki. A V3 melzi specific version of Klimet's code  
 
 **2017/07/27 Changes:**  
@@ -78,4 +78,4 @@ New PC style beep codes to help diagnose thermistor errors.
 **One long beep** and **four short beeps** heated bed themistor **high** (short circuit themistor)  
 New experimental I2C bus simplified from Marlin M260 and M261  
 New M code to test error conditions M499  
-Added file Config_LCD.h to hold the LCD configeration data  
+Added file **Config_LCD.h** to hold the LCD configeration data  
