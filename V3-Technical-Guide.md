@@ -291,8 +291,10 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    ### Returns
    **V1_00 firmware version**  
    FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http%3A//rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
+   
    **V1_00a firmware version**  
    FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http%3A//rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
+   
    **V1_01 firmware version**  
    PROTOCOL_VERSION:1.01.0104 FIRMWARE_NAME:Sprinter FIRMWARE_URL:https%3A//github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/ MACHINE_TYPE:Vector 3 EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
 ### M119 - Report endstops status.
@@ -342,7 +344,7 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
 #### Useage
    Setting the PID parameters. Reports the current settings.
 #### Parameters
-   This command can be used without any additional parameters.  
+   *This command can be used without any additional parameters.*  
    **Pnnn** proportional (Kp)  
    **Innn** integral (Ki)  
    **Dnnn** derivative (Kd)  
@@ -350,12 +352,15 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    **Znnn** nzone  
    **Wnnn** pid_i_max  
    #### Examples
-   M301             ; returnes the  
-   M301 P1 I2 D3    ; 
+   M301             ; Returns the PID settings
+   M301 P1 I2 D3    ; Sets Kp t0 1 Ki to 2 and Kd to 3 then returns the PIC settings
    #### Responce
-   Snnn,Verbose Status          ; if no error  
-   Snnn,Verbose Status          ; if error  
-   EC:nnn,Verbose Error
+   Kp nnn  
+   Ki nnn  
+   Kd nnn  
+   PID_MAX nnn  
+   PID_I_MAX nnn  
+   NZONE nnn  
 ## 1.d Unique V3 M Codes
 These unofficial non standard M codes are unique to the official Eaglemoss firmware release.
 ### M4   - Query Status.
@@ -367,6 +372,7 @@ These unofficial non standard M codes are unique to the official Eaglemoss firmw
    M4                           ; returns machien status and error code if set
    #### Responce
    Snnn,Verbose Status          ; if no error  
+   
    Snnn,Verbose Status          ; if error  
    EC:nnn,Verbose Error  
 ### M5   - Reset Status and Clears Error flag.
