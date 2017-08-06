@@ -65,7 +65,6 @@ extern int error_code ;                        // hook to error status 0=Nothing
 extern const char* status_str[] ;              // hook status strings
 extern const char* error_code_str[] ;          // hook to error strings
 extern const char* pszFirmware[] ;             // hook to Firmware strings
-extern const char* uuid ;                      // hook to error UUID string
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -78,7 +77,7 @@ long hour = 3600000; // 3600000 milliseconds in an hour
 long minute = 60000; // 60000 milliseconds in a minute
 long second =  1000; // 1000 milliseconds in a second
 
-int   iMazFeedrate = 0;
+//int   iMazFeedrate = 0;
 char  szTemp[41];                              // temp work aria for sprintf
 char  szT[41] ;                                // workspace for float to string conversions
 bool  bNewStatusScreen = true;
@@ -154,43 +153,42 @@ byte byClock[8] = {       B00000,
                           B00000,
                           B00000  };
                           
-byte byCorner[4][8] = { {
-      B00000,
-      B00000,
-      B00000,
-      B00000,
-      B00001,
-      B00010,
-      B00100,
-      B00100
-    }, {
-      B00000,
-      B00000,
-      B00000,
-      B11100,
-      B11100,
-      B01100,
-      B00100,
-      B00100
-    }, {
-      B00100,
-      B00010,
-      B00001,
-      B00000,
-      B00000,
-      B00000,
-      B00000,
-      B00000
-    }, {
-      B00100,
-      B01000,
-      B10000,
-      B00000,
-      B00000,
-      B00000,
-      B00000,
-      B00000
-    } };
+byte byCorner[4][8] = { { B00000,
+                          B00000,
+                          B00000,
+                          B00000,
+                          B00001,
+                          B00010,
+                          B00100,
+                          B00100
+                        },{
+                          B00000,
+                          B00000,
+                          B00000,
+                          B11100,
+                          B11100,
+                          B01100,
+                          B00100,
+                          B00100
+                       }, {
+                          B00100,
+                          B00010,
+                          B00001,
+                          B00000,
+                          B00000,
+                          B00000,
+                          B00000,
+                          B00000
+                       }, {
+                          B00100,
+                          B01000,
+                          B10000,
+                          B00000,
+                          B00000,
+                          B00000,
+                          B00000,
+                          B00000
+                       } };
                           
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -258,22 +256,19 @@ void StatusScreen(){
     lcd.setCursor( 0, 2 ); 
     sprintf( szTemp, "%c%3d%c ", LCD_FEEDRATE_CHAR, ((feedrate*100)/7800), 37 );
     lcd.print( szTemp );
-    
 #endif // LCD_DISPLAY_FAN
-#define LCD_CLOCK
+
 #ifdef LCD_CLOCK
   // do the elapsed time clock
   lcd.setCursor( 14, 2 );
   long timeNow = millis();
- 
   int iDays = timeNow / day ;                                //number of days
   int iHours = (timeNow % day) / hour;                       //the remainder from days division (in milliseconds) divided by hours, this gives the full hours
   int iMinutes = ((timeNow % day) % hour) / minute ;         //and so on...
   int iSeconds = (((timeNow % day) % hour) % minute) / second;
-  
   sprintf( szTemp, "%c%02d:%02d", LCD_CLOCK_CHAR, iHours, iMinutes);
   lcd.print( szTemp );
-#endif
+#endif // LCD_CLOCK
 
   // do fourth line
   PrinterState( );

@@ -135,8 +135,7 @@ long max_travel_acceleration_units_per_sq_second[] = {500,500,50,500}; // X, Y, 
 // Machine UUID
 // This may be useful if you have multiple machines and wish to identify them by using the M115 command.
 // By default we set it to zeros.
-//char uuid[] = "00000000-0000-0000-0000-000000000000";
-char *uuid = "00000000-0000-0000-0000-000000000000";
+const char uuid[] = "00000000-0000-0000-0000-000000000000";
 // 
 
 //// AD595 THERMOCOUPLE SUPPORT UNTESTED... USE WITH CAUTION!!!!

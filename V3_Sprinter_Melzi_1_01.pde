@@ -97,7 +97,6 @@ to
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 // M203 - Adjust Z height
-// M205 - Advanced settings
 // V3 mods for non standard M Codes
 // M211 - sends 211 to V3_I2C device, extruder Red LED on
 // M212 - sends 212 to V3_I2C device, extruder Red LED flashing
@@ -903,9 +902,6 @@ inline void process_commands()
       case 203: // M203 - set Z height adjustment
         gcode_M203();
         break;
-      case 205: // M205 - Advanced settings
-        gcode_M205();
-        return;
           
 #ifdef V3  // V3 specific code
       case 211: // M211 - red on
@@ -1726,7 +1722,6 @@ inline void gcode_M106() {
     WRITE(FAN_PIN, HIGH);
     analogWrite(FAN_PIN, fanSpeeds[p] );
   }
-//  bFanOn = true;
 }
 
 ////////////////////////////////
@@ -1741,7 +1736,6 @@ inline void gcode_M107() {
     fanSpeeds[p] = 0;
     analogWrite(FAN_PIN, 0);
     WRITE(FAN_PIN, LOW);
-//   bFanOn = false;
   }
 }
 #endif
@@ -1797,7 +1791,7 @@ inline void gcode_M115() {
   SerialMgr.cur()->print(pszFirmware[FIRMWARE_MACHINENAME]);
   SerialMgr.cur()->print(" EXTRUDER_COUNT:");
   SerialMgr.cur()->print(pszFirmware[FIRMWARE_EXTRUDERS]);
-  SerialMgr.cur()->print("UUID:");
+  SerialMgr.cur()->print(" UUID:");
   SerialMgr.cur()->println(uuid);
 /*
   //SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
@@ -1942,22 +1936,6 @@ inline void gcode_M203() {
     EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
   }
 }
-
-////////////////////////////////
-// M205 - Advanced settings
-////////////////////////////////
-
-inline void gcode_M205() {
-  SerialMgr.cur()->print("ok o:");
-  SerialMgr.cur()->print(output);
-  SerialMgr.cur()->print(", p:");
-  SerialMgr.cur()->print(pTerm);
-  SerialMgr.cur()->print(", i:");
-  SerialMgr.cur()->print(iTerm);
-  SerialMgr.cur()->print(", d:");
-  SerialMgr.cur()->print(dTerm);
-}
-
 
 ////////////////////////////////
 // M240 - Set or Get Z_MAX_LENGTH_M240 from EEPROM
