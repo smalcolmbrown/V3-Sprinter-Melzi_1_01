@@ -1,5 +1,12 @@
 # Eaglemoss Vector 3 Firmware Technical Guide
 # Version 1.01.x
+## V3 Firmware releases
+   ### 3.a 2016/07/01 Firmware release
+   **V3-Sprinter-Melzi_1_00** The original Eaglemoss Vector 3 firmware release.
+   ### 3.b 2017/02/24 Firmware release
+   **V3-Sprinter-Melzi_1_01** User community version with simple LCD development version. All future enhancements from Eaglemoss will be incorporated into this user community release.
+   ### 3.c 2017/07/06 Firmware release
+   **V3_Sprinter_Melzi_1_00a** The original Eaglemoss Vector 3 firmware release.
 
 # Contents
 ## 1. Supported G amd M Codes
@@ -20,13 +27,6 @@
    ### 2.a Pin definition for the Vector 3
    ### 2.b Pin assignments on the Vector 3
 
-## 3. V3 Firmware releases
-   ### 3.a 2016/07/01 Firmware release
-   **V3-Sprinter-Melzi_1_00** The original Eaglemoss Vector 3 firmware release.
-   ### 3.b 2017/02/24 Firmware release
-   **V3-Sprinter-Melzi_1_01** User community version with simple LCD development version
-   ### 3.c 2017/07/06 Firmware release
-   **V3_Sprinter_Melzi_1_00a** The original Eaglemoss Vector 3 firmware release.
    
 # Section 1 Supported G and M Codes.
 
@@ -849,10 +849,3 @@ These unofficial non standard M codes have been added since the official Eaglemo
 #define SDPOWER          -1
 #define SDSS          31
 
-# 3. Official Eaglemoss Firmware releases
-   ## 3.a 2016/07/01 Firmware release
-   **V3-Sprinter-Melzi_1_00** The original Eaglemoss Vector 3 firmware release.
-   ## 3.b 2017/02/24 Firmware release
-   **V3-Sprinter-Melzi_1_01** User community version with simple LCD development version
-   ## 3.c 2017/07/06 Firmware release
-   **V3_Sprinter_Melzi_1_00a** The original Eaglemoss Vector 3 firmware release.
