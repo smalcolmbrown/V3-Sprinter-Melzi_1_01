@@ -324,9 +324,12 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    #### Example
    M115     ; Get Firmware Version and Capabilities
    ### Returns
-   Sample data from firmware:
-   
-   ok PROTOCOL_VERSION:1.01.0104 FIRMWARE_NAME:Sprinter FIRMWARE_URL:https%3A//github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/ MACHINE_TYPE:Vector 3 EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000
+   V1_00 firmware version  
+   FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http%3A//rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
+   V1_00a firmware versions  
+   FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http%3A//rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
+   V1_01 firmware version  
+   PROTOCOL_VERSION:1.01.0104 FIRMWARE_NAME:Sprinter FIRMWARE_URL:https%3A//github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/ MACHINE_TYPE:Vector 3 EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
 ### M119 - Report endstops status.
    #### useage
    Returns the current state of the configured X, Y, Z endstops. Only reports on end stops that actually exist.
