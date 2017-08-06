@@ -78,3 +78,4 @@ New PC style beep codes to help diagnose thermistor errors.
 **One long beep** and **four short beeps** heated bed themistor **high** (short circuit themistor)  
 New experimental I2C bus simplified from Marlin M260 and M261  
 New M code to test error conditions M499  
+Added file Config_LCD.h to hold the LCD configeration data  
