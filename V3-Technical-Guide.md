@@ -712,79 +712,79 @@ These unofficial non standard M codes have been added since the official Eaglemo
 * Sanguinololu pin assignment
 *
 ****************************************************************************************/
-#if MOTHERBOARD == 62
-#define MOTHERBOARD 6
-#define SANGUINOLOLU_V_1_2 
-#endif
-#if MOTHERBOARD == 6
-#define KNOWN_BOARD 1
-#ifndef __AVR_ATmega644P__
-#ifndef __AVR_ATmega1284P__
-#error Oops!  Make sure you have the appropriate 'Sanguino' selected from the 'Tools -> Boards' menu.
-#endif
-#endif
+#if MOTHERBOARD == 62  
+#define MOTHERBOARD 6  
+#define SANGUINOLOLU_V_1_2  
+#endif  
+#if MOTHERBOARD == 6  
+#define KNOWN_BOARD 1  
+#ifndef __AVR_ATmega644P__  
+#ifndef __AVR_ATmega1284P__  
+#error Oops!  Make sure you have the appropriate 'Sanguino' selected from the 'Tools -> Boards' menu.  
+#endif  
+#endif  
 
 //x axis pins
 
-#define X_STEP_PIN         15
-#define X_DIR_PIN          21
-#define X_MIN_PIN          18
-#define X_MAX_PIN          -2
+#define X_STEP_PIN         15  
+#define X_DIR_PIN          21  
+#define X_MIN_PIN          18  
+#define X_MAX_PIN          -2  
 
-//y axis pins
+//y axis pins  
 
-#define Y_STEP_PIN         22
-#define Y_DIR_PIN          23
-#define Y_MIN_PIN          19
-#define Y_MAX_PIN          -1
+#define Y_STEP_PIN         22  
+#define Y_DIR_PIN          23  
+#define Y_MIN_PIN          19  
+#define Y_MAX_PIN          -1  
 
 //z axis pins
 
-#define Z_STEP_PIN         3
-#define Z_DIR_PIN          2
-#define Z_MIN_PIN          -1
-#define Z_MAX_PIN          20
+#define Z_STEP_PIN         3  
+#define Z_DIR_PIN          2  
+#define Z_MIN_PIN          -1  
+#define Z_MAX_PIN          20  
 
-//extruder pins
+//extruder pins  
 
-#define E_STEP_PIN         1
-#define E_DIR_PIN          0
-
-
-
-#define PROBE_PIN          11     // TX1 on V3
-//#define PROBE_PIN          29    //29 on Melzi1284p A2
+#define E_STEP_PIN         1  
+#define E_DIR_PIN          0  
 
 
-#define LED_PIN            27
 
-#define FAN_PIN            4 
+#define PROBE_PIN          11     // TX1 on V3  
+//#define PROBE_PIN          29    //29 on Melzi1284p A2  
 
-#define PS_ON_PIN          -1
-#define KILL_PIN           -1
 
-#define HEATER_0_PIN       13 // (extruder)
+#define LED_PIN            27  
 
-#ifdef SANGUINOLOLU_V_1_2
+#define FAN_PIN            4  
 
-#define HEATER_1_PIN       12 // (bed)
-#define X_ENABLE_PIN       14
-#define Y_ENABLE_PIN       14
-#define Z_ENABLE_PIN       26
-#define E_ENABLE_PIN       14
+#define PS_ON_PIN          -1  
+#define KILL_PIN           -1  
 
-#else
+#define HEATER_0_PIN       13 // (extruder)  
 
-#define HEATER_1_PIN       14  // (bed)
-#define X_ENABLE_PIN       -1
-#define Y_ENABLE_PIN       -1
-#define Z_ENABLE_PIN       -1
-#define E_ENABLE_PIN       -1
+#ifdef SANGUINOLOLU_V_1_2  
 
-#endif
+#define HEATER_1_PIN       12 // (bed)  
+#define X_ENABLE_PIN       14  
+#define Y_ENABLE_PIN       14  
+#define Z_ENABLE_PIN       26  
+#define E_ENABLE_PIN       14  
 
-#define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 33 extruder)
-#define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
-#define SDPOWER          -1
+#else  
+
+#define HEATER_1_PIN       14  // (bed)  
+#define X_ENABLE_PIN       -1  
+#define Y_ENABLE_PIN       -1  
+#define Z_ENABLE_PIN       -1  
+#define E_ENABLE_PIN       -1  
+
+#endif  
+
+#define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 33 extruder)  
+#define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)  
+#define SDPOWER          -1  
 #define SDSS          31
 
