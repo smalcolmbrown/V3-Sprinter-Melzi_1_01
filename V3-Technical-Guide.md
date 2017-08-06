@@ -324,10 +324,18 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    #### Example
    M115     ; Get Firmware Version and Capabilities
    ### Returns
-   sample data from firmware:
+   Sample data from firmware:
    
    ok PROTOCOL_VERSION:1.01.0104 FIRMWARE_NAME:Sprinter FIRMWARE_URL:https%3A//github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/ MACHINE_TYPE:Vector 3 EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000
 ### M119 - Report endstops status.
+   #### useage
+   Returns the current state of the configured X, Y, Z endstops. Only reports on end stops that actually exist.
+   #### Parameters
+   None.
+   #### Example
+   M119     ; Report endstops status.
+   ### Returns
+   x_min:(H¦L) x_max:(H¦L) y_min:(H¦L) y_max:(H¦L) z_min:(H¦L) z_max:(H¦L) 
 ### M140 - Set Bed Temperature (Fast)
    #### useage
    Set the temperature of the Heated bed and return control to the host immediately (i.e. before that temperature has been reached by the heated bed).
@@ -388,7 +396,6 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    Snnn,Verbose Status          ; if error
    
    EC:nnn,Verbose Error
-
 ## 1.d Unique V3 M Codes
 These unofficial non standard M codes are unique to the official Eaglemoss firmware release.
 ### M4   - Query Status.
