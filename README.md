@@ -22,7 +22,7 @@ I2C_LCD needs F Malpartida's NewLiquidCrystal library. Download the repository f
 
 You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to compile in Arduino 0023 
 
-An already modified version cam be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C)  
+An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C)  
 
 **2016/12/19 Changes:**  
 I2C_lcd.h to contain the I2C lcd specific declarations.  
@@ -72,9 +72,9 @@ New custom characters to resemble the screens on marlin LCDs
 New LCD splash screen added
 LCD now displays feed rate percentage and elapsed time  
 New PC style beep codes to help diagnose thermistor errors.  
-One long beep and one short beep hot end low (open circuit themistor)  
-One long beep and two short beep bed end low (open circuit themistor)  
-One long beep and three short beep hot end high (short circuit themistor)  
-One long beep and four short beep bed end high (short circuit themistor)
+**One long beep** and **one short beep** extruder themistor **low** (open circuit themistor)  
+**One long beep** and **two short beeps** heated bed themistor **low** (open circuit themistor)  
+**One long beep** and **three short beeps** extruder themistor **high** (short circuit themistor)  
+**One long beep** and **four short beeps** heated bed themistor **high** (short circuit themistor)
 New experimental I2C bus simplified from Marlin M260 and M261
 New M code to test error conditions M499
