@@ -87,7 +87,7 @@ These G Codes are the standard ones supported by the Eaglemoss firmware release.
    Allows programming of absolute zero point, by reseting the current position to the values specified. This would set the machine's X coordinate to 10, and the extrude coordinate to 90. No physical motion will occur.
    A G92 without coordinates will reset all axes to zero.   
    #### Parameters
-   *This command can be used without any additional parameters.**  
+   *This command can be used without any additional parameters.*  
    **Xnnn** new X axis position  
    **Ynnn** new Y axis position  
    **Znnn** new Z axis position  
@@ -349,8 +349,9 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    **Innn** integral (Ki)  
    **Dnnn** derivative (Kd)  
    **Fnnn** pid max  
-   **Znnn** nzone  
    **Wnnn** pid_i_max  
+   **Znnn** nzone  
+
    #### Examples
    M301             ; Returns the PID settings
    M301 P1 I2 D3    ; Sets Kp t0 1 Ki to 2 and Kd to 3 then returns the PIC settings
