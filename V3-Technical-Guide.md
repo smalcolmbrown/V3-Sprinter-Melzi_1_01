@@ -35,63 +35,51 @@ These G Codes are the standard ones supported by the Eaglemoss firmware release.
 ### G0  - Rapid linear Move 
    #### Usage
    G0 and G1 have become merged for efficienccy reasons. For details of **G0** see **G1**
-
 ### G1  - Linear Move
    #### Usage
    **G0** and **G1** have become merges for efficienccy reasons.
-   
-#### Parameters
-   Not all parameters need to be used, but at least one has to be used
-
-   **Xnnn** The position to move to on the X axis
-
-   **Ynnn** The position to move to on the Y axis
-
-   **Znnn** The position to move to on the Z axis
-
-   **Ennn** The amount to extrude between the starting point and ending point
-
-   **Fnnn** The feedrate per minute of the move between the starting point and ending point (if supplied)
-
-#### Examples
-G0 X12               ; move to 12mm on the X axis
-
-G0 F1500             ; Set the feedrate to 1500mm/minute
-
-G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis while extruding 22.4mm of material
-
+   #### Parameters
+   *Not all parameters need to be used, but at least one has to be used*  
+   **Xnnn** The position to move to on the X axis  
+   **Ynnn** The position to move to on the Y axis  
+   **Znnn** The position to move to on the Z axis  
+   **Ennn** The amount to extrude between the starting point and ending point  
+   **Fnnn** The feedrate per minute of the move between the starting point and ending point (if supplied)  
+   #### Examples
+   G0 X12               ; move to 12mm on the X axis  
+   G0 F1500             ; Set the feedrate to 1500mm/minute  
+   G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis while extruding 22.4mm of material  
 ### G4  - Dwell
    #### Usage
    Pause the machine for a period of time.
    #### Parameters
-   **Pnnn** Time to wait, in milliseconds
-
-   **Snnn** Time to wait, in seconds 
+   **Pnnn** Time to wait, in milliseconds  
+   **Snnn** Time to wait, in seconds  
    #### Example
    G4 P200
 ### G28 -  Move to Origin (Home)
    #### Usage
    When the firmware receives this command, it quickly moves the specified axes (or all axes if none are given) to the endstops, backs away from each endstop by a short distance, and slowly bumps the endstop again to increase positional accuracy. This process, known as "Homing", is required to determine the position of the print carriage(s). Some firmware may even forbid movement away from endstops and other operations until the axes have been homed.
    #### Parameters
-   This command can be used without any additional parameters.
-
-   **X Flag** to go back to the X axis origin
-
-   **Y Flag** to go back to the Y axis origin
-
-   **Z Flag** to go back to the Z axis origin
+   *This command can be used without any additional parameters.*  
+   **X Flag** to go back to the X axis origin  
+   **Y Flag** to go back to the Y axis origin  
+   **Z Flag** to go back to the Z axis origin  
    #### Examples
-   G28     ; Home all axes
-
+   G28     ; Home all axes  
    G28 X Z ; Home the X and Z axes
 ### G90 - Use Absolute Coordinates
    #### Usage
    All coordinates from now on are absolute relative to the origin of the machine. (This is the RepRap default.)
+   #### Parameters
+   None  
    #### Example
    G90                          ; All coordinates from now on are absolute relative to the origin of the machine.
    ### G91 - Use Relative Coordinates
    #### Usage
    All coordinates from now on are relative to the last position. Note: RepRapFirmware latest revision firmware uses M83 to set the extruder to relative mode: extrusion is NOT set to relative by ReprapFirmware on G91: only X,Y and Z are set to relative.
+   #### Parameters
+   None  
    #### Example
    G91                          ; All coordinates from now on are relative to the last position. 
 ### G92 - Set current position to cordinates given
@@ -99,15 +87,11 @@ G1 X90.6 Y13.8 E22.4 ; Move to 90.6mm on the X axis and 13.8mm on the Y axis whi
    Allows programming of absolute zero point, by reseting the current position to the values specified. This would set the machine's X coordinate to 10, and the extrude coordinate to 90. No physical motion will occur.
    A G92 without coordinates will reset all axes to zero.   
    #### Parameters
-   This command can be used without any additional parameters.
-
-   **Xnnn** new X axis position
-
-   **Ynnn** new Y axis position
-
-   **Znnn** new Z axis position
-
-   **Ennn** new extruder position
+   *This command can be used without any additional parameters.**  
+   **Xnnn** new X axis position  
+   **Ynnn** new Y axis position  
+   **Znnn** new Z axis position  
+   **Ennn** new extruder position  
    #### Example
    G92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
 ## 1.b New Supported G Codes
@@ -116,23 +100,16 @@ These G codes have been added since the official Eaglemoss firmware release.
    ####  Usage
    In its simplest form probes bed at current XY location. Otherwise the bed is probed at the specified location
    #### Parameters
-   This command can be used without any additional parameters.
-
-   **Xnnn** X coordinate
-
-   **Ynnn** Y coordinate
-
-   **Znnn** Z coordinate
-
-   **Snnn** Set parameter
+   *This command can be used without any additional parameters.*  
+   **Xnnn** X coordinate  
+   **Ynnn** Y coordinate  
+   **Znnn** Z coordinate  
+   **Snnn** Set parameter  
    #### Example
-   G30                          ; Probe the bed at the current XY position. When the probe is triggered, set the Z coordinate to the probe trigger height.
-
-   G30 S-1                      ; Probe the bed at the current XY position. When the probe is triggered, do not savet the Z coordinate.
-
-   G30 X20 Y50                  ; Probe the bed at X20 Y50 and save the XY coordinates
-
-   G30 X180 Y180 S-1            ; As previous example but just report the height errors
+   G30                          ; Probe the bed at the current XY position. When the probe is triggered, set the Z coordinate to the probe trigger height.  
+   G30 S-1                      ; Probe the bed at the current XY position. When the probe is triggered, do not savet the Z coordinate.  
+   G30 X20 Y50                  ; Probe the bed at X20 Y50 and save the XY coordinates  
+   G30 X180 Y180 S-1            ; As previous example but just report the height errors  
 ## 1.c Supported Standard RepRap M Codes
 These M codes are the standard ones supported by the official Eaglemoss firmware release.
 ### M20  - List SD card
@@ -143,15 +120,11 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    ### Examples
    M20
    ### Returns
-   Begin file list:
-   
-   SQUARE.G
-   
-   ZCARRI~2.GCO
-   
-   End file list
-   
-   ok
+   Begin file list:  
+   SQUARE.G  
+   ZCARRI~2.GCO  
+   End file list  
+   ok  
 ### M21  - Initialise SD card
    ### Useage
    The SD card is initialized. If an SD card is loaded when the machine is switched on, this will happen by default. SD card must be initialized for the other SD functions to work.
@@ -202,13 +175,10 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    #### Example
    M27      ; report SD print status
    ### Returns
-   If Printing: 
-   
-   SD printing byte 2134/235422
-   
-   If not printing:
-   
-   Not SD printing.
+   If Printing:  
+   SD printing byte 2134/235422  
+   If not printing:  
+   Not SD printing.  
 ### M28  - Start SD write
    ### Useage
    File specified by filename.gco is created (or overwritten if it exists) on the SD card and all subsequent commands sent to the machine are written to that file.
@@ -257,15 +227,11 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    Allows programming of steps per unit (usually mm) for motor drives. These values are reset to firmware defaults on power on, unless saved to EEPROM if available (M500 in Marlin) or in the configuration file (config.g in RepRapFirmware). Very useful for calibration.
 RepRapFirmware will report the current steps/mm if you send M92 without any parameters.  
    #### Parameters
-   This command can be used without any additional parameters.
-
-   **Xnnn** Steps per unit for the X drive
-
-   **Ynnn** Steps per unit for the Y drive
-
-   **Znnn** Steps per unit for the Z drive
-
-   **Ennn** Steps per unit for the extruder drive
+   *This command can be used without any additional parameters.*  
+   **Xnnn** Steps per unit for the X drive  
+   **Ynnn** Steps per unit for the Y drive  
+   **Znnn** Steps per unit for the Z drive  
+   **Ennn** Steps per unit for the extruder drive  
    #### Example
    M92 X10 E90                  ; Allows programming of absolute zero point, by reseting the current position to the values specified. 
 ### M104 - Set extruder target temp
@@ -288,9 +254,8 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    ### Useage
    Switches the work cooling fan on
    #### Parameters
-   This command can be used without any additional parameters.
-   
-   **Snnn** Fan speed (0 to 255)
+   *This command can be used without any additional parameters.*  
+      **Snnn** Fan speed (0 to 255)  
    ### Examples
    M106     ; switch work cooling fan on
 ### M107 - Fan off
@@ -401,11 +366,9 @@ These unofficial non standard M codes are unique to the official Eaglemoss firmw
    #### Example
    M4                           ; returns machien status and error code if set
    #### Responce
-   Snnn,Verbose Status          ; if no error
-   
-   Snnn,Verbose Status          ; if error
-   
-   EC:nnn,Verbose Error
+   Snnn,Verbose Status          ; if no error  
+   Snnn,Verbose Status          ; if error  
+   EC:nnn,Verbose Error  
 ### M5   - Reset Status and Clears Error flag.
    #### Usage
    Resets the status flag and clears error flag if set
@@ -620,13 +583,10 @@ These unofficial non standard M codes are unique to the official Eaglemoss firmw
    #### Usage
    Sets or reads the stored the max Z Height parameter in to the EEPROM
    #### Parameters
-   This command can be used without any additional parameters.
-  
-   **Znnn** the Max Z height
-
+   *This command can be used without any additional parameters.*  
+   **Znnn** the Max Z height  
    #### Examples
-   M240 Z129.2   ; sets the max Z height to 129.2
-   
+   M240 Z129.2   ; sets the max Z height to 129.2  
    M240          ; returns the max z height from the EEPROM
 ## 1.e New Supported Standard M Codes
 These M codes have been added since the official Eaglemoss firmware release.
@@ -636,31 +596,25 @@ These M codes have been added since the official Eaglemoss firmware release.
    #### Parameters
    There are two distinct syntaxes for this command 1 standard and the other rather non standard both are equally valid
    #### Syntanx 1 - Standard M code syntax
-   **Pnnn** Pin number - 27(A4), 28(A3), 29(A2) or 30(A1)
-   
-   **Snnn** Pin value  -  0 = off, 1 = on.
-
+   **Pnnn** Pin number - 27(A4), 28(A3), 29(A2) or 30(A1)  
+   **Snnn** Pin value  -  0 = off, 1 = on.  
    #### Examples
-   M42 M42 P30 S1 This turns pin A1 on.
-   
-   M42 M42 P30 S1 This turns pin A1 on.
+   M42 M42 P30 S1 This turns pin A1 on.  
+   M42 M42 P30 S1 This turns pin A1 on. 
    #### Syntanx 3 - Melzi specific syntax
-   **Annn** Pin number - A1, A2, A3 or A4
-   
-   **Snnn** Pin value  - 0 = off, 1 = on.
-
+   **Annn** Pin number - A1, A2, A3 or A4  
+   **Snnn** Pin value  - 0 = off, 1 = on.  
    #### Examples
-   M42 A1 S1 ; This turns pin A1 on.
-   
+   M42 A1 S1 ; This turns pin A1 on.  
    M42 A1 S0 ; This turns pin A1 off
    ### Date implementation
    2017/07/16
 ### M203 - Record Z adjustment
    ### Useage
    This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set, 
-even when the power is turned off and on again.
+even when the power is turned off and on again.  
    If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
-   If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed. 
+   If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed.  
    The maximum adjustment is +/-1.27mm.
    #### Parameters
    **Znnn** the Max Z adjustment
@@ -670,43 +624,29 @@ even when the power is turned off and on again.
    #### Usage
    Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x  Does not act as a slave device. Needs the EXPERIMENTAL_I2CBUS define in Confiruation.h
    #### Parameters
-   **Annn** The I2C address to send data to
-   
-   **Bnnn** The data to put into the buffer
-   
-   **Snnn** Sends the data in the buffer to the I2C address
+   **Annn** The I2C address to send data to  
+   **Bnnn** The data to put into the buffer  
+   **Snnn** Sends the data in the buffer to the I2C address  
    #### Examples
-   M260 A5 B65 S1 ; Send 'A' to Address 5 now
-   
-   M260 A39       ; Set address to device I2C address 0x27
-   
-   M260 B83       ; Add 'S' to the buffer
-   
-   M260 B112      ; Add 'p' to the buffer
-   
-   M260 B114      ; Add 'r' to the buffer
-   
-   M260 B108      ; Add 'i' to the buffer
-   
-   M260 B105      ; Add 'n' to the buffer
-   
-   M260 B110      ; Add 't' to the buffer
-   
-   M260 B110      ; Add 'e' to the buffer
-   
-   M260 B110      ; Add 'r' to the buffer
-   
-   M260 S1        ; Send the current buffer
+   M260 A5 B65 S1 ; Send 'A' to Address 5 now  
+   M260 A39       ; Set address to device I2C address 0x27  
+   M260 B83       ; Add 'S' to the buffer  
+   M260 B112      ; Add 'p' to the buffer  
+   M260 B114      ; Add 'r' to the buffer  
+   M260 B108      ; Add 'i' to the buffer  
+   M260 B105      ; Add 'n' to the buffer  
+   M260 B110      ; Add 't' to the buffer  
+   M260 B110      ; Add 'e' to the buffer  
+   M260 B110      ; Add 'r' to the buffer  
+   M260 S1        ; Send the current buffer  
    ### Date implemented
    2017/08/04
 ### M261 - i2c Request Data
    #### Usage
    Request data from an i2c slave device. This command simply relays the received data to the host. Does not act as a slave device. Needs the EXPERIMENTAL_I2CBUS define in Confiruation.h
    #### Parameters
-   **Annn** The I2C address to get data from
-   
-   **Bnnn** The number of bytes to request from the I2C address
-   
+   **Annn** The I2C address to get data from  
+   **Bnnn** The number of bytes to request from the I2C address  
    #### Example
    M261 A99 B5 ; Request 5 bytes from Address 99
    ### Date implemented
@@ -719,13 +659,10 @@ These unofficial non standard M codes have been added since the official Eaglemo
    #### Parameters
    **ennn** The error nimber (1, 2, 3 or 4)
    #### Example
-   M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit
-   
-   M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit
-   
-   M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit
-   
-   M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit
+   M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit  
+   M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit  
+   M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit  
+   M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit  
    ### Date implemented
    2017/08/04
 
