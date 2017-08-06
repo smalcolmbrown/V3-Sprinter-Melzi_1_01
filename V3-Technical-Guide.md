@@ -20,9 +20,13 @@
    ### 2.a Pin definition for the Vector 3
    ### 2.b Pin assignments on the Vector 3
 
-## 3. Official Eaglemoss Firmware releases
+## 3. V3 Firmware releases
    ### 3.a 2016/07/01 Firmware release
-   ### 3.b 2017/07/06 Firmware release
+   **V3-Sprinter-Melzi_1_00** The original Eaglemoss Vector 3 firmware release.
+   ### 3.b 2017/02/24 Firmware release
+   **V3-Sprinter-Melzi_1_01** User community version with simple LCD development version
+   ### 3.c 2017/07/06 Firmware release
+   **V3_Sprinter_Melzi_1_00a** The original Eaglemoss Vector 3 firmware release.
    
 # Section 1 Supported G and M Codes.
 
@@ -271,7 +275,15 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    **Snnn** the Target temperature in degrees C for the extruder   
    #### Example
    M104 S190 ; sets the extruder target temparture to 190 degrees C
-### M105 - Read current temp
+### M105 - Get Extruder Temperature
+   ### Useage
+   Request the temperature of the current extruder and the build base in degrees Celsius. The temperatures are returned to the host computer. For example, the line sent to the host in response to this command looks like:
+   #### Parameters
+   None
+   ### Examples
+   M105     ; Get Extruder Temperature
+   ### Returns
+   ok T:201 B:117
 ### M106 - Fan on
    ### Useage
    Switches the work cooling fan on
@@ -280,7 +292,7 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    
    **Snnn** Fan speed (0 to 255)
    ### Examples
-   M107     ; switch work cooling fan off
+   M106     ; switch work cooling fan on
 ### M107 - Fan off
    ### Useage
    Switches the work cooling fan off
@@ -832,4 +844,8 @@ These unofficial non standard M codes have been added since the official Eaglemo
 
 # 3. Official Eaglemoss Firmware releases
    ## 3.a 2016/07/01 Firmware release
-   ## 3.b 2017/07/06 Firmware release
+   **V3-Sprinter-Melzi_1_00** The original Eaglemoss Vector 3 firmware release.
+   ## 3.b 2017/02/24 Firmware release
+   **V3-Sprinter-Melzi_1_01** User community version with simple LCD development version
+   ## 3.c 2017/07/06 Firmware release
+   **V3_Sprinter_Melzi_1_00a** The original Eaglemoss Vector 3 firmware release.
