@@ -25,8 +25,8 @@ You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to 
 An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C)  
 
 **2016/12/19 Changes:**  
-I2C_lcd.h to contain the I2C lcd specific declarations.  
-I2C_lcd.cpp to contain the I2C lcd specific functions etc.  
+Added file **I2C_lcd.h** to contain the I2C lcd specific declarations.  
+Added file **I2C_lcd.cpp** to contain the I2C lcd specific functions etc.  
 global int btt to store the target heated bed temperature in degrees C.  
 global int ett to store the extrude traget temprature in degrees C.  
 global bool bFanOn to store fan status: true = on, false = off.  
@@ -55,7 +55,7 @@ Fixed Bug in displaying printer state on the LCD.
 **2017/02/28 Changes:**  
 Made the check_PauseID() function in V3.cpp more readable through a series of defines in V3.h  
 Fixed bug in M109 that was preventing the LCD from displaying the extruder Temperature as it rose from ambient to target temperature.  
-Changed printer name from "Vector 3 3D printer" to "Vector 3"  
+Changed printer name from **"Vector 3 3D printer"** to **"Vector 3"**  
 fixed centering bug in SplashScreen()  
 Displaying printer state on LCD to **"Vector 3: Idle", "Vector 3: Heating", "Vector 3: Printing", "Vector 3: Done"** 
 
@@ -76,6 +76,7 @@ New PC style beep codes to help diagnose thermistor errors.
 **One long beep** and **two short beeps** heated bed themistor **low** (open circuit themistor)  
 **One long beep** and **three short beeps** extruder themistor **high** (short circuit themistor)  
 **One long beep** and **four short beeps** heated bed themistor **high** (short circuit themistor)  
-New experimental I2C bus simplified from Marlin M260 and M261  
-New M code to test error conditions M499  
+New experimental I2C bus simplified from Marlin **M260** and **M261**  
+New test error conditions **M499**  
 Added file **Config_LCD.h** to hold the LCD configeration data  
+Changed char pointer uuid[] = "0000..." back to char uuid[] = "0000..."
