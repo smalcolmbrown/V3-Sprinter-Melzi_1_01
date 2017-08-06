@@ -326,7 +326,7 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    ### Returns
    **V1_00 firmware version**  
    FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http%3A//rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
-   **V1_00a firmware versions**  
+   **V1_00a firmware version**  
    FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http%3A//rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
    **V1_01 firmware version**  
    PROTOCOL_VERSION:1.01.0104 FIRMWARE_NAME:Sprinter FIRMWARE_URL:https%3A//github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/ MACHINE_TYPE:Vector 3 EXTRUDER_COUNT:1 UUID:00000000-0000-0000-0000-000000000000  
@@ -357,47 +357,39 @@ RepRapFirmware will report the current steps/mm if you send M92 without any para
    #### useage
    Sets the acceleration that axes can do in units/second^2 for print moves. For consistency with the rest of G Code movement this should be in units/(minute^2), but that gives really silly numbers and one can get lost in all the zeros. So for this we use seconds.
    #### Parameters
-   **Xnnn** Acceleration for X axis
-   **Ynnn** Acceleration for Y axis
-   **Znnn** Acceleration for Z axis
-   **Ennn** Acceleration for extruder drives
+   **Xnnn** Acceleration for X axis  
+   **Ynnn** Acceleration for Y axis  
+   **Znnn** Acceleration for Z axis  
+   **Ennn** Acceleration for extruder drives  
    #### Example
    M201 X1000 Y1000 Z100 E2000
 ### M202 - Set max travel acceleration
    #### useage
    Set max travel acceleration in units/s^2 for travel moves (M202 X1000 Y1000).
    #### Parameters
-   **Xnnn** Acceleration for X axis
-   **Ynnn** Acceleration for Y axis
-   **Znnn** Acceleration for Z axis
-   **Ennn** Acceleration for extruder drives
+   **Xnnn** Acceleration for X axis  
+   **Ynnn** Acceleration for Y axis  
+   **Znnn** Acceleration for Z axis  
+   **Ennn** Acceleration for extruder drives  
    #### Example
    M201 X1000 Y1000 Z100 E2000
 ### M301 - Set PID parameters
 #### Useage
    Setting the PID parameters. Reports the current settings.
 #### Parameters
-   This command can be used without any additional parameters.
-   
-   **Pnnn** proportional (Kp)
-   
-   **Innn** integral (Ki)
-   
-   **Dnnn** derivative (Kd)
-   
-   **Fnnn** pid max
-   
-   **Znnn** nzone
-   
-   **Wnnn** pid_i_max
+   This command can be used without any additional parameters.  
+   **Pnnn** proportional (Kp)  
+   **Innn** integral (Ki)  
+   **Dnnn** derivative (Kd)  
+   **Fnnn** pid max  
+   **Znnn** nzone  
+   **Wnnn** pid_i_max  
    #### Examples
-   M301             ; returnes the 
+   M301             ; returnes the  
    M301 P1 I2 D3    ; 
    #### Responce
-   Snnn,Verbose Status          ; if no error
-   
-   Snnn,Verbose Status          ; if error
-   
+   Snnn,Verbose Status          ; if no error  
+   Snnn,Verbose Status          ; if error  
    EC:nnn,Verbose Error
 ## 1.d Unique V3 M Codes
 These unofficial non standard M codes are unique to the official Eaglemoss firmware release.
