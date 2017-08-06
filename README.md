@@ -66,15 +66,15 @@ Added M42 function works on M42 A1 S1 syntax as per Bill and M42 P30 S1 as per r
 Added functionality from the latest firmware update from Eaglemoss as modified by Chris Holland. Changes include over temperature detection for both hot end and the heated bed and improved thermistor tables  
 
 **2017/08/05 Changes:**  
-global int fanSpeeds to store fan speed, 0-255 0 = off, 255 full speed
-global bool bFanOn removed.
-New custom characters to resemble the screens on marlin LCDs
-New LCD splash screen added
+global int fanSpeeds to store fan speed, 0-255 0 = off, 255 full speed  
+global bool bFanOn removed.  
+New custom characters to resemble the screens on marlin LCDs  
+New LCD splash screen added  
 LCD now displays feed rate percentage and elapsed time  
 New PC style beep codes to help diagnose thermistor errors.  
 **One long beep** and **one short beep** extruder themistor **low** (open circuit themistor)  
 **One long beep** and **two short beeps** heated bed themistor **low** (open circuit themistor)  
 **One long beep** and **three short beeps** extruder themistor **high** (short circuit themistor)  
-**One long beep** and **four short beeps** heated bed themistor **high** (short circuit themistor)
-New experimental I2C bus simplified from Marlin M260 and M261
-New M code to test error conditions M499
+**One long beep** and **four short beeps** heated bed themistor **high** (short circuit themistor)  
+New experimental I2C bus simplified from Marlin M260 and M261  
+New M code to test error conditions M499  
