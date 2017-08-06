@@ -6,7 +6,7 @@
    ### 3.b 2017/02/24 Firmware release
    **V3-Sprinter-Melzi_1_01** User community version with simple LCD development version. All future enhancements from Eaglemoss will be incorporated into this user community release.
    ### 3.c 2017/07/06 Firmware release
-   **V3_Sprinter_Melzi_1_00a** The original Eaglemoss Vector 3 firmware release.
+   **V3_Sprinter_Melzi_1_00a** The new Eaglemoss Vector 3 firmware release. Fixes the thermistor tables and improved thermistor error detection.
 
 # Contents
 ## 1. Supported G amd M Codes
