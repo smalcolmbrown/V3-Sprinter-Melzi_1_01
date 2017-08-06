@@ -79,4 +79,6 @@ New PC style beep codes to help diagnose thermistor errors.
 New experimental I2C bus simplified from Marlin **M260** and **M261**  
 New test error conditions **M499**  
 Added file **Config_LCD.h** to hold the LCD configeration data  
-Changed char pointer uuid[] = "0000..." back to char uuid[] = "0000..."
+Added file **I2C_Experimental.h** to hold the experimental I2C data  
+Added file **I2C_Experimental.cpp** to hold the experimental I2C code  
+Changed char pointer uuid[] = "0000..." back to char uuid[] = "0000..."  
