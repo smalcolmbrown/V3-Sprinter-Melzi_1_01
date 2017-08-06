@@ -9,7 +9,7 @@
    ### 2016/07/01 Firmware release
    **V3-Sprinter-Melzi_1_00** The original Eaglemoss Vector 3 firmware release.
    ### 2017/02/24 Firmware release
-   **V3-Sprinter-Melzi_1_01** User community version. All future enhancements from Eaglemoss will be incorporated into this user community release. New features include an I2C driven LCD, the ability to use a Z height probe, M42 sopport, a simplified experimental I2C bus (pinched from Marlin) and PC style beep Error codes.
+   **V3-Sprinter-Melzi_1_01** User community version. All future enhancements from Eaglemoss will be incorporated into this user community release. New features include an I2C driven LCD, the ability to use a Z height probe, M42 support, a simplified experimental I2C bus (pinched from Marlin) and PC style beep Error codes.
    ### 2017/06/17 Firmware release
    **V3_Sprinter_Melzi_1_00a** The new Eaglemoss Vector 3 firmware release. Fixes the thermistor tables and improved thermistor error detection.
 
