@@ -387,16 +387,27 @@ void SplashScreen() {
     lcd.createChar(i, byCorner[i-1]);
 
   sprintf( szTemp, "%c%s%c", 1, szDashes, 2 );
-  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,0); 
+//  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,0); 
+  lcd.setCursor(0, 0); 
   lcd.print( szTemp );
   sprintf( szTemp,  "| %s |", pszFirmware[FIRMWARE_NAME]) ;
-  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,1); 
+//  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,1);
+  lcd.setCursor(0, 1); 
   lcd.print( szTemp );
   sprintf( szTemp,  "| %s |", pszFirmware[FIRMWARE_MACHINENAME]) ;
-  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,2); 
+//  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,2); 
+  lcd.setCursor(0, 2); 
   lcd.print( szTemp );
   sprintf( szTemp, "%c%s%c", 3, szDashes, 4);
-  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,3); 
+//  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,3); 
+  lcd.setCursor(0, 3); 
+  lcd.print( szTemp );
+  lcd.setCursor(iLen+3, 1);
+  strncpy(szTemp, pszFirmware[FIRMWARE_VERSION], 8);
+  szTemp[4]= 0;  
+  lcd.print( szTemp );
+  strcpy(szTemp, pszFirmware[FIRMWARE_VERSION] + 5);
+  lcd.setCursor(iLen+3, 2); 
   lcd.print( szTemp );
   delay(4000);
   

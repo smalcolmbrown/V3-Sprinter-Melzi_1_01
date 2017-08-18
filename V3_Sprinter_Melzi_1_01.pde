@@ -1934,12 +1934,21 @@ inline void gcode_M202() {
 
 ////////////////////////////////
 // M203 - set Z height adjustment
-// Z<byte> byte 0 = 0 mm, 255 = 2.55 mm
+// Znnn nnn = +/- 1.27 mm
+//
+// M203: Record Z adjustment
+// Example: M203 Z-0.75
+// This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set,
+// even when the power is turned off and on again.
+// If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
+// If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed.
+// The maximum adjustment is +/-1.27mm.
+//
 ////////////////////////////////
 
 inline void gcode_M203() {
   if(code_seen('Z')){
-    EEPROM.write(Z_ADJUST_BYTE, (byte) constrain(code_value(), 0, 2.55)*100);
+    EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
   }
 }
 
