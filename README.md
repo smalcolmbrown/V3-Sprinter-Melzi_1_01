@@ -65,7 +65,7 @@ Added M42 function works on M42 A1 S1 syntax as per Bill and M42 P30 S1 as per r
 **2017/07/27 Changes:**  
 Added functionality from the latest firmware update from Eaglemoss as modified by Chris Holland. Changes include over temperature detection for both hot end and the heated bed and improved thermistor tables  
 
-**2017/08/05 Changes:**  
+**2017/08/05 Build 0104 Changes:**  
 global int fanSpeeds to store fan speed, 0-255 0 = off, 255 full speed  
 global bool bFanOn removed.  
 New custom characters to resemble the screens on marlin LCDs  
@@ -82,3 +82,9 @@ Added file **Config_LCD.h** to hold the LCD configeration data
 Added file **I2C_Experimental.h** to hold the experimental I2C data  
 Added file **I2C_Experimental.cpp** to hold the experimental I2C code  
 Changed char pointer uuid[] = "0000..." back to char uuid[] = "0000..."  
+
+**2016/08/18 Build 0105**  
+Fixed Feed Rate display to reflect reality.  
+Added M355 - Case light on or off. Operating on on Pin A1  
+Added theoretical support for the Panelolu2 LCD but not the rotary switch and integrated SD card reader. **Untested!**  
+Added **V3_EEPROM.h** to hold EEPROM data locations making future EEPROM functions easier to implement  
