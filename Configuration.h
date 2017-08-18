@@ -4,68 +4,105 @@
 // Uncomment ONE of the next three lines - the one for your RepRap machine
 #define V3
 
+//-----------------------------------------------------------------------
+//// Nozzel offset from X=0 Y=0 on the build plate
+//-----------------------------------------------------------------------
 // change to 0 if you do not need a offset 20160329
 #define X_OFFSET 8
 #define Y_OFFSET 12
 
-// BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
-
+//-----------------------------------------------------------------------
+//// BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
+//-----------------------------------------------------------------------
+//
+//-----------------------------------------------------------------------
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // MEGA/RAMPS up to 1.2  = 3,
 // RAMPS 1.3 = 33
 // Gen6 = 5,
 // Sanguinololu up to 1.1 = 6
 // Sanguinololu 1.2 and above, and Melzi = 62
+//-----------------------------------------------------------------------
 #define MOTHERBOARD 62
 
+//-----------------------------------------------------------------------
 //// Thermistor settings:
 // 1 is 100k thermistor
 // 2 is 200k thermistor
 // 3 is mendel-parts thermistor
 // 4 is 10k thermistor
+//-----------------------------------------------------------------------
 #define THERMISTORHEATER 1
 #define THERMISTORBED 1
 
+//-----------------------------------------------------------------------
+//// SETTINGS FOR Stepper driver type
+//-----------------------------------------------------------------------
+// Un-Comment out if you are using DRV8825 Stepper drivers for X and Y axis 
+// the default is commented out for an un-modified V3 printer only use this
+// setting if you have Bill Green's Stepper Mod fitted.
+#define STEPPER_DRIVER_X_Y_DRV8825      
+
+//-----------------------------------------------------------------------
 //// Calibration variables
+//-----------------------------------------------------------------------
 // X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-//float axis_steps_per_unit[] = {91.4286, 91.4286,4000,910};
-//float axis_steps_per_unit[] = {80.00, 80.00,2560,910};
+//  float axis_steps_per_unit[] = {91.4286, 91.4286,4000,910};
+//  float axis_steps_per_unit[] = {80.00, 80.00,2560,910};
 
 //// Calibration variables
-// X, Y, Z, E steps per unit - String with extruder
-//float axis_steps_per_unit[] = {78.82, 78.82,78.82,99.6150}; //V3-Z-belt
-//float axis_steps_per_unit[] = {78.82, 78.82,400,99.6150}; //V3-Z-screw
-float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150}; //V3-Z-screw2
+// X, Y, Z, E steps per unit - V3 
+//  float axis_steps_per_unit[] = {78.82, 78.82,78.82,99.6150};   //V3-Z-belt fitted with A4988 stepper drivers for X, Y, Z and E 
+//  float axis_steps_per_unit[] = {78.82, 78.82,400,99.6150};     //V3-Z-screw fitted with A4988 stepper drivers for X, Y, Z and E 
+#ifndef STEPPER_DRIVER_X_Y_DRV8825
+  float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150};      //V3-Z-screw2 fitted with A4988 stepper drivers for X, Y, Z and E (the default for the V3 )
+#else
+  float axis_steps_per_unit[] = {157.64, 157.64, 2560, 99.6150};    //V3-Z-screw2 with X and Y fitted with DRV8825 stepper drivers and A4988 stepper drivers for Z and E
+#endif
 
+//-----------------------------------------------------------------------
 //// Endstop Settings
+//-----------------------------------------------------------------------
 //#define ENDSTOPPULLUPS 1 // Comment this out (using // at the start of the line) to disable the endstop pullup resistors
 // The pullups are needed if you directly connect a mechanical endswitch between the signal and ground pins.
-const bool ENDSTOPS_INVERTING = true; //set to true to invert the logic of the endstops
+  const bool ENDSTOPS_INVERTING = true; //set to true to invert the logic of the endstops
 //If your axes are only moving in one direction, make sure the endstops are connected properly.
 //If your axes move in one direction ONLY when the endstops are triggered, set ENDSTOPS_INVERTING to true here
 
+//-----------------------------------------------------------------------
 // This determines the communication speed of the printer
+//-----------------------------------------------------------------------
 #define BAUDRATE 115200
 
+//-----------------------------------------------------------------------
 // Comment out (using // at the start of the line) to disable SD support:
+//-----------------------------------------------------------------------
 #define SDSUPPORT 1
 
+//-----------------------------------------------------------------------
 // Uncomment to make run init.g from SD on boot
+//-----------------------------------------------------------------------
 #define SDINITFILE
 
+//-----------------------------------------------------------------------
 // Comment out (using // at the start of the line) to disable Bluetooth support:
+//-----------------------------------------------------------------------
 //#define BLUETOOTH
 #ifdef BLUETOOTH
 	#define BLUETOOTH_SERIAL Serial1
 #endif
 
+//-----------------------------------------------------------------------
 // catch all for the V3 
+//-----------------------------------------------------------------------
 #ifndef V3
-  #error Uncomment one of #define V3 at the start of the file Configuration.h
+  #error Uncomment #define V3 at the start of the file Configuration.h
 #endif
 
 
+//-----------------------------------------------------------------------
 //// ADVANCED SETTINGS - to tweak parameters
+//-----------------------------------------------------------------------
 
 //#include "thermistortables.h"
 
@@ -87,29 +124,38 @@ const bool INVERT_Y_DIR = false;
 const bool INVERT_Z_DIR = false;
 const bool INVERT_E_DIR = true;
 
+//-----------------------------------------------------------------------
 //// ENDSTOP SETTINGS:
 // Sets direction of endstops when homing; 1=MAX, -1=MIN
+//-----------------------------------------------------------------------
 #define X_HOME_DIR -1
 #define Y_HOME_DIR -1
 #define Z_HOME_DIR 1
 
-const bool min_software_endstops = false; //If true, axis won't move to coordinates less than zero.
-const bool max_software_endstops = true;  //If true, axis won't move to coordinates greater than the defined lengths below.
+  const bool min_software_endstops = false; //If true, axis won't move to coordinates less than zero.
+  const bool max_software_endstops = true;  //If true, axis won't move to coordinates greater than the defined lengths below.
 
 #ifdef V3
-const int X_MAX_LENGTH = 140;
-const int Y_MAX_LENGTH = 140;
-const int Z_MAX_LENGTH = 130;
+  const int X_MAX_LENGTH = 140;
+  const int Y_MAX_LENGTH = 140;
+  const int Z_MAX_LENGTH = 130;
+#else
+  const int X_MAX_LENGTH = 220;    
+  const int Y_MAX_LENGTH = 220;
+  const int Z_MAX_LENGTH = 240;
+
 #endif
 
 
+//-----------------------------------------------------------------------
 //// MOVEMENT SETTINGS
-const int NUM_AXIS = 4; // The axis order in all axis related arrays is X, Y, Z, E
-//float max_feedrate[] = {3000, 3000, 800, 10000}; //V3 Z-belt
-float max_feedrate[] = {3000, 3000, 350, 10000}; //V3 Z-screw
-//float homing_feedrate[] = {1500,1500,800}; //V3 Z-blet
-float homing_feedrate[] = {1500,1500,350}; //V3 Z-screw
-bool axis_relative_modes[] = {false, false, false, false};
+//-----------------------------------------------------------------------
+  const int NUM_AXIS = 4; // The axis order in all axis related arrays is X, Y, Z, E
+//  float max_feedrate[] = {3000, 3000, 800, 10000}; //V3 Z-belt
+  float max_feedrate[] = {3000, 3000, 350, 10000}; //V3 Z-screw
+//  float homing_feedrate[] = {1500,1500,800}; //V3 Z-blet
+  float homing_feedrate[] = {1500,1500,350}; //V3 Z-screw
+  bool axis_relative_modes[] = {false, false, false, false};
 
 // Min step delay in microseconds. If you are experiencing missing steps, try to raise the delay microseconds, but be aware this
 // If you enable this, make sure STEP_DELAY_RATIO is disabled.
@@ -119,36 +165,45 @@ bool axis_relative_modes[] = {false, false, false, false};
 // If you enable this, make sure STEP_DELAY_MICROS is disabled. (except for Gen6: both need to be enabled.)
 //#define STEP_DELAY_RATIO 0.25
 
+//-----------------------------------------------------------------------
+//// Ramp Accelertaion settings
+//-----------------------------------------------------------------------
 // Comment this to disable ramp acceleration
 #define RAMP_ACCELERATION 1
 
-//// Acceleration settings
+// Acceleration settings
 #ifdef RAMP_ACCELERATION
 // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
-float max_start_speed_units_per_second[] = {25.0,25.0,25.0,10.0};
-//long max_acceleration_units_per_sq_second[] = {1000,1000,1000,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-blet
-long max_acceleration_units_per_sq_second[] = {1000,1000,50,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
-//long max_travel_acceleration_units_per_sq_second[] = {500,500,500,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-blet
-long max_travel_acceleration_units_per_sq_second[] = {500,500,50,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
+  float max_start_speed_units_per_second[] = {25.0,25.0,25.0,10.0};
+//  long max_acceleration_units_per_sq_second[] = {1000,1000,1000,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-blet
+  long max_acceleration_units_per_sq_second[] = {1000,1000,50,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
+  //long max_travel_acceleration_units_per_sq_second[] = {500,500,500,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-blet
+  long max_travel_acceleration_units_per_sq_second[] = {500,500,50,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
 #endif
 
+//-----------------------------------------------------------------------
 // Machine UUID
+//-----------------------------------------------------------------------
 // This may be useful if you have multiple machines and wish to identify them by using the M115 command.
 // By default we set it to zeros.
-const char uuid[] = "00000000-0000-0000-0000-000000000000";
+  const char uuid[] = "00000000-0000-0000-0000-000000000000";
 // 
 
+//-----------------------------------------------------------------------
 //// AD595 THERMOCOUPLE SUPPORT UNTESTED... USE WITH CAUTION!!!!
+//-----------------------------------------------------------------------
 
+//-----------------------------------------------------------------------
 //// PID settings:
+//-----------------------------------------------------------------------
 // Uncomment the following line to enable PID support. This is untested and could be disastrous. Be careful.
 #define PIDTEMP 1
 #ifdef PIDTEMP
-int pid_max = 255; // limits current to nozzle
-int pid_i_max = 80;//130;//125;
-double Kp = 2;//1.10;
-double Ki = 0.01;
-double Kd = 20.0;//0.01;
+  int pid_max = 255; // limits current to nozzle
+  int pid_i_max = 80;//130;//125;
+  double Kp = 2;//1.10;
+  double Ki = 0.01;
+  double Kd = 20.0;//0.01;
 #endif
 
 //-----------------------------------------------------------------------
@@ -170,16 +225,8 @@ double Kd = 20.0;//0.01;
 #endif
 
 //-----------------------------------------------------------------------
-//// SETTINGS FOR Malsoft I2C LCD 
-//-----------------------------------------------------------------------
-
-// comment out if no I2C display
-#define MALSOFT_I2C_DISPLAY
-
-//-----------------------------------------------------------------------
 //// SETTINGS FOR M42  - Switch I/O pin (Command M42)
 //-----------------------------------------------------------------------
-
 // comment out of no M42 support
 #define M42_SUPPORT
 
@@ -189,57 +236,94 @@ double Kd = 20.0;//0.01;
 // M260 - Send data to a I2C slave device 
 // M261 - Request X bytes from I2C slave device 
 //-----------------------------------------------------------------------
-
 // comment out if no EXPERIMENTAL_I2CBUS
 #define EXPERIMENTAL_I2CBUS
 
 //-----------------------------------------------------------------------
+//// SETTINGS FOR M355  - Case light on or off (Command M355)
+//-----------------------------------------------------------------------
+// comment out if no M355 support 
+#define M355_SUPPORT
+
+#ifdef M355_SUPPORT
+  #define CASE_LIGHT 30          // A1 on J16
+#endif
+
+//-----------------------------------------------------------------------
 //// SETTINGS FOR M499  - Force Error mode(Command M499)
 //-----------------------------------------------------------------------
-
 // comment out if no M499 support (only used to test BBB() error reporting)
 //#define M499_SUPPORT
 
-// a V3 has two fans extruder and work fan
-#define FAN_COUNT 1
+//-----------------------------------------------------------------------
+//// Setting for the software control of fans
+// a V3 has two fans extruder and work fan. Only the work fan is software controlable
+//-----------------------------------------------------------------------
+#define FAN_COUNT 2
 
-//M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
-int nzone = 5;//2;
+//-----------------------------------------------------------------------
+//// M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
+//-----------------------------------------------------------------------
+//  int nzone = 5;//2;      // setting for the 2016 and 2017 Eaglemoss firmware releases
+  int nzone = 2;          // setting for the V1.01 firmware release 
 
-//#define DEBUG_PID
 
+//-----------------------------------------------------------------------
+//// Sets the Initial speed of the work cooling fan
+//-----------------------------------------------------------------------
 #define FAN_INIT 200
 
-// How often should the heater check for new temp readings, in milliseconds
+//-----------------------------------------------------------------------
+//// How often should the heater check for new temp readings, in milliseconds
+//-----------------------------------------------------------------------
 #define HEATER_CHECK_INTERVAL 112
 #define BED_CHECK_INTERVAL 5000
+
+//-----------------------------------------------------------------------
 // Comment the following line to enable heat management during acceleration
+//-----------------------------------------------------------------------
 //#define DISABLE_CHECK_DURING_ACC
+
 #ifndef DISABLE_CHECK_DURING_ACC
   // Uncomment the following line to disable heat management during moves
   //#define DISABLE_CHECK_DURING_MOVE
 #endif
-// Uncomment the following line to disable heat management during travel moves (and extruder-only moves, eg: retracts), strongly recommended if you are missing steps mid print.
-// Probably this should remain commented if are using PID.
-// It also defines the max milliseconds interval after which a travel move is not considered so for the sake of this feature.
+
+//-----------------------------------------------------------------------
+//// Heater Management
+//  Uncomment the following line to disable heat management during travel moves
+//  (and extruder-only moves, eg: retracts), strongly recommended if you are
+//  missing steps mid print.
+//  Probably this should remain commented if are using PID.
+//  It also defines the max milliseconds interval after which a travel move is
+//  not considered so for the sake of this feature.
+//-----------------------------------------------------------------------
 //#define DISABLE_CHECK_DURING_TRAVEL 1000
 
+//-----------------------------------------------------------------------
 //// Temperature smoothing - only uncomment this if your temp readings are noisy (Gen6 without EvdZ's 5V hack)
+//-----------------------------------------------------------------------
 //#define SMOOTHING 1
 //#define SMOOTHFACTOR 16 //best to use a power of two here - determines how many values are averaged together by the smoothing algorithm
 
+//-----------------------------------------------------------------------
 //// Experimental watchdog and minimal temp
 // The watchdog waits for the watchperiod in milliseconds whenever an M104 or M109 increases the target temperature
 // If the temperature has not increased at the end of that period, the target temperature is set to zero. It can be reset with another M104/M109
+//-----------------------------------------------------------------------
 //#define WATCHPERIOD 5000 //5 seconds
 
+//-----------------------------------------------------------------------
 //// The minimal temperature defines the temperature below which the heater will not be enabled
+//-----------------------------------------------------------------------
 #define MINTEMP 5
 
+//-----------------------------------------------------------------------
 //// Experimental max temp
 // When temperature exceeds max temp, your heater will be switched off.
 // This feature exists to protect your hotend from overheating accidentally, but *NOT* from thermistor short/failure!
 // You should use MINTEMP for thermistor short/failure protection.
+//-----------------------------------------------------------------------
 #define MAXTEMP 270
 #define MAXTEMPBED 130
 
@@ -252,6 +336,9 @@ int nzone = 5;//2;
 #define BED_USES_THERMISTOR
 //#define BED_USES_AD595
 
+//-----------------------------------------------------------------------
+//// Debug Settings
+//-----------------------------------------------------------------------
 // Uncomment the following line to enable debugging. You can better control debugging below the following line
 //#define DEBUG
 #ifdef DEBUG
@@ -262,6 +349,12 @@ int nzone = 5;//2;
   //#define DEBUG_HEAT_MGMT //Enable this to debug heat management. WARNING, this will cause axes to jitter!
   //#define DEBUG_DISABLE_CHECK_DURING_TRAVEL //Debug the namesake feature, see above in this file
 #endif
+
+//-----------------------------------------------------------------------
+////Debug setting for debugging PID
+//-----------------------------------------------------------------------
+//#define DEBUG_PID
+
 
 // Thermistor lookup table for RepRap Temperature Sensor Boards (http://reprap.org/wiki/Thermistor)
 // Made with the online thermistor table generator by nathan7 at http://calculator.josefprusa.cz/

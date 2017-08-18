@@ -1,20 +1,19 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// I2C_lcd.h 
+// V3_EEPROM.h
 //
 // Date:      2016/12/19
 // By:        Suusi Malcolm-Brown
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef I2C_LCD_H
-  #define I2C_LCD_H
+#ifndef V3_EEPROM.h
+  #define V3_EEPROM.h
   
-  // include the config detailes for the LCD
-  #include "Config_LCD.h"
-
-  void SplashScreen();
-  void StatusScreen();
-  void DisplayAxisPosition( int iAxis );
-  void DisplayBedAndExtruderTemparature();
-#endif
+// EEPROM related variables
+#define Z_ADJUST_BYTE             0    // byte 0-255 (0-2.55 mm)                    1 byte
+#define Z_MAX_LENGTH_EEPROM       1    // float Z height                            4 bytes
+  
+  
+  
+#endif  

@@ -18,26 +18,18 @@
   #include "V3.h"
 #endif
 
-#ifdef MALSOFT_I2C_DISPLAY
-  #include "I2C_lcd.h"
-  #include <LCD.h>
-  #include <LiquidCrystal_I2C.h>  // F Malpartida's NewLiquidCrystal library
-  // download the repository from here and put it in your documents/arduino/libraries folder and restart your ide 
-  // https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads
-  // adaptations needed to work with arduino version 0023
-/*
-LiquidCrystal_I2C_ByVac.h
 
-change from 
-#include <Arduino.h>
-to
-#if (ARDUINO <  100)
-  #include <WProgram.h>
-#else
-  #include <Arduino.h>
-#endif
-*/
-#endif
+#include "I2C_lcd.h"
+
+
+#if defined( LCD_I2C_SAINSMART_YWROBOT) || defined( LCD_I2C_SAINSMART_YWROBOT_A)
+  #include <LCD.h>
+  #include <LiquidCrystal_I2C.h>  
+#endif // LCD_I2C_SAINSMART_YWROBOT || LCD_I2C_SAINSMART_YWROBOT_A
+#ifdef LCD_I2C_PANELOLU2
+  #include <LiquidTWI2.h>
+#endif // LCD_I2C_PANELOLU2
+
 
 #ifdef SDSUPPORT
   #include "SdFat.h"
@@ -96,8 +88,10 @@ to
 // M190 - Wait for bed current temp to reach target temp.
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
-// M203 - Adjust Z height
+
 // V3 mods for non standard M Codes
+
+// M203 - Adjust Z height
 // M211 - sends 211 to V3_I2C device, extruder Red LED on
 // M212 - sends 212 to V3_I2C device, extruder Red LED flashing
 // M213 - sends 213 to V3_I2C device, extruder Green LED on
@@ -128,14 +122,22 @@ to
 // M238	- Hood Switch Disable
 // M239 - sends 239 to V3_I2C device, Short Beep
 // M240 - set Z_MAX_LENGTH_M240
+
 // end of V3 mods
 
 // M260 - Send data to a I2C slave device 
 // M261 - Request X bytes from I2C slave device 
 
 // M301 - Set PID parameters
+// M355 - Case light on or off (uses pin A1 on J16) can be changed in Configuration.h
+// M499 - Forces printer into Error mode for Testing only. Comment out in Configuration.h for production release
 
-// M499 - forces printer into error mode for resting only comment out in Configuration.h for production release
+#define BUILD "0105"           // make sure you update pszFirmware 
+
+const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
+const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
+const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", "1.01.0105", "Vector 3", "1" };
+
 
 #ifdef V3 // V3 specific code
 //0x03, 0x01, 0x10
@@ -146,9 +148,9 @@ extern int FSW_status ;        // = 1; //rp3d.com Front Switch Status
 // unsigned long previous_millis_PauseID;
 #endif
 
-// M42 related vairables
-int OUT_PIN =0;
-int pin_status = 0;
+// M42 and M355 related vairables
+int iPinNumber = 0;
+int iPinStatus = 0;
 
 //Printer status variables
 int status = STATUS_OK; //
@@ -191,12 +193,12 @@ float axis_diff[NUM_AXIS] = {0, 0, 0, 0};
   long long_step_delay_ratio = STEP_DELAY_RATIO * 100;
 #endif
 
-// EEPROM related variables
-#define Z_ADJUST_BYTE 0
-float Z_MAX_LENGTH_M240 = 120.00;
+#include "V3_EEPROM.h"
+
+float Z_MAX_LENGTH_M240 = 120.00;    // set low to prevent a head crash
 
 #if FAN_PIN > -1
-  int fanSpeeds[FAN_COUNT] = { 0 };
+  int fanSpeeds[FAN_COUNT] = { 0,0 };    // FAN_COUNT = 2 in the V3 initialise fans to 0
 #endif
 
 #ifdef EXPERIMENTAL_I2CBUS
@@ -232,9 +234,6 @@ int bt = 0 ;       // Heated Bed temperature in C
 int ett = 0 ;      // Extruder target temperature in C
 int btt = 0 ;      // Heated Bed target temperature in C
 
-const char* status_str[]         = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
-const char* error_code_str[]     = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
-const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", "1.01.0104", "Vector 3", "1" };
 
 #ifdef PIDTEMP
   int temp_iState = 0;
@@ -347,7 +346,7 @@ void EmergencyStop() {
   
   V3_I2C_Command( V3_LONG_BEEP, false ) ;                         // beep long x1
   PauseID = 0;                                                    // clear PauseID
-  kill() ;                                                        // Now disable the x,y,z and e motors andswitch off the heaters etc.
+  kill() ;                                                        // Now disable the x,y,z and e motors and switch off the heaters etc.
   gcode_M107();                                                   // stop fan
   SerialMgr.cur()->println("Emergency Stop");                     // tell the world
   while(1){ ; }                                                   // indefinite loop (reset requited to break out of)
@@ -380,9 +379,9 @@ me when you already have a kill() function that does all that. S M-B 2016/12/15
 }
 #endif   // ifdef V3
 
-#ifdef MALSOFT_I2C_DISPLAY
-int iOldBedTemprature = -1;
-int iOldExtruderTemperature = -1;
+#ifdef LCD_SUPPORTED
+//int iOldBedTemprature = -1;
+//int iOldExtruderTemperature = -1;
 #endif
 
 
@@ -551,7 +550,7 @@ void setup()
   Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();
 #endif
 
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
   SplashScreen();
   StatusScreen();
 #endif
@@ -749,7 +748,7 @@ inline void process_commands()
   unsigned long codenum; //throw away variable
   char *starpos = NULL;
 
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
   StatusScreen();
 #endif
 
@@ -1013,6 +1012,12 @@ inline void process_commands()
         break;
 #endif // PIDTEMP
 
+#ifdef M355_SUPPORT
+      case 355:
+        gcode_M355() ;
+        break;
+#endif  // M355_SUPPORT
+
 #ifdef M499_SUPPORT
       case 499:
         gcode_M499() ;
@@ -1055,7 +1060,7 @@ void ClearToSend() {
     SerialMgr.cur()->print("EC:");
     SerialMgr.cur()->println(error_code);
     SerialMgr.cur()->print(", ");
-    SerialMgr.cur()->print(error_code_str[error_code]);
+    SerialMgr.cur()->print(pszErrorCodeString[error_code]);
   } else {
 #ifdef SDSUPPORT
     if(fromsd[bufindr]) {
@@ -1121,7 +1126,7 @@ inline void gcode_G28() {
   feedrate = 0;
 
   home_all_axis = !((code_seen(axis_codes[X_AXIS])) || (code_seen(axis_codes[Y_AXIS])) || (code_seen(axis_codes[Z_AXIS])));
-
+  
   if((home_all_axis) || (code_seen(axis_codes[X_AXIS]))) {
     if((X_MIN_PIN > -1 && X_HOME_DIR==-1) || (X_MAX_PIN > -1 && X_HOME_DIR==1)){
       current_position[X_AXIS] = 0;
@@ -1173,7 +1178,7 @@ inline void gcode_G28() {
       feedrate = 0;
     }
   }
-  
+        
   if((home_all_axis) || (code_seen(axis_codes[Z_AXIS]))) {
     if((Z_MIN_PIN > -1 && Z_HOME_DIR==-1) || (Z_MAX_PIN > -1 && Z_HOME_DIR==1)){
       current_position[Z_AXIS] = 0;
@@ -1194,7 +1199,7 @@ inline void gcode_G28() {
       feedrate = 0;
     }
   }
-        
+
   feedrate = saved_feedrate;
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
@@ -1315,7 +1320,7 @@ float probe_XY_point(const float fX_Probe, const float fY_Probe ){
   }
   prepare_move();                                              // do the move
 
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
   StatusScreen();                                              // display X Y Z
 #endif
 	
@@ -1326,20 +1331,20 @@ float probe_XY_point(const float fX_Probe, const float fY_Probe ){
 
   // now move up in small increments until switch makes
   // 
-  boolean bProbeState = READ(PROBE_PIN);                          // read the probe state
+//  boolean bProbeState = READ(PROBE_PIN);                          // read the probe state
 //  SerialMgr.cur()->print( "Z = " );
 //  SerialMgr.cur()->println( current_position[Z_AXIS] ) ;
-  while( (bProbeState == Z_NEGETIVE_TRIGGER) && (z < iZ_Stop) ){
+  while( (READ(PROBE_PIN) == Z_NEGETIVE_TRIGGER) && (z < iZ_Stop) ){
     
     // probe not triggered advance z probe height
     
     destination[Z_AXIS] = current_position[Z_AXIS] - (Z_INCREMENT * Z_HOME_DIR) ;
     prepare_move();                                            // do the move
-    bProbeState = READ(PROBE_PIN);                             // read the probe state
+//    bProbeState = READ(PROBE_PIN);                             // read the probe state
 //    SerialMgr.cur()->print( "Z = " );
 //    SerialMgr.cur()->println( current_position[Z_AXIS] ) ;
     z++;                                                       // increment the limit counter
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
     StatusScreen();                                            // display X Y Z
 #endif
   }
@@ -1370,12 +1375,12 @@ inline void gcode_M4() {
   SerialMgr.cur()->print("S:");
   SerialMgr.cur()->print(status);
   SerialMgr.cur()->print(", ");
-  SerialMgr.cur()->println(status_str[status]);
+  SerialMgr.cur()->println(pszStatusString[status]);
   if(status == STATUS_ERROR) {
     SerialMgr.cur()->print("EC:");
     SerialMgr.cur()->print(error_code);
     SerialMgr.cur()->print(", ");
-    SerialMgr.cur()->println(error_code_str[error_code]);
+    SerialMgr.cur()->println(pszErrorCodeString[error_code]);
   }
 }
 
@@ -1553,30 +1558,30 @@ inline void gcode_M29() {
 ////////////////////////////////
 
 inline void gcode_M42() {
-  int pin_number;
+  iPinNumber = -1;
   code_seen ( 'S' );
-  pin_status =code_value();
+  iPinStatus =code_value();
   if( code_seen ( 'A' )) {     
     
-    pin_number = 31 - code_value() ;
-    if (pin_number <27 || pin_number >30) {
-      pin_number = -1;
+    iPinNumber = 31 - code_value() ;
+    if (iPinNumber <27 || iPinNumber >30) {
+      iPinNumber = -1;
     }
     
-  } else if( code_seen('P') && pin_status >= 0 && pin_status <= 255) {
-    pin_number = code_value();
-    if (pin_number <27 || pin_number >30) {  // only pins A1 A2 A3 A4 allowed on the V3
-      pin_number = -1;
+  } else if( code_seen('P') && iPinStatus >= 0 && iPinStatus <= 255) {
+    iPinNumber = code_value();
+    if (iPinNumber <27 || iPinNumber >30) {  // only pins A1 A2 A3 A4 allowed on the V3
+      iPinNumber = -1;
     }
     
   } else {    // neither P or A specified so LED_PIN is switched (27)
-    pin_number = LED_PIN;
+    iPinNumber = LED_PIN;
   }
 
-  if (pin_number > -1) {              
-    pinMode(pin_number, OUTPUT);
-    digitalWrite(pin_number, pin_status);
-    //analogWrite(pin_number, pin_status);
+  if (iPinNumber > -1) {              
+    pinMode(iPinNumber, OUTPUT);
+    digitalWrite(iPinNumber, iPinStatus);
+    //analogWrite(iPinNumber, iPinStatus);
   }
 }
 
@@ -1710,13 +1715,13 @@ inline void gcode_M105() {
 // M106: Set Fan Speed
 // *
 // *  S<int>   Speed between 0-255
-// *  P<int>   Fan number
+// *  P<int>   Fan number, 0 = work fan on V3
 ////////////////////////////////
 
 inline void gcode_M106() {
 
   uint16_t s = (code_seen('S')) ? constrain( code_value(), 0, 255) : 255;
-  uint16_t p = (code_seen('P')) ? code_value() : 0;
+  uint16_t p = (code_seen('P')) ? constrain( code_value(), 0, (FAN_COUNT-1)) : 0;
   if (p < FAN_COUNT) {
     fanSpeeds[p] = s;
     WRITE(FAN_PIN, HIGH);
@@ -1727,11 +1732,11 @@ inline void gcode_M106() {
 ////////////////////////////////
 // M107: Fan Off
 // *
-// *  P<int>   Fan number
+// *  P<int>   Fan number, 0 = work fan on V3
 ////////////////////////////////
 
 inline void gcode_M107() {
-  uint16_t p = (code_seen('P')) ? code_value() : 0;
+  uint16_t p = (code_seen('P')) ? constrain( code_value(), 0, (FAN_COUNT-1)) : 0;
   if (p < FAN_COUNT) {
     fanSpeeds[p] = 0;
     analogWrite(FAN_PIN, 0);
@@ -1846,7 +1851,7 @@ inline void gcode_M140() {
   if (code_seen('S')) {
     btt = code_value();
     target_bed_raw = temp2analogBed(btt);
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
     StatusScreen();                                            // update the bed temperature
 #endif
   }
@@ -1883,7 +1888,7 @@ inline void gcode_M190() {
       SerialMgr.cur()->print(" B:");
       bt=analog2temp(current_bed_raw);
       SerialMgr.cur()->println( bt ); 
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
       StatusScreen();                                            // update the bed temperature
 #endif
       codenum = millis(); 
@@ -1929,11 +1934,12 @@ inline void gcode_M202() {
 
 ////////////////////////////////
 // M203 - set Z height adjustment
+// Z<byte> byte 0 = 0 mm, 255 = 2.55 mm
 ////////////////////////////////
 
 inline void gcode_M203() {
   if(code_seen('Z')){
-    EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
+    EEPROM.write(Z_ADJUST_BYTE, (byte) constrain(code_value(), 0, 2.55)*100);
   }
 }
 
@@ -2060,6 +2066,40 @@ inline void gcode_M301(){
 }
 
 #endif //PIDTEMP
+
+
+#ifdef M355_SUPPORT
+
+////////////////////////////////
+// M355: Turn case lights on/off
+//
+// M355 S1 ; Enable lights
+// M355 S0 ; Disable lights
+// M355    ; Report status
+// 
+// Works on LED_PIN which is A1 on the V3 (pin 30)
+////////////////////////////////
+
+inline void gcode_M355() {
+  iPinStatus = -1;
+  if( code_seen('S')) 
+  {
+     iPinStatus = constrain(code_value(),0 ,1);
+     pinMode(CASE_LIGHT, OUTPUT);
+     digitalWrite(CASE_LIGHT, iPinStatus);
+  }
+  else // no S code so return current state
+  {
+     iPinStatus = digitalRead(CASE_LIGHT);
+  }
+  if( iPinStatus > -1)
+  {
+    SerialMgr.cur()->print("Case lights O");
+    SerialMgr.cur()->println((iPinStatus) ? "n" : "ff");
+  }
+}
+
+#endif // M355_SUPPORT
 
 #ifdef M499_SUPPORT
 
@@ -2547,7 +2587,7 @@ void wait_for_temp() {
       SerialMgr.cur()->print("T:");
 	  tt = analog2temp(current_raw);
       SerialMgr.cur()->println( tt ); 
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
       StatusScreen();                                            // update the LCD bed temperature
 #endif
       codenum = millis(); 
@@ -2891,7 +2931,7 @@ void log_ulong_array(char* message, unsigned long value[], int array_lenght) {
 
 void ErrorBleepCodes(){
   
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                          // beep long
+  V3_I2C_Command( V3_LONG_BEEP, false ) ;                         // beep long
   delay(2000);
   
   for (int i = 1 ; i <= error_code ; i++) {
@@ -2899,13 +2939,14 @@ void ErrorBleepCodes(){
     delay(1000);                                                  // 1 second delay
   }
   
-#ifdef MALSOFT_I2C_DISPLAY
+#ifdef LCD_SUPPORTED
   StatusScreen();                                                 // display X Y Z and error on LCD
 #endif
-  SerialMgr.cur()->print("EC:");
+  
+  SerialMgr.cur()->print("EC:");                                  // Now send error code and error string to the terminal
   SerialMgr.cur()->print(error_code);
   SerialMgr.cur()->print(", ");
-  SerialMgr.cur()->println(error_code_str[error_code]);
+  SerialMgr.cur()->println(pszErrorCodeString[error_code]);
   
   delay(2000);                                                    // delay 2 seconds
 }

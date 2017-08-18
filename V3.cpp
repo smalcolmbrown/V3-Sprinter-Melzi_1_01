@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <Wire.h>
 #include <EEPROM.h>
-
+#include "V3_EEPROM.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -26,7 +26,6 @@ int FSW_status = 1;                   //rp3d.com Front Switch Status
 
 unsigned long previous_millis_PauseID;
 
-#define Z_MAX_LENGTH_EEPROM 1
 union data {
   float v;
   unsigned char fchar[4];
@@ -93,7 +92,7 @@ void Write_Z_MAX_LENGTH_M240_ToEEPROM(float fZ_Max_Length) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// void check_PauseID()
+//       // setting for the 2016 firmware release
 //
 // unique to V3
 //
@@ -127,7 +126,7 @@ void check_PauseID() {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // this bit bit commented out by eaglemoss / reprap pro coder 
-// thank the stars imagine 3 mins of beeping!
+// thank the stars imagine 3 mins of beeping! >:) so I enabled it :D
 //
 
   if( (HSW_Enable == HOODSWITCH_ENABLED) && ((PauseID & HOODSWITCH_BIT) == HOODSWITCH_OPEN) ){ 
