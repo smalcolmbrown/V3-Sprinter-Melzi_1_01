@@ -388,6 +388,17 @@ These unofficial non standard M codes are unique to the official Eaglemoss firmw
    None
    #### Example
    M5                           ; Reset Status and Clears Error flag.
+### M203 - Record Z adjustment
+   ### Useage
+   This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set, 
+even when the power is turned off and on again.  
+   If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
+   If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed.  
+   The maximum adjustment is +/-1.27mm.
+   #### Parameters
+   **Znnn** the Max Z adjustment
+   #### Example: 
+   M203 Z-0.75  ;
 ### M211 - Set extruder LED Red LED
    #### Usage
    Sets the extruder LED Red. Sends 211 to V3_I2C device.
@@ -621,17 +632,6 @@ These M codes have been added since the official Eaglemoss firmware release.
    M42 A1 S0 ; This turns pin A1 off
    ### Date implementation
    2017/07/16
-### M203 - Record Z adjustment
-   ### Useage
-   This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set, 
-even when the power is turned off and on again.  
-   If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
-   If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed.  
-   The maximum adjustment is +/-1.27mm.
-   #### Parameters
-   **Znnn** the Max Z adjustment
-   #### Example: 
-   M203 Z-0.75  ;
 ### M260 - i2c Send Data
    #### Usage
    Buffer and send data over the i2c bus. Use A to set the address from 0-127. Add up to 32 bytes to the buffer with each B. Send and reset the buffer with S. Pinched from Marlin 1.1.x  Does not act as a slave device. Needs the EXPERIMENTAL_I2CBUS define in Confiruation.h
@@ -662,7 +662,19 @@ even when the power is turned off and on again.
    #### Example
    M261 A99 B5 ; Request 5 bytes from Address 99
    ### Date implemented
-   2017/08/04
+   2017/08/04  
+### M355: Turn case lights on/off  
+   #### Usage
+  turns the case light On or Off
+   #### Parameters
+   *This command can be used without any additional parameters.*  
+   **Snnn** S0 = OFF, S1 = On   
+   #### Example
+   M355 S1 ; Enable lights
+   M355 S0 ; Disable lights
+   M355    ; Report status
+   ### Date implemented
+   2017/08/18  
 ## 1.f New Supported Unofficial M Codes
 These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
 ### M499 - Force Error
