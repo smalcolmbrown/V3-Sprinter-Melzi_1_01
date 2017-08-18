@@ -665,16 +665,16 @@ These M codes have been added since the official Eaglemoss firmware release.
    2017/08/04  
 ### M355: Turn case lights on/off  
    #### Usage
-  turns the case light On or Off
+  turns the case light On or Off  
    #### Parameters
    *This command can be used without any additional parameters.*  
-   **Snnn** S0 = OFF, S1 = On   
+   **Snnn** S0 = OFF, S1 = On  
    #### Example
-   M355 S1 ; Enable lights
-   M355 S0 ; Disable lights
-   M355    ; Report status
+   M355 S1 ; Enable lights  
+   M355 S0 ; Disable lights  
+   M355    ; Report status  
    ### Date implemented
-   2017/08/18  
+   2017/08/18  Build 0105
 ## 1.f New Supported Unofficial M Codes
 These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
 ### M499 - Force Error
