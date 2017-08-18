@@ -83,8 +83,8 @@ Added file **I2C_Experimental.h** to hold the experimental I2C data
 Added file **I2C_Experimental.cpp** to hold the experimental I2C code  
 Changed char pointer uuid[] = "0000..." back to char uuid[] = "0000..."  
 
-**2016/08/18 Build 0105**  
+**2016/08/18 Build 0105 Changes:**  
 Fixed Feed Rate display to reflect reality.  
-Added M355 - Case light on or off. Operating on on Pin A1  
-Added theoretical support for the Panelolu2 LCD but not the rotary switch and integrated SD card reader. **Untested!**  
-Added **V3_EEPROM.h** to hold EEPROM data locations making future EEPROM functions easier to implement  
+Added **M355** - Case light on or off. Operating on on Pin A1  
+Added theoretical support for the **Panelolu2 LCD** but **NOT** the rotary switch and integrated SD card reader. **Untested!**  
+Added file **V3_EEPROM.h** to hold EEPROM data locations making future EEPROM functions easier to implement  
