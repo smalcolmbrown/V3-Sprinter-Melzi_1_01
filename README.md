@@ -22,7 +22,10 @@ I2C_LCD needs F Malpartida's NewLiquidCrystal library. Download the repository f
 
 You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to compile in Arduino 0023 
 
-An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C)  
+An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C) 
+
+Since build 1.01.0105 yu will need to install the LiquidTWI2(https://github.com/lincomatic/LiquidTWI2) library  
+
 
 **2016/12/19 Build 0100  Changes:**  
 Added file **I2C_lcd.h** to contain the I2C lcd specific declarations.  
@@ -83,7 +86,7 @@ Added file **I2C_Experimental.h** to hold the experimental I2C data
 Added file **I2C_Experimental.cpp** to hold the experimental I2C code  
 Changed char pointer uuid[] = "0000..." back to char uuid[] = "0000..."  
 
-**2016/08/18 Build 0105 Changes:**  
+**2017/08/18 Build 0105 Changes:**  
 Fixed Feed Rate display to reflect reality.  
 Added **M355** - Case light on or off. Operating on on Pin **A1** on J16  
 Added theoretical support for the **Panelolu2 LCD** but **NOT** the rotary switch and integrated SD card reader. **Untested!**  
