@@ -24,7 +24,7 @@ You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to 
 
 An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C) 
 
-Since build 1.01.0105 yu will need to install the LiquidTWI2(https://github.com/lincomatic/LiquidTWI2) library  
+Since build 1.01.0105 yu will need to install the [LiquidTWI2](https://github.com/lincomatic/LiquidTWI2) library  
 
 
 **2016/12/19 Build 0100  Changes:**  
