@@ -33,7 +33,7 @@
 
 [lcd_front]: https://ardushop.ro/135-thickbox_default/lcd-2004.jpg "The 20 * 40 aplha numeric LCD from the front"
 
-and from the back showing the YwRobot I2C Lcd driver fitted
+And from the back showing the YwRobot I2C Lcd driver fitted
 
 ![alt text][lcd_back]
 
@@ -43,7 +43,14 @@ and from the back showing the YwRobot I2C Lcd driver fitted
 
 ![alt text][lcd_lead]
 
-[lcd_lead]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/gyzwsy9tmeknolon0w6k0dr4mx66ldqr.jpg "The the extender lead that extends JP 16 on the main boaed"
+[lcd_lead]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/gyzwsy9tmeknolon0w6k0dr4mx66ldqr.jpg "The the extender lead that extends JP 16 on the main board"
+
+This lead plugs into JP 16 with the red trace towards JP 17
+
+![alt text][lcd_mb]
+
+[lcd_mb]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3276/nvai8seu48gefsaysxmp30tpbicsb1uo.jpg "This is where the lead plugs into the main board"
+
 
 3. The lead that connect the 10 way male socket to the XwRobot I2C LCD driver
 
