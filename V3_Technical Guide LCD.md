@@ -50,3 +50,23 @@ and from the back showing the YwRobot I2C Lcd driver fitted
 ![alt text][lcd_i2c_lead]
 
 [lcd_i2c_lead]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/8ixl4b4y4rdbppff0ba8jk1me5ihwgfv.jpg "The lead that connect the 10 way male socket to the XwRobot I2C LCD driver"
+
+The lead that connects the I2C interface on the LCD to the 10 way plug on the printer on one end we have a 10 way IDC socket 2×5 way (Maplin code JB59P)  and the other we have two DuPont connectors the I2C connector is 1 * 4 way DuPont and the other is 1 * 8 way DuPont connector available here
+
+If you are not good at soldering then invest in a crimper for the DuPont connectors ebay.
+
+IDC 10 way pin 10 goes to 4 way DuPont pin 1 (GND)  
+IDC 10 way pin  9 goes to 4 way DuPont pin 2 (VCC)  
+IDC 10 way pin  1 goes to 4 way DuPont pin 3 (SDA)  
+IDC 10 way pin  3 goes to 4 way DuPont pin 4 (SCL)  
+
+IDC 10 way pin  2 goes to 8 way DuPont pin 4 (A1)  
+IDC 10 way pin  4 goes to 8 way DuPont pin 3 (A2)  
+IDC 10 way pin  5 goes to 8 way DuPont pin 3 (TX) 
+IDC 10 way pin  6 goes to 8 way DuPont pin 2 (A2)  
+IDC 10 way pin  7 goes to 8 way DuPont pin 5 (RX)  
+IDC 10 way pin  8 goes to 8 way DuPont pin 1 (A4)  
+IDC 10 way pin  9 goes to 8 way DuPont pin 7 (VCC)  
+IDC 10 way pin 10 goes to 8 way DuPont pin 8 (GND)  
+
+NOTE the DuPont connector pin 1 is denoted by a small triangle  
