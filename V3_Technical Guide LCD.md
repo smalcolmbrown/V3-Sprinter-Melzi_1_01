@@ -22,18 +22,25 @@
 
 ![alt text][info]
 
-[info]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3458/ves0xbpjv0nkez0huw06h1ijo0oskwa5.jpg"The LCD information screen"
+[info]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3458/ves0xbpjv0nkez0huw06h1ijo0oskwa5.jpg "The LCD information screen"
 
 
 ## What you need to add a LCD to your Vector 3 3D Printer
 
-1. A 2004 alpha numeric LCD with a I2C_SAINSMART_YWROBOT I2C LCD driver
+1. A 2004 alpha numeric LCD with a YwRobot I2C LCD driver
 
 ![alt text][lcd_front]
 
-[lcd_front]: https://ardushop.ro/135-thickbox_default/lcd-2004.jpg "The LCD front"
+[lcd_front]: http://3.bp.blogspot.com/-YtWLjAsjH4A/U84ws4xBOwI/AAAAAAAAAL4/5nC6RlHy0p4/s1600/lcd6.png "The LCD back with YwRobot I2C Lcd driver fitted"
+
+and from the back showing the YwRobot I2C Lcd driver fitted
 
 ![alt text][lcd_back]
 
 [lcd_back]: http://3.bp.blogspot.com/-YtWLjAsjH4A/U84ws4xBOwI/AAAAAAAAAL4/5nC6RlHy0p4/s1600/lcd6.png "The LCD back with YwRobot I2C Lcd driver fitted"
 
+2. the lead that connects the main board to the outside. plugs into JP 16 on the main boaed Pin 1 is nearest to JP 17
+
+![alt text][lcd_lead]
+
+[lcd_lead]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/gyzwsy9tmeknolon0w6k0dr4mx66ldqr.jpg "The the extender lead that extends JP 16 on the main boaed"
