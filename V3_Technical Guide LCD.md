@@ -39,8 +39,14 @@ and from the back showing the YwRobot I2C Lcd driver fitted
 
 [lcd_back]: http://3.bp.blogspot.com/-YtWLjAsjH4A/U84ws4xBOwI/AAAAAAAAAL4/5nC6RlHy0p4/s1600/lcd6.png "The LCD back with YwRobot I2C Lcd driver fitted"
 
-2. the lead that connects the main board to the outside. plugs into JP 16 on the main boaed Pin 1 is nearest to JP 17
+2. the lead that connects the main board to the outside. plugs into JP 16 on the main board Pin 1 (the red trace on the 10 way IDC lead) is nearest to JP 17
 
 ![alt text][lcd_lead]
 
 [lcd_lead]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/gyzwsy9tmeknolon0w6k0dr4mx66ldqr.jpg "The the extender lead that extends JP 16 on the main boaed"
+
+3. The lead that connect the 10 way male socket to the XwRobot I2C LCD driver
+
+![alt text][lcd_i2c_lead]
+
+[lcd_i2c_lead]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/8ixl4b4y4rdbppff0ba8jk1me5ihwgfv.jpg "The lead that connect the 10 way male socket to the XwRobot I2C LCD driver"
