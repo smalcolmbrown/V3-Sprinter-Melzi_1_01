@@ -31,7 +31,7 @@
 
 ![alt text][lcd_front]
 
-[lcd_front]: http://3.bp.blogspot.com/-YtWLjAsjH4A/U84ws4xBOwI/AAAAAAAAAL4/5nC6RlHy0p4/s1600/lcd6.png "The LCD back with YwRobot I2C Lcd driver fitted"
+[lcd_front]: https://ardushop.ro/135-thickbox_default/lcd-2004.jpg "The 20 * 40 aplha numeric LCD from the front"
 
 and from the back showing the YwRobot I2C Lcd driver fitted
 
