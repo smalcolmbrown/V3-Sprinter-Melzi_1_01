@@ -31,7 +31,7 @@
 
 ![alt text][lcd_front]
 
-[lcd_front]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/jk1a80dd6c4v13i54863i0mexyxbipcr.jpg "The LCD front"
+[lcd_front]: https://ardushop.ro/135-thickbox_default/lcd-2004.jpg "The LCD front"
 
 ![alt text][lcd_back]
 
