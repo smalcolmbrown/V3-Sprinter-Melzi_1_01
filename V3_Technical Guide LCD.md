@@ -6,15 +6,34 @@
 
 # Version 1.01.x
 
-![alt text][lcd]
+![alt text][lcd_over]
 
-[lcd]: https://i2.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3439/3sdh017cme486uxe6o4y3q55e978cud6.jpg "The LCD fitted to the V3 printer"
+[lcd_over]: https://i2.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3439/3sdh017cme486uxe6o4y3q55e978cud6.jpg "The LCD fitted to the V3 printer"
 
 
-##The Splash Screen
+### The Splash Screen
 
 ![alt text][splash]
 
 [splash]: https://i2.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3458/nb6afttzvukeynlqd56smublbxsfetis.jpg "The LCD Splash screen"
 
+
+### The Information Screen
+
+![alt text][info]
+
+[info]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3458/ves0xbpjv0nkez0huw06h1ijo0oskwa5.jpg"The LCD information screen"
+
+
+## What you need to add a LCD to your Vector 3 3D Printer
+
+1. A 2004 alpha numeric LCD with a I2C_SAINSMART_YWROBOT I2C LCD driver
+
+![alt text][lcd_front]
+
+[lcd_front]: https://i0.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/jk1a80dd6c4v13i54863i0mexyxbipcr.jpg "The LCD front"
+
+![alt text][lcd_back]
+
+[lcd_back]: https://i2.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/03ryuv2qxxcpqkllihfr7swugjvozy6p.jpg "The LCD back"
 
