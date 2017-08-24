@@ -8,7 +8,7 @@
 
 ![alt text][lcd]
 
-[lcd]: https://i2.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3439/3sdh017cme486uxe6o4y3q55e978cud6.jpg "The LCD fitted to the V3 printer
+[lcd]: https://i2.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3439/3sdh017cme486uxe6o4y3q55e978cud6.jpg "The LCD fitted to the V3 printer"
 
 
 ##The Splash Screen
