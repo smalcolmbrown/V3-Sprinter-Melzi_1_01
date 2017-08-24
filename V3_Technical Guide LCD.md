@@ -35,5 +35,5 @@
 
 ![alt text][lcd_back]
 
-[lcd_back]: https://i2.wp.com/v3uc.com/wp-content/uploads/hm_bbpui/3447/03ryuv2qxxcpqkllihfr7swugjvozy6p.jpg "The LCD back"
+[lcd_back]: http://3.bp.blogspot.com/-YtWLjAsjH4A/U84ws4xBOwI/AAAAAAAAAL4/5nC6RlHy0p4/s1600/lcd6.png "The LCD back with YwRobot I2C Lcd driver fitted"
 
