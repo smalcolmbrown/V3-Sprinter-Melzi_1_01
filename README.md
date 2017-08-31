@@ -8,6 +8,7 @@ Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 Based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi
 V3 parts http://rp3d.com/ 
 I2C_lcd  Suusi Malcolm-Brown
+T0 and T1 Bill Green
 
 Licence: GPL
 
@@ -24,7 +25,7 @@ You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to 
 
 An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C) 
 
-Since build 1.01.0105 yu will need to install the [LiquidTWI2](https://github.com/lincomatic/LiquidTWI2) library  
+Since build 1.01.0105 you will need to install the [LiquidTWI2](https://github.com/lincomatic/LiquidTWI2) library  
 
 
 **2016/12/19 Build 0100  Changes:**  
@@ -93,4 +94,9 @@ Added theoretical support for the **Panelolu2 LCD** but **NOT** the rotary switc
 Added file **V3_EEPROM.h** to hold EEPROM data locations making future EEPROM functions easier to implement  
 Added **STEPPER_DRIVER_X_Y_DRV8825** switch to allow for Bill Greens stepper driver boards which use **DRV8825** stepper drivers instead of the standard **A4988** stepper drivers for the **X and Y Axis**  
 Changed the default value of **nzone** back to 2 from 5. The Jume 2017 Eaglemoss firmware release fixed the themistor tables and cured the problem.
-LCD boot screen now shows the Firmware version Major, Minor and Build
+LCD boot screen now shows the Firmware version Major, Minor and Build  
+
+**2017/08/31 Build 0106 changes**  
+Fixed coding error in M360 and M361 handling  
+Added Bill Green's Tool select patch to allow for two extruders T0 and T1  
+Changes to system reporting.
