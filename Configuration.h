@@ -47,8 +47,8 @@
 //// Calibration variables
 //-----------------------------------------------------------------------
 // X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-//  float axis_steps_per_unit[] = {91.4286, 91.4286,4000,910};
-//  float axis_steps_per_unit[] = {80.00, 80.00,2560,910};
+//  float axis_steps_per_unit[] = {91.4286, 91.4286, 4000, 910};
+//  float axis_steps_per_unit[] = {80.00,     80.00, 2560, 910};
 
 //// Calibration variables
 // X, Y, Z, E steps per unit - V3 
@@ -135,6 +135,10 @@ const bool INVERT_E_DIR = true;
   const bool min_software_endstops = false; //If true, axis won't move to coordinates less than zero.
   const bool max_software_endstops = true;  //If true, axis won't move to coordinates greater than the defined lengths below.
 
+
+//-----------------------------------------------------------------------
+//// Heated bed extent
+//-----------------------------------------------------------------------
 #ifdef V3
   const int X_MAX_LENGTH = 140;
   const int Y_MAX_LENGTH = 140;
@@ -143,7 +147,6 @@ const bool INVERT_E_DIR = true;
   const int X_MAX_LENGTH = 220;    
   const int Y_MAX_LENGTH = 220;
   const int Z_MAX_LENGTH = 240;
-
 #endif
 
 
@@ -216,9 +219,9 @@ const bool INVERT_E_DIR = true;
 #ifdef HAS_BED_PROBE
   #define Z_INCREMENT 0.05                  // increments for probing Z Height
   #define Z_NEGETIVE_TRIGGER 1              // Z probe: 1 if a Negetive Pulse, 0 if a Positive Pulse on trigger
-  #define X_PROBE_OFFSET_FROM_EXTRUDER 45   // X offset: -left  +right  [of the nozzle]
-  #define Y_PROBE_OFFSET_FROM_EXTRUDER 10   // Y offset: -front +behind [the nozzle]
-  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0    // Z offset: -below +above  [the nozzle]
+  #define X_PROBE_OFFSET_FROM_EXTRUDER -45  // X offset: -left  +right  [of the nozzle] (Must Be an Integer)
+  #define Y_PROBE_OFFSET_FROM_EXTRUDER -10  // Y offset: -front +behind [the nozzle] (Must Be an Integer)
+  #define Z_PROBE_OFFSET_FROM_EXTRUDER 0    // Z offset: -below +above  [the nozzle] (Can be a Float)
 
   #define Z_CLEARANCE_BETWEEN_PROBES   5    // Z Clearance between probe points
 
@@ -245,9 +248,6 @@ const bool INVERT_E_DIR = true;
 // comment out if no M355 support 
 #define M355_SUPPORT
 
-#ifdef M355_SUPPORT
-  #define CASE_LIGHT 30          // A1 on J16
-#endif
 
 //-----------------------------------------------------------------------
 //// SETTINGS FOR M499  - Force Error mode(Command M499)
@@ -1085,12 +1085,12 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #define E_STEP_PIN         1
 #define E_DIR_PIN          0
 
-// Z height probe
 
-#define PROBE_PIN          11     // TX1 on V3
-//#define PROBE_PIN          29    //29 on Melzi1284p A2
-
-#define LED_PIN            27
+#define CASE_LIGHT_PIN     30     // Case light pin (A1) 
+//#define PROBE_PIN          29     // Melzi1284p (A2)
+#define PROBE_PIN          11     // Z height probe (TX1) on V3
+#define TOOL_PIN           28     // Tool select pin 
+#define LED_PIN            27     // LED pin (A4)
 
 #define FAN_PIN            4
 

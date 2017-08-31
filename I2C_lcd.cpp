@@ -450,8 +450,25 @@ void DisplayBedAndExtruderTemparature() {
 
 void DisplayAxisPosition( int iAxis ) {
   if( faOldPosition[iAxis] != current_position[iAxis] ) {
-    lcd.setCursor( 7*iAxis, 1 );
-    ConvertleadingSpacesToZeros( dtostrf( current_position[iAxis], NUM_DIGITS, NUM_PRECISION, szT) );
+//    lcd.setCursor( 7*iAxis, 1 );
+    lcd.setCursor( 5*iAxis, 1 );
+    switch (iAxis)
+    {
+      case 0:
+        ConvertleadingSpacesToZeros(dtostrf( current_position[iAxis], 5, 0, szT)) ;
+        sprintf( szTemp, "%c%s", 'X'+iAxis, szT+2 );
+        break;
+      case 1:
+        ConvertleadingSpacesToZeros(dtostrf( current_position[iAxis], 5, 0, szT)) ;
+        sprintf( szTemp, "%c%s", 'X'+iAxis, szT+2 );
+        break;
+      case 2:
+        ConvertleadingSpacesToZeros(dtostrf( current_position[iAxis], 8, 2, szT)) ;
+        sprintf( szTemp, "%c%s", 'X'+iAxis, szT+2 );
+        lcd.setCursor( (5 * iAxis ) + 3, 1 );
+        break;
+    }
+//    ConvertleadingSpacesToZeros( dtostrf( current_position[iAxis], NUM_DIGITS, NUM_PRECISION, szT) );
     sprintf( szTemp, "%c%s", 'X'+iAxis, szT+2 );
     lcd.print( szTemp );
     faOldPosition[iAxis] = current_position[iAxis] ;

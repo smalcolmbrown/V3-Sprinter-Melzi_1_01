@@ -132,11 +132,11 @@
 // M355 - Case light on or off (uses pin A1 on J16) can be changed in Configuration.h
 // M499 - Forces printer into Error mode for Testing only. Comment out in Configuration.h for production release
 
-#define BUILD "0105"           // make sure you update pszFirmware 
+#define BUILD "1.01.0106"           // make sure you update thia
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
-const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", "1.01.0105", "Vector 3", "1" };
+const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", BUILD, "Vector 3", "1" };
 
 
 #ifdef V3 // V3 specific code
@@ -167,11 +167,11 @@ unsigned long axis_previous_micros[NUM_AXIS];
 unsigned long previous_micros = 0, previous_millis_heater, previous_millis_bed_heater;
 unsigned long move_steps_to_take[NUM_AXIS];
 #ifdef RAMP_ACCELERATION
-unsigned long axis_max_interval[NUM_AXIS];
-unsigned long axis_steps_per_sqr_second[NUM_AXIS];
-unsigned long axis_travel_steps_per_sqr_second[NUM_AXIS];
-unsigned long max_interval;
-unsigned long steps_per_sqr_second, plateau_steps;  
+  unsigned long axis_max_interval[NUM_AXIS];
+  unsigned long axis_steps_per_sqr_second[NUM_AXIS];
+  unsigned long axis_travel_steps_per_sqr_second[NUM_AXIS];
+  unsigned long max_interval;
+  unsigned long steps_per_sqr_second, plateau_steps;  
 #endif
 boolean acceleration_enabled = false, accelerating = false;
 unsigned long interval;
@@ -752,7 +752,18 @@ inline void process_commands()
   StatusScreen();
 #endif
 
-  if(code_seen('G')) {
+  if(code_seen('T')) {
+    switch((int)code_value()) {
+      case 0:  
+        gcode_T0();
+        break;
+        
+      case 1:  
+        gcode_T1();
+        break;
+    }
+  }
+  else if(code_seen('G')) {
     switch((int)code_value()) {
       case 0:  // G0 -> G1
       case 1:  // G1  - Coordinated Movement X Y Z E
@@ -898,11 +909,10 @@ inline void process_commands()
         break;
 #endif
       
+#ifdef V3  // V3 specific code
       case 203: // M203 - set Z height adjustment
         gcode_M203();
         break;
-          
-#ifdef V3  // V3 specific code
       case 211: // M211 - red on
         V3_I2C_Command( V3_NOZZLE_RED, true ) ;              // sends 211, Red LED on
         break;
@@ -999,10 +1009,10 @@ inline void process_commands()
 
 #ifdef  EXPERIMENTAL_I2CBUS
       case 260: // M260 -  i2c Send Data
-        gcode_M301();
+        gcode_M260();
         break;
       case 261: // Mm261 - i2c Request Data
-        gcode_M301();
+        gcode_M261();
         break;
 #endif //   EXPERIMENTAL_I2CBUS
 
@@ -1030,9 +1040,10 @@ inline void process_commands()
     }
     
   }
-  else{
-      SerialMgr.cur()->println("Unknown command:");
-      SerialMgr.cur()->println(cmdbuffer[bufindr]);
+  else
+  {
+    SerialMgr.cur()->println("Unknown command:");
+    SerialMgr.cur()->println(cmdbuffer[bufindr]);
   }
   
   ClearToSend();
@@ -1073,8 +1084,55 @@ void ClearToSend() {
 }
 
 /**************************************************
- ***************** GCode Handlers *****************
+ ************ T, G and M Code Handlers ************
  **************************************************/
+
+////////////////////////////////
+// T Codes
+// 
+// The T codes operate on pin 28
+////////////////////////////////
+
+////////////////////////////////
+// T0 - Select Extruder 0
+//
+// if called with no parameters selects tool 0
+//
+// if called with S<int> 0 selects tool 0, 1 selects tool 1
+//
+////////////////////////////////
+
+inline void gcode_T0()
+{
+  if(code_seen('S'))
+  {
+    byte byTool = constrain(int(code_value()),0 ,1);
+    pinMode(TOOL_PIN, OUTPUT);
+    digitalWrite(TOOL_PIN, byTool);
+  }
+  else
+  {
+    // no tool specified so defaults to Tool 0
+    pinMode(TOOL_PIN, OUTPUT);
+    digitalWrite(TOOL_PIN, LOW);
+  }
+}
+  
+////////////////////////////////
+// T1 - Select Extruder 1
+//
+////////////////////////////////
+
+inline void gcode_T1()
+{
+  pinMode(TOOL_PIN, OUTPUT);
+  digitalWrite(TOOL_PIN, HIGH);
+}
+
+
+////////////////////////////////
+// G Codes
+////////////////////////////////
 
 ////////////////////////////////
 // G0_G1 - Ask for status
@@ -1256,9 +1314,22 @@ int   iS_Param;
     
   // confine Z probe to the to the heated bed
 
-    fX_Probe = constrain(fX_Probe + X_PROBE_OFFSET_FROM_EXTRUDER, (float)X_PROBE_OFFSET_FROM_EXTRUDER + 1 , (float)(X_MAX_LENGTH - 10));  // X axis
-    fY_Probe = constrain(fY_Probe + Y_PROBE_OFFSET_FROM_EXTRUDER, (float)Y_PROBE_OFFSET_FROM_EXTRUDER + 1 , (float)(Y_MAX_LENGTH - 10));  // Y axis
-	
+//    fX_Probe = constrain(fX_Probe + X_PROBE_OFFSET_FROM_EXTRUDER, (float)X_PROBE_OFFSET_FROM_EXTRUDER + 1 , (float)(X_MAX_LENGTH - 1));  // X axis
+//    fY_Probe = constrain(fY_Probe + Y_PROBE_OFFSET_FROM_EXTRUDER, (float)Y_PROBE_OFFSET_FROM_EXTRUDER + 1 , (float)(Y_MAX_LENGTH - 1));  // Y axis
+    
+    NozzelCoodinateToProbeCoodinate( fX_Probe, (float)X_PROBE_OFFSET_FROM_EXTRUDER );
+    NozzelCoodinateToProbeCoodinate( fY_Probe, (float)Y_PROBE_OFFSET_FROM_EXTRUDER );
+    
+    if( !IsPositionProbeable(fX_Probe, fY_Probe))               // check that we can actually probe that position return if not
+    {
+      SerialMgr.cur()->print("Coodinates ");
+      SerialMgr.cur()->print(fX_Probe);
+      SerialMgr.cur()->print(",");
+      SerialMgr.cur()->print(fY_Probe);
+      SerialMgr.cur()->println(" are outside the probeable aria" );
+      return;
+    }
+
     fZ_Height = probe_XY_point(fX_Probe, fY_Probe) ;            // get the Z height
 	
 /*
@@ -1300,6 +1371,7 @@ int   iS_Param;
 ////////////////////////////////
 
 float probe_XY_point(const float fX_Probe, const float fY_Probe ){
+float fZ_Height;
 
   // set probe X Y position
   
@@ -1350,8 +1422,124 @@ float probe_XY_point(const float fX_Probe, const float fY_Probe ){
   }
   
   // probe now triggered 
-    
-  return (current_position[Z_AXIS]*-1);                        // convert the negative number to a positive one
+  fZ_Height = (current_position[Z_AXIS]*-1);                   // convert the negative number to a positive one and save
+
+  if( Z_HOME_DIR == 1) {
+//    destination[Z_AXIS] = current_position[Z_AXIS] - (Z_MAX_LENGTH - Z_CLEARANCE_BETWEEN_PROBES) ;   
+    destination[Z_AXIS] = 0 - (Z_MAX_LENGTH - Z_CLEARANCE_BETWEEN_PROBES) ;   
+  } else {
+    // to do code for other type of probe
+//    current_position[Z_AXIS] = 0;
+  }
+  prepare_move();                                              // do the move
+
+  return fZ_Height;                        // convert the negative number to a positive one
+}
+
+////////////////////////////////
+// void NozzelCoodinateToProbeCoodinate(float &fCoodinate, float fOffset )
+//
+//
+////////////////////////////////
+
+void NozzelCoodinateToProbeCoodinate(float &fCoodinate, float fOffset )
+{
+  if( fOffset < 0 )
+  {
+    // Offset is negative so we add the offset
+    // example offfset = -45
+    // nozzel has to move + 45 to get there
+    fCoodinate += abs( fOffset );
+  }
+  else
+  {
+    // Offset is Positive so we subtract the offset
+    // example offfset = +45
+    // nozzel has to move -45 to get there
+    fCoodinate -= abs( fOffset );
+  }
+}
+
+////////////////////////////////
+// bool IsPositionProbeable(const float fX_Probe, const float fY_Probe )
+//
+// fX_Probe - the X position to probe Z height
+// fY_Probe - the Y position to probe Z height
+//
+// returns true if the coords are with in the probable aria false if not
+////////////////////////////////
+
+bool IsPositionProbeable(const float fX_Probe, const float fY_Probe) 
+{
+  // First check the X Coordinate
+
+  if( X_PROBE_OFFSET_FROM_EXTRUDER < 0 ) 
+  {
+    // X probe offset is Negative
+    if( fX_Probe < abs( X_PROBE_OFFSET_FROM_EXTRUDER ) )
+    {
+      SerialMgr.cur()->println("Fail 1: X Coodinate is less than X_PROBE_OFFSET_FROM_EXTRUDER" );
+      return false;
+    }
+    if( fX_Probe > X_MAX_LENGTH )
+    {
+      SerialMgr.cur()->println("Fail 2: X Coodinate is greater than X_MAX_LENGTH" );
+      return false;
+    }
+  }
+  else
+  {
+    // X probe offset is Positive
+    if( fX_Probe < X_PROBE_OFFSET_FROM_EXTRUDER )
+    {
+      SerialMgr.cur()->println("Fail 3: X Coodinate is less than X_PROBE_OFFSET_FROM_EXTRUDER" );
+      return false;
+    }
+    if( fX_Probe > ( X_MAX_LENGTH - X_PROBE_OFFSET_FROM_EXTRUDER ) )
+    {
+      SerialMgr.cur()->println("Fail 4: X Coodinate is greater than  X_MAX_LENGTH - X_PROBE_OFFSET_FROM_EXTRUDER" );
+      return false;
+    }
+  }
+  
+  // Now check the Y Coordinate
+  
+  if( Y_PROBE_OFFSET_FROM_EXTRUDER < 0 ) 
+  {
+    // Y probe offset is Negative
+    if( fY_Probe < abs( Y_PROBE_OFFSET_FROM_EXTRUDER ) )
+    {
+      SerialMgr.cur()->println("Fail 1: Y Coodinate is less than Y_PROBE_OFFSET_FROM_EXTRUDER" );
+      return false;
+    }
+    if( fY_Probe > Y_MAX_LENGTH )
+    {
+      SerialMgr.cur()->println("Fail 2: Y Coodinate is greater than Y_MAX_LENGTH" );
+      return false;
+    }
+  }
+  else    // if( Y_PROBE_OFFSET_FROM_EXTRUDER < 0 )
+  {
+    // Y probe offset is Positive
+    if( fY_Probe < Y_PROBE_OFFSET_FROM_EXTRUDER )
+    {
+      SerialMgr.cur()->println("Fail 3: Y Coodinate is less than X_PROBE_OFFSET_FROM_EXTRUDER" );
+      return false;
+    }
+    if( fY_Probe > ( Y_MAX_LENGTH - Y_PROBE_OFFSET_FROM_EXTRUDER ) )
+    {
+      SerialMgr.cur()->println("Fail 4: Y Coodinate is greater than  X_MAX_LENGTH - X_PROBE_OFFSET_FROM_EXTRUDER" );
+      return false;
+    }
+  }   //  if( Y_PROBE_OFFSET_FROM_EXTRUDER < 0 )
+  
+  // if we get here then the fX_Probe, fY_Probe position is probeable
+  SerialMgr.cur()->print("IsPositionProbeable( " );
+  SerialMgr.cur()->print(fX_Probe );
+  SerialMgr.cur()->print(" , " );
+  SerialMgr.cur()->print(fY_Probe );
+  SerialMgr.cur()->println(" ) true" );
+  return true;
 }
 
 #endif // HAS_BED_PROBE
@@ -1366,6 +1554,9 @@ inline void gcode_G92() {
   }
 }
 
+////////////////////////////////
+// M Codes
+////////////////////////////////
 
 ////////////////////////////////
 // M4 - Ask for status
@@ -1933,7 +2124,7 @@ inline void gcode_M202() {
 #endif  // ifdef RAMP_ACCELERATION
 
 ////////////////////////////////
-// M203 - set Z height adjustment
+// M203 - Set Z height adjustment
 // Znnn nnn = +/- 1.27 mm
 //
 // M203: Record Z adjustment
@@ -2039,25 +2230,33 @@ inline void gcode_M261() {
 // M301 - Set PID parameters
 ////////////////////////////////
 
-inline void gcode_M301(){
-  if(code_seen('P')) {
+inline void gcode_M301()
+{
+  if(code_seen('P'))
+  {
     Kp = code_value();
   }
-  if(code_seen('I')) {
+  if(code_seen('I'))
+  {
     Ki = code_value();
   }
-  if(code_seen('D')) { 
+  if(code_seen('D'))
+  { 
     Kd = code_value();
   }
-  if(code_seen('F')) {
+  if(code_seen('F'))
+  {
     pid_max = code_value();
   }
-  if(code_seen('Z')) {
+  if(code_seen('Z'))
+  {
     nzone = code_value();
   }
-  if(code_seen('W')) {
+  if(code_seen('W'))
+  {
     pid_i_max = code_value();
   }
+  // Now echo the PID settings to the host
   SerialMgr.cur()->print("Kp ");
   SerialMgr.cur()->println(Kp);
   SerialMgr.cur()->print("Ki ");
@@ -2089,17 +2288,18 @@ inline void gcode_M301(){
 // Works on LED_PIN which is A1 on the V3 (pin 30)
 ////////////////////////////////
 
-inline void gcode_M355() {
+inline void gcode_M355()
+{
   iPinStatus = -1;
   if( code_seen('S')) 
   {
      iPinStatus = constrain(code_value(),0 ,1);
-     pinMode(CASE_LIGHT, OUTPUT);
-     digitalWrite(CASE_LIGHT, iPinStatus);
+     pinMode(CASE_LIGHT_PIN, OUTPUT);
+     digitalWrite(CASE_LIGHT_PIN, iPinStatus);
   }
   else // no S code so return current state
   {
-     iPinStatus = digitalRead(CASE_LIGHT);
+     iPinStatus = digitalRead(CASE_LIGHT_PIN);
   }
   if( iPinStatus > -1)
   {
@@ -2116,8 +2316,10 @@ inline void gcode_M355() {
 // M499 - Force Error Code
 ////////////////////////////////
 
-inline void gcode_M499() {
-   if( code_seen('E')) {
+inline void gcode_M499()
+{
+   if( code_seen('E'))
+   {
      status  = STATUS_ERROR;
      error_code = constrain(code_value(),1,4);
      BBB();
@@ -2126,6 +2328,9 @@ inline void gcode_M499() {
         
 #endif // M499_SUPPORT
 
+////////////////////////////////
+// End of T, G and M codes
+////////////////////////////////
 
 
 inline void get_coordinates() {
