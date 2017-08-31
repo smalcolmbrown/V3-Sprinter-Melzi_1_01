@@ -554,6 +554,9 @@ void setup()
   SplashScreen();
   StatusScreen();
 #endif
+
+gcode_T0();  //Set extruder to T0
+
 }
 
 
