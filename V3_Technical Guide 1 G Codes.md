@@ -1,4 +1,5 @@
 # The Completely Unofficial Eaglemoss Vector 3 3D Printer Firmware Technical Guide
+## Supported G, M and T Codes.
 
 ![alt text][logo]
 
