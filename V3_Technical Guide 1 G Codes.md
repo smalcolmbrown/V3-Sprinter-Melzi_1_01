@@ -211,11 +211,25 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    None
    #### Example
    M83      ; Set E codes relative while in Absolute Coordinates
-### M84  - Disable steppers until next move, or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
-### M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
+### M84  -  Stop Idle Hold
    #### Useage
+   Disable steppers until next move, or use S seconds to specify an inactivity timeout, after which the steppers will be disabled. S0 to disable the timeout.
    #### Parameters
+   *This command can be used without any additional parameters.*  
    **Snnn** Set inactivity timer for nnn seconds. To disable set S to zero (default)
+   #### Example
+   M84 S10                   ; sets the stepper inactive time to 10 seconds. 
+   M84 S0                    ; disables the stepper time out. 
+   M84                       ; disables the stepper motors. 
+### M85  - Set inactivity shutdown timer
+#### Useage
+   Set inactivity shutdown timer with parameter S seconds. To disable set zero (default)
+   #### Parameters
+   *This command can be used without any additional parameters.*  
+   **Snnn** Set inactivity timer for nnn seconds. To disable set S to zero (default)
+    #### Example
+   M84 S10                   ; sets the  inactive timer to 10 seconds. 
+   M84 S0                    ; will disable the inactivity shutdown time (default) 
 ### M92  - Set axis_steps_per_unit
    #### Usage
    Allows programming of steps per unit (usually mm) for motor drives. These values are reset to firmware defaults on power on, unless saved to EEPROM if available (M500 in Marlin) or in the configuration file (config.g in RepRapFirmware). Very useful for calibration.
