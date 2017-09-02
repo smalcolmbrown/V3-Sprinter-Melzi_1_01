@@ -1,11 +1,28 @@
 # The Completely Unofficial Eaglemoss Vector 3 3D Printer Firmware Technical Guide
-## Supported G, M and T Codes.
+# Supported G, M and T Codes.
 
 ![alt text][logo]
 
 [logo]: https://www.eaglemoss.com/uploads/141647767867724/original.png "Eaglemoss Vector 3 Firmware Technical Guide"
 
-# Section 1 Supported G and M Codes.
+# Contents
+## 1. Supported G, M amd T Codes
+   ### 1.a Supported G Codes
+   These G Codes are the standard ones supported by the Eaglemoss firmware release.
+   ### 1.b New Supported G Codes
+   These G codes have been added since the official Eaglemoss firmware release.
+   ### 1.c Supported Standard RepRap M Codes
+   These M codes are the standard ones supported by the official Eaglemoss firmware release.
+   ### 1.d Unique V3 M Codes
+   These unofficial non standard M codes are unique to the official Eaglemoss firmware release.
+   ### 1.e New Supported Standard M Codes
+   These are official M codes have been added since the official Eaglemoss firmware release.
+   ### 1.f New Supported Unofficial M Codes
+   These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
+   ### 1.g New T codes
+   These areToo l change codes added since the official Eaglemoss firmware release.
+
+# Section 1 Supported G, M and T Codes.
 
 ## 1.a Supported G Codes.
 These G Codes are the standard ones supported by the Eaglemoss firmware release.
@@ -660,5 +677,25 @@ These unofficial non standard M codes have been added since the official Eaglemo
    M499 E3 ; Sets the Status flag to error and the error code to Extruder thermistor short circuit  
    M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit  
    ### Date implemented
-   2017/08/04
+   2017/08/04  
+## 1.e New Supported Standard M Codes
+These M codes have been added since the official Eaglemoss firmware release.  
+### T0 - Select Tool 0
+   #### Usage
+   Selects the first extruder E0 in a two exruder system   
+   #### Parameters
+   None.
+   #### Example 
+   T0                           ; Selects the first extruder E0 in a two exruder system  
+   ### Date implemented
+   2017/08/31  All credit to Bill Green for this mod  
+### T1 - Select Tool 1
+   #### Usage
+   Selects the first extruder E1 in a two exruder system
+   #### Parameters
+   None.
+   #### Example 
+   T1                           ; Selects the first extruder E1 in a two exruder system 
+   ### Date implemented
+   2017/08/31  All credit to Bill Green for this mod  
 
