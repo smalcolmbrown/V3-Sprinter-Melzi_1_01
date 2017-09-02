@@ -227,7 +227,7 @@ These M codes are the standard ones supported by the official Eaglemoss firmware
    #### Parameters  
    *This command can be used without any additional parameters.*  
    **Snnn** Set inactivity timer for nnn seconds. To disable set S to zero (default)  
-    #### Example  
+   #### Example  
    M84 S10                   ; sets the  inactive timer to 10 seconds.  
    M84 S0                    ; will disable the inactivity shutdown time (default)  
 ### M92  - Set axis_steps_per_unit  
