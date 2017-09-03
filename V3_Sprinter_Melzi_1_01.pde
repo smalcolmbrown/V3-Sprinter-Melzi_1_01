@@ -45,6 +45,8 @@
 
 //Implemented Codes
 //-------------------
+// T0  - Select Extruder 0
+// T1  - Select Extruder 1
 // G0  -> G1
 // G1  - Coordinated Movement X Y Z E
 // G4  - Dwell S<seconds> or P<milliseconds>
@@ -132,7 +134,7 @@
 // M355 - Case light on or off (uses pin A1 on J16) can be changed in Configuration.h
 // M499 - Forces printer into Error mode for Testing only. Comment out in Configuration.h for production release
 
-#define BUILD "1.01.0106"           // make sure you update thia
+#define BUILD "1.01.0107"           // make sure you update thia
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
@@ -555,7 +557,7 @@ void setup()
   StatusScreen();
 #endif
 
-gcode_T0();  //Set extruder to T0
+  gcode_T0();  //Set extruder to T0
 
 }
 
@@ -755,18 +757,23 @@ inline void process_commands()
   StatusScreen();
 #endif
 
+/*
   if(code_seen('T')) {
     switch((int)code_value()) {
-      case 0:  
+      case 0:  // Select extruder 0
         gcode_T0();
         break;
         
-      case 1:  
+      case 1:  // Select extruder 1
         gcode_T1();
         break;
+
     }
   }
-  else if(code_seen('G')) {
+  else if(code_seen('G')) {        */
+    
+    
+  if(code_seen('G')) {
     switch((int)code_value()) {
       case 0:  // G0 -> G1
       case 1:  // G1  - Coordinated Movement X Y Z E
@@ -1099,26 +1106,12 @@ void ClearToSend() {
 ////////////////////////////////
 // T0 - Select Extruder 0
 //
-// if called with no parameters selects tool 0
-//
-// if called with S<int> 0 selects tool 0, 1 selects tool 1
-//
 ////////////////////////////////
 
 inline void gcode_T0()
 {
-  if(code_seen('S'))
-  {
-    byte byTool = constrain(int(code_value()),0 ,1);
-    pinMode(TOOL_PIN, OUTPUT);
-    digitalWrite(TOOL_PIN, byTool);
-  }
-  else
-  {
-    // no tool specified so defaults to Tool 0
-    pinMode(TOOL_PIN, OUTPUT);
-    digitalWrite(TOOL_PIN, LOW);
-  }
+  pinMode(TOOL_PIN, OUTPUT);
+  digitalWrite(TOOL_PIN, LOW);
 }
   
 ////////////////////////////////
@@ -1131,7 +1124,6 @@ inline void gcode_T1()
   pinMode(TOOL_PIN, OUTPUT);
   digitalWrite(TOOL_PIN, HIGH);
 }
-
 
 ////////////////////////////////
 // G Codes
@@ -1840,18 +1832,25 @@ inline void gcode_M104() {
   V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;             // front orange flashing 
   V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;             // nozzle orange flashing
 #endif    // ifdef V3
-  if (code_seen('S')) {
+  if (code_seen('S'))
+  {
     ett = code_value();
     target_raw = temp2analogh(ett);
   }
-  if (error_code == ERROR_CODE_HOTEND_TEMPERATURE) {
+  if (error_code == ERROR_CODE_HOTEND_TEMPERATURE)
+  {
     wait_for_temp(); //if we have had a nozzle error, we should wait even though not wait command
-  } else {
+  }
+  else
+  {
 #ifdef WATCHPERIOD
-    if(target_raw > current_raw){
+    if(target_raw > current_raw)
+    {
       watchmillis = max(1,millis());
       watch_raw = current_raw;
-    }else{
+    }
+    else
+    {
       watchmillis = 0;
     }
 #endif    // ifdef WATCHPERIOD
@@ -1940,18 +1939,21 @@ inline void gcode_M107() {
 #endif
 
 ////////////////////////////////
-// M109 - Wait for extruder heater to reach target.
+// M109 -  Set Extruder Temperature and Wait till it reachs target temperature.
 ////////////////////////////////
 
-inline void gcode_M109() {
+inline void gcode_M109()
+{
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_ORANGE_FLASH, false ) ;            // front orange flashing 
   V3_I2C_Command( V3_NOZZLE_ORANGE_FLASH, false ) ;            // nozzle orange flashing
 #endif // ifdef V3
-  if (code_seen('S')) 
+  if (code_seen('S'))
+  {
     ett = code_value();
     target_raw = temp2analogh(ett - nzone);
-  wait_for_temp();
+    wait_for_temp();
+  }
 #ifdef V3
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
@@ -2782,27 +2784,34 @@ void reset_status() {
     error_code = ERROR_CODE_NO_ERROR;
 }
 
-void wait_for_temp() {
-  
+void wait_for_temp()
+{
   unsigned long codenum; //throw away variable
   
-  if (error_code == ERROR_CODE_HOTEND_TEMPERATURE) {
+  if (error_code == ERROR_CODE_HOTEND_TEMPERATURE)
+  {
     reset_status();
   }
     
 #ifdef WATCHPERIOD
-  if(target_raw > current_raw) {
+  if(target_raw > current_raw)
+  {
     watchmillis = max(1, millis());
     watch_raw = current_raw;
-  } else {
+  }
+  else
+  {
     watchmillis = 0;
   }
 #endif
   codenum = millis(); 
-  while ((current_raw < target_raw) && (status == STATUS_OK)) {
-    if( (millis() - codenum) > 1000 ) {                          // Print Temp Reading every 1 second while heating up.
+  while ((current_raw < target_raw) && (status == STATUS_OK))
+  {
+    if( (millis() - codenum) > 1000 )
+    {
+      // Print Temp Reading every 1 second while heating up.
       SerialMgr.cur()->print("T:");
-	  tt = analog2temp(current_raw);
+      tt = analog2temp(current_raw);
       SerialMgr.cur()->println( tt ); 
 #ifdef LCD_SUPPORTED
       StatusScreen();                                            // update the LCD bed temperature
