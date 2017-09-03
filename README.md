@@ -100,3 +100,6 @@ LCD boot screen now shows the Firmware version Major, Minor and Build
 Fixed coding error in M360 and M361 handling  
 Added Bill Green's Tool select patch to allow for two extruders T0 and T1  
 Changes to system reporting.
+
+**2017/09/04 Build 0107 changes**  
+Removed Tool select patch to allow for two extruders T0 and T1 due to problems with Matter control and S3D  
