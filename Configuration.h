@@ -40,7 +40,8 @@
 //-----------------------------------------------------------------------
 // Un-Comment out if you are using DRV8825 Stepper drivers for X and Y axis 
 // the default is commented out for an un-modified V3 printer only use this
-// setting if you have Bill Green's Stepper Mod fitted.
+// setting if you have Bill Green's Stepper Mod fitted with DRV8825 steppers
+// drivers in the X and Y Axis.
 #define STEPPER_DRIVER_X_Y_DRV8825      
 
 //-----------------------------------------------------------------------
@@ -178,9 +179,9 @@ const bool INVERT_E_DIR = true;
 #ifdef RAMP_ACCELERATION
 // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
   float max_start_speed_units_per_second[] = {25.0,25.0,25.0,10.0};
-//  long max_acceleration_units_per_sq_second[] = {1000,1000,1000,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-blet
+//  long max_acceleration_units_per_sq_second[] = {1000,1000,1000,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-belt
   long max_acceleration_units_per_sq_second[] = {1000,1000,50,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
-  //long max_travel_acceleration_units_per_sq_second[] = {500,500,500,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-blet
+  //long max_travel_acceleration_units_per_sq_second[] = {500,500,500,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-belt
   long max_travel_acceleration_units_per_sq_second[] = {500,500,50,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
 #endif
 

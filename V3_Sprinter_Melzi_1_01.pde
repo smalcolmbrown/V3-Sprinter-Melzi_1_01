@@ -45,8 +45,6 @@
 
 //Implemented Codes
 //-------------------
-// T0  - Select Extruder 0
-// T1  - Select Extruder 1
 // G0  -> G1
 // G1  - Coordinated Movement X Y Z E
 // G4  - Dwell S<seconds> or P<milliseconds>
@@ -134,10 +132,13 @@
 // M355 - Case light on or off (uses pin A1 on J16) can be changed in Configuration.h
 // M499 - Forces printer into Error mode for Testing only. Comment out in Configuration.h for production release
 
-#define BUILD "1.01.0107"           // make sure you update thia
+// T0  - Select Extruder 0
+// T1  - Select Extruder 1
+
+#define BUILD "1.01.0108"           // make sure you update this
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
-const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
+const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High", "User Abort" };
 const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", BUILD, "Vector 3", "1" };
 
 
@@ -757,24 +758,10 @@ inline void process_commands()
   StatusScreen();
 #endif
 
-/*
-  if(code_seen('T')) {
-    switch((int)code_value()) {
-      case 0:  // Select extruder 0
-        gcode_T0();
-        break;
-        
-      case 1:  // Select extruder 1
-        gcode_T1();
-        break;
-
-    }
-  }
-  else if(code_seen('G')) {        */
-    
-    
-  if(code_seen('G')) {
-    switch((int)code_value()) {
+  if(code_seen('G'))
+  {
+    switch((int)code_value())
+    {
       case 0:  // G0 -> G1
       case 1:  // G1  - Coordinated Movement X Y Z E
         gcode_G0_G1();
@@ -802,11 +789,10 @@ inline void process_commands()
         break;
     }
   }
-
   else if(code_seen('M'))
   {
-    
-    switch((int)code_value()) {
+    switch((int)code_value())
+    {
       case 4: // M4 - Ask for status
         gcode_M4();
         break;
@@ -1048,7 +1034,23 @@ inline void process_commands()
         ClearToSend();        
         return;
     }
-    
+  }
+  else if(code_seen('T'))    /*         */
+  {
+    switch((int)code_value())
+    {
+      case 0:  // Select extruder 0
+        gcode_T0();
+        break;
+        
+      case 1:  // Select extruder 1
+        gcode_T1();
+        break;
+      default: // unknown tool number
+        SerialMgr.cur()->print("Unknown Tool: ");
+        SerialMgr.cur()->println((int)code_value());
+        break;
+    }
   }
   else
   {
@@ -1094,36 +1096,8 @@ void ClearToSend() {
 }
 
 /**************************************************
- ************ T, G and M Code Handlers ************
+ ************ G, M and G Code Handlers ************
  **************************************************/
-
-////////////////////////////////
-// T Codes
-// 
-// The T codes operate on pin 28
-////////////////////////////////
-
-////////////////////////////////
-// T0 - Select Extruder 0
-//
-////////////////////////////////
-
-inline void gcode_T0()
-{
-  pinMode(TOOL_PIN, OUTPUT);
-  digitalWrite(TOOL_PIN, LOW);
-}
-  
-////////////////////////////////
-// T1 - Select Extruder 1
-//
-////////////////////////////////
-
-inline void gcode_T1()
-{
-  pinMode(TOOL_PIN, OUTPUT);
-  digitalWrite(TOOL_PIN, HIGH);
-}
 
 ////////////////////////////////
 // G Codes
@@ -2332,6 +2306,35 @@ inline void gcode_M499()
 }
         
 #endif // M499_SUPPORT
+
+////////////////////////////////
+// T Codes
+// 
+// The T codes operate on pin 28
+////////////////////////////////
+
+////////////////////////////////
+// T0 - Select Extruder 0
+//
+////////////////////////////////
+
+inline void gcode_T0()
+{
+  pinMode(TOOL_PIN, OUTPUT);
+  digitalWrite(TOOL_PIN, LOW);
+}
+  
+////////////////////////////////
+// T1 - Select Extruder 1
+//
+////////////////////////////////
+
+inline void gcode_T1()
+{
+  pinMode(TOOL_PIN, OUTPUT);
+  digitalWrite(TOOL_PIN, HIGH);
+}
+
 
 ////////////////////////////////
 // End of T, G and M codes
