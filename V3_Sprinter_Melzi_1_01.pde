@@ -319,17 +319,19 @@ unsigned long stepper_inactive_time = 0;
       char* end = buf + strlen(buf) - 1;
       
       file.writeError = false;
-      if((npos = strchr(buf, 'N')) != NULL){
-          begin = strchr(npos, ' ') + 1;
-          end = strchr(npos, '*') - 1;
+      if((npos = strchr(buf, 'N')) != NULL)
+      {
+        begin = strchr(npos, ' ') + 1;
+        end = strchr(npos, '*') - 1;
       }
       end[1] = '\r';
       end[2] = '\n';
       end[3] = '\0';
       //SerialMgr.cur()->println(begin);
       file.write(begin);
-      if (file.writeError){
-          SerialMgr.cur()->println("error writing to file");
+      if (file.writeError)
+      {
+        SerialMgr.cur()->println("error writing to file");
       }
   }
 #endif
@@ -345,8 +347,8 @@ unsigned long stepper_inactive_time = 0;
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EmergencyStop() {
-  
+void EmergencyStop()
+{
   V3_I2C_Command( V3_LONG_BEEP, false ) ;                         // beep long x1
   PauseID = 0;                                                    // clear PauseID
   kill() ;                                                        // Now disable the x,y,z and e motors and switch off the heaters etc.
@@ -550,6 +552,7 @@ void setup()
 #endif
 
 #ifdef V3  // V3 specific code
+  HSW_Enable = EEPROM.read(HOOD_SWITCH_EEPROM) & HOODSWITCH_BIT;              // get the hood switch state from the EEPROM
   Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();
 #endif
 
@@ -614,84 +617,89 @@ void loop() {
 #endif   // ifdef V3
 }
 
-inline void get_command() {
-  
+inline void get_command()
+{
 //  SerialMgr.cur()->println("get_command"); 
-  while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE) {
+  while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE)
+  {
     serial_char = SerialMgr.cur()->read();
     if(serial_char == '\n' || serial_char == '\r' || serial_char == ':' || serial_count >= (MAX_CMD_SIZE - 1) ) 
     {
       if(!serial_count) return; //if empty line
       cmdbuffer[bufindw][serial_count] = 0; //terminate string
-      if(!comment_mode){
-    fromsd[bufindw] = false;
-  if(strstr(cmdbuffer[bufindw], "N") != NULL)
-  {
-    strchr_pointer = strchr(cmdbuffer[bufindw], 'N');
-    gcode_N = (strtol(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL, 10));
-    if(gcode_N != gcode_LastN+1 && (strstr(cmdbuffer[bufindw], "M110") == NULL) ) {
-      SerialMgr.cur()->print("Serial Error: Line Number is not Last Line Number+1, Last Line:");
-      SerialMgr.cur()->println(gcode_LastN);
-      //SerialMgr.cur()->println(gcode_N);
-      FlushSerialRequestResend();
-      serial_count = 0;
-      return;
-    }
+      if(!comment_mode)
+      {
+        fromsd[bufindw] = false;
+        if(strstr(cmdbuffer[bufindw], "N") != NULL)
+        {
+          strchr_pointer = strchr(cmdbuffer[bufindw], 'N');
+          gcode_N = (strtol(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL, 10));
+          if(gcode_N != gcode_LastN+1 && (strstr(cmdbuffer[bufindw], "M110") == NULL) )
+          {
+            SerialMgr.cur()->print("Serial Error: Line Number is not Last Line Number+1, Last Line:");
+            SerialMgr.cur()->println(gcode_LastN);
+            //SerialMgr.cur()->println(gcode_N);
+            FlushSerialRequestResend();
+            serial_count = 0;
+            return;
+          }
     
-    if(strstr(cmdbuffer[bufindw], "*") != NULL)
-    {
-      byte checksum = 0;
-      byte count = 0;
-      while(cmdbuffer[bufindw][count] != '*') checksum = checksum^cmdbuffer[bufindw][count++];
-      strchr_pointer = strchr(cmdbuffer[bufindw], '*');
-  
-      if( (int)(strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL)) != checksum) {
-        SerialMgr.cur()->print("Error: checksum mismatch, Last Line:");
-        SerialMgr.cur()->println(gcode_LastN);
-        FlushSerialRequestResend();
-        serial_count = 0;
-        return;
-      }
-      //if no errors, continue parsing
-    }
-    else 
-    {
-      SerialMgr.cur()->print("Error: No Checksum with line number, Last Line:");
-      SerialMgr.cur()->println(gcode_LastN);
-      FlushSerialRequestResend();
-      serial_count = 0;
-      return;
-    }
-    
-    gcode_LastN = gcode_N;
-    //if no errors, continue parsing
-  }
-  else  // if we don't receive 'N' but still see '*'
-  {
-    if((strstr(cmdbuffer[bufindw], "*") != NULL))
-    {
-      SerialMgr.cur()->print("Error: No Line Number with checksum, Last Line:");
-      SerialMgr.cur()->println(gcode_LastN);
-      serial_count = 0;
-      return;
-    }
-  }
-	if((strstr(cmdbuffer[bufindw], "G") != NULL)){
-		strchr_pointer = strchr(cmdbuffer[bufindw], 'G');
-		switch((int)((strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL)))){
-		case 0:
-		case 1:
-              #ifdef SDSUPPORT
+          if(strstr(cmdbuffer[bufindw], "*") != NULL)
+          {
+            byte checksum = 0;
+            byte count = 0;
+            while(cmdbuffer[bufindw][count] != '*') checksum = checksum^cmdbuffer[bufindw][count++];
+            strchr_pointer = strchr(cmdbuffer[bufindw], '*');
+            
+            if( (int)(strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL)) != checksum) 
+            {
+              SerialMgr.cur()->print("Error: checksum mismatch, Last Line:");
+              SerialMgr.cur()->println(gcode_LastN);
+              FlushSerialRequestResend();
+              serial_count = 0;
+              return;
+            }
+            //if no errors, continue parsing
+          }
+          else 
+          {
+            SerialMgr.cur()->print("Error: No Checksum with line number, Last Line:");
+            SerialMgr.cur()->println(gcode_LastN);
+            FlushSerialRequestResend();
+            serial_count = 0;
+            return;
+          }
+          
+          gcode_LastN = gcode_N;
+          //if no errors, continue parsing
+        }
+        else  // if we don't receive 'N' but still see '*'
+        {
+          if((strstr(cmdbuffer[bufindw], "*") != NULL))
+          {
+            SerialMgr.cur()->print("Error: No Line Number with checksum, Last Line:");
+            SerialMgr.cur()->println(gcode_LastN);
+            serial_count = 0;
+            return;
+          }
+        }
+	if((strstr(cmdbuffer[bufindw], "G") != NULL)) 
+        {
+	  strchr_pointer = strchr(cmdbuffer[bufindw], 'G');
+          switch((int)((strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL))))
+          {
+            case 0:
+            case 1:
+#ifdef SDSUPPORT
               if(savetosd)
                 break;
-              #endif
-			  SerialMgr.cur()->println("ok"); 
-			  break;
-		default:
-			break;
-		}
-
-	}
+#endif
+              SerialMgr.cur()->println("ok"); 
+              break;
+            default:
+              break;
+          }
+        }
         bufindw = (bufindw + 1)%BUFSIZE;
         buflen += 1;
         
@@ -706,22 +714,26 @@ inline void get_command() {
     }
   }
 #ifdef SDSUPPORT
-if(!sdmode || serial_count!=0){
+  if(!sdmode || serial_count!=0)
+  {
     return;
-}
-  while( filesize > sdpos  && buflen < BUFSIZE) {
+  }
+  while( filesize > sdpos  && buflen < BUFSIZE)
+  {
     n = file.read();
     serial_char = (char)n;
     if(serial_char == '\n' || serial_char == '\r' || serial_char == ':' || serial_count >= (MAX_CMD_SIZE - 1) || n == -1) 
     {
         sdpos = file.curPosition();
-        if(sdpos >= filesize){
+        if(sdpos >= filesize)
+        {
             sdmode = false;
             SerialMgr.cur()->println("Done printing file");
         }
       if(!serial_count) return; //if empty line
       cmdbuffer[bufindw][serial_count] = 0; //terminate string
-      if(!comment_mode){
+      if(!comment_mode)
+      {
         fromsd[bufindw] = true;
         buflen += 1;
         bufindw = (bufindw + 1)%BUFSIZE;
@@ -987,13 +999,11 @@ inline void process_commands()
       case 236: // M236	Beep Off
         V3_I2C_Command( V3_BEEP_OFF, true ) ;               // sends 236, Beep Off
         break;
-      case 237: // M237	HSW Enable
-        HSW_Enable = 0x01;
-        SerialMgr.cur()->println("M237 OK");
+      case 237: // M237	Hood Switch Enable
+        gcode_M237();
         break;
-      case 238:
-        HSW_Enable = 0x00;
-        SerialMgr.cur()->println("M238 OK");
+      case 238: // M237	Hood Switch disable
+        gcode_M238();
         break;
       case 239: // M239	Short Beep x 1
         V3_I2C_Command( V3_SHORT_BEEP, true ) ;             // sends 239, Short Beep
@@ -2120,6 +2130,31 @@ inline void gcode_M203() {
   if(code_seen('Z')){
     EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
   }
+}
+
+
+////////////////////////////////
+// M237 - HSW Enable
+//
+////////////////////////////////
+
+inline void gcode_M237() 
+{	
+  HSW_Enable = 0x01;
+  EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+  SerialMgr.cur()->println("M237 OK");
+}
+
+////////////////////////////////
+// M237 - Hood switch disable
+//
+////////////////////////////////
+
+inline void gcode_M238()
+{ 
+  HSW_Enable = 0x00;
+  EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+  SerialMgr.cur()->println("M238 OK");
 }
 
 ////////////////////////////////
