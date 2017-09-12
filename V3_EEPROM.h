@@ -14,6 +14,6 @@
 #define Z_ADJUST_BYTE            0                                       // byte 0-255 (0-2.55 mm)                    1 byte
 #define Z_MAX_LENGTH_EEPROM      (Z_ADJUST_BYTE+ sizeof(byte))           // float Z height                            4 bytes
 #define HOOD_SWITCH_EEPROM       (Z_MAX_LENGTH_EEPROM + sizeof(float))   // byte hood switch default                  1 byte
-  
+#define MUTE_BEEP_EEPROM         (HOOD_SWITCH_EEPROM+ sizeof(byte))      // mute unessential beeps                    1 byte
   
 #endif  

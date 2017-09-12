@@ -146,6 +146,7 @@ const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbro
 //0x03, 0x01, 0x10
 extern char PauseID ;          // = 0x03;//rp3d.com pause id
 extern char HSW_Enable ;       // = 0x01; //rp3d.com M237, M238
+extern char MuteBeeps ;        // = 0; mute non essestial beeps
 extern int FSW_Counter ;       // = 0; //rp3d.com Front Switch Counter
 extern int FSW_status ;        // = 1; //rp3d.com Front Switch Status
 // unsigned long previous_millis_PauseID;
@@ -553,6 +554,7 @@ void setup()
 
 #ifdef V3  // V3 specific code
   HSW_Enable = EEPROM.read(HOOD_SWITCH_EEPROM) & HOODSWITCH_BIT;              // get the hood switch state from the EEPROM
+  MuteBeeps  = EEPROM.read(MUTE_BEEP_EEPROM);                                // get the hood switch state from the EEPROM
   Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();
 #endif
 
@@ -1153,7 +1155,10 @@ inline void gcode_G28() {
 #ifdef V3 // V3 specific code
   V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  }
   delay(2000);                                                  // wait for beeps end   
 #endif   // ifdef V3
   saved_feedrate = feedrate;
@@ -1241,7 +1246,10 @@ inline void gcode_G28() {
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  }
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
 #endif // ifdef V3
 }
@@ -1267,7 +1275,10 @@ int   iS_Param;
 #ifdef V3 // V3 specific code
   V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  }
   delay(2000);                                                  // wait for beeps end   
 #endif   // ifdef V3
 
@@ -1334,7 +1345,10 @@ int   iS_Param;
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  }
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
 #endif // ifdef V3
 }
@@ -1842,7 +1856,10 @@ inline void gcode_M104() {
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  }
 #endif // ifdef V3
 }
         
@@ -1941,7 +1958,10 @@ inline void gcode_M109()
 #ifdef V3
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  }
 #endif // ifdef V3
 }
 
@@ -2039,7 +2059,10 @@ inline void gcode_M140() {
 #ifdef V3
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  }
 #endif // ifdef V3
 }
 
@@ -2079,7 +2102,10 @@ inline void gcode_M190() {
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                      // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                     // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                        // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                        // beep long x1
+  }
 #endif // ifdef V3
 }
 
@@ -2136,24 +2162,54 @@ inline void gcode_M203() {
 ////////////////////////////////
 // M237 - HSW Enable
 //
+// M237 ; Hood switch Enable
+// M237 S1 ; Hood switch Enable and store result in EEPROM
+// M237 S2 ; Mute Beep Enable and store result in EEPROM
 ////////////////////////////////
 
 inline void gcode_M237() 
 {	
   HSW_Enable = 0x01;
-  EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+  if(code_seen('S'))
+  {
+    switch((int)code_value())
+    {
+      case 1:
+        EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+        break;
+      case 2:
+        MuteBeeps = false;
+        EEPROM.write(MUTE_BEEP_EEPROM, MuteBeeps);         // store in EEPROM
+        break;
+    }
+  }
   SerialMgr.cur()->println("M237 OK");
 }
 
 ////////////////////////////////
 // M237 - Hood switch disable
 //
+// M238 ; Hood switch disable
+// M238 S1 ; Hood switch disable and store result in EEPROM
+// M238 S2 ; Mute Beep disable and store result in EEPROM
 ////////////////////////////////
 
 inline void gcode_M238()
 { 
   HSW_Enable = 0x00;
-  EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+  if(code_seen('S'))
+  {
+    switch((int)code_value())
+    {
+      case 1:
+        EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+        break;
+      case 2:
+        MuteBeeps = true;
+        EEPROM.write(MUTE_BEEP_EEPROM, MuteBeeps);         // store in EEPROM
+        break;
+    }
+  }
   SerialMgr.cur()->println("M238 OK");
 }
 
