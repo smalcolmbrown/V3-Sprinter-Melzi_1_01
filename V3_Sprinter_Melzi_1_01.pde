@@ -135,11 +135,12 @@
 // T0  - Select Extruder 0
 // T1  - Select Extruder 1
 
-#define BUILD "1.01.0108"           // make sure you update this
+#define _VERSION_TEXT "1.01.0108"           // make sure you update this
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High", "User Abort" };
-const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", BUILD, "Vector 3", "1" };
+const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", _VERSION_TEXT, "Vector 3", _EXTRUDERS };
+const char uuid[]                = _DEF_CHAR_UUID;
 
 
 #ifdef V3 // V3 specific code
@@ -160,17 +161,27 @@ int iPinStatus = 0;
 int status = STATUS_OK; //
 int error_code = ERROR_CODE_NO_ERROR; //0=Nothing, 1=Heater thermistor error
 
+float max_feedrate[4] = _MAX_FEEDRATE;
+float homing_feedrate[] = _HOMING_FEEDRATE;
+bool axis_relative_modes[] = _AXIS_RELATIVE_MODES;
+
 //Led counter (for blinking the led in different timings)
 int led_counter = 0;
 
 //Stepper Movement Variables
 
 char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
+float axis_steps_per_unit[4] = _AXIS_STEP_PER_UNIT; 
+
 bool move_direction[NUM_AXIS];
 unsigned long axis_previous_micros[NUM_AXIS];
 unsigned long previous_micros = 0, previous_millis_heater, previous_millis_bed_heater;
 unsigned long move_steps_to_take[NUM_AXIS];
 #ifdef RAMP_ACCELERATION
+  float max_start_speed_units_per_second[] = _MAX_START_SPEED_UNITS_PER_SECOND;                        // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
+  long max_acceleration_units_per_sq_second[] = _MAX_ACCELERATION_UNITS_PER_SQ_SECOND;                 // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
+  long max_travel_acceleration_units_per_sq_second[] = _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND;   // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
+
   unsigned long axis_max_interval[NUM_AXIS];
   unsigned long axis_steps_per_sqr_second[NUM_AXIS];
   unsigned long axis_travel_steps_per_sqr_second[NUM_AXIS];
@@ -1999,7 +2010,7 @@ inline void gcode_M115() {
   SerialMgr.cur()->print(" UUID:");
   SerialMgr.cur()->println(uuid);
 /*
-  //SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
+  SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
   SerialMgr.cur()->print("FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http://rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:");
   SerialMgr.cur()->println(uuid);
 */
