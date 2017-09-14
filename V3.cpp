@@ -20,7 +20,7 @@
 
 char PauseID = 0x03;                  //rp3d.com pause id
 char HSW_Enable = 0x01;               //rp3d.com M237, M238
-
+char MuteBeeps = 0x0;                 // 
 int FSW_Counter = 0;                  //rp3d.com Front Switch Counter
 int FSW_status = 1;                   //rp3d.com Front Switch Status
 

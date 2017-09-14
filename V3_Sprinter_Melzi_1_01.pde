@@ -45,8 +45,6 @@
 
 //Implemented Codes
 //-------------------
-// T0  - Select Extruder 0
-// T1  - Select Extruder 1
 // G0  -> G1
 // G1  - Coordinated Movement X Y Z E
 // G4  - Dwell S<seconds> or P<milliseconds>
@@ -134,17 +132,22 @@
 // M355 - Case light on or off (uses pin A1 on J16) can be changed in Configuration.h
 // M499 - Forces printer into Error mode for Testing only. Comment out in Configuration.h for production release
 
-#define BUILD "1.01.0107"           // make sure you update thia
+// T0  - Select Extruder 0
+// T1  - Select Extruder 1
+
+#define _VERSION_TEXT "1.01.0108"           // make sure you update this
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
-const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High" };
-const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", BUILD, "Vector 3", "1" };
+const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High", "User Abort" };
+const char* pszFirmware[]        = { "Sprinter", "https://github.com/smalcolmbrown/V3-Sprinter-Melzi_1_01/", _VERSION_TEXT, "Vector 3", _EXTRUDERS };
+const char uuid[]                = _DEF_CHAR_UUID;
 
 
 #ifdef V3 // V3 specific code
 //0x03, 0x01, 0x10
 extern char PauseID ;          // = 0x03;//rp3d.com pause id
 extern char HSW_Enable ;       // = 0x01; //rp3d.com M237, M238
+extern char MuteBeeps ;        // = 0; mute non essestial beeps
 extern int FSW_Counter ;       // = 0; //rp3d.com Front Switch Counter
 extern int FSW_status ;        // = 1; //rp3d.com Front Switch Status
 // unsigned long previous_millis_PauseID;
@@ -158,17 +161,27 @@ int iPinStatus = 0;
 int status = STATUS_OK; //
 int error_code = ERROR_CODE_NO_ERROR; //0=Nothing, 1=Heater thermistor error
 
+float max_feedrate[4] = _MAX_FEEDRATE;
+float homing_feedrate[] = _HOMING_FEEDRATE;
+bool axis_relative_modes[] = _AXIS_RELATIVE_MODES;
+
 //Led counter (for blinking the led in different timings)
 int led_counter = 0;
 
 //Stepper Movement Variables
 
 char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
+float axis_steps_per_unit[4] = _AXIS_STEP_PER_UNIT; 
+
 bool move_direction[NUM_AXIS];
 unsigned long axis_previous_micros[NUM_AXIS];
 unsigned long previous_micros = 0, previous_millis_heater, previous_millis_bed_heater;
 unsigned long move_steps_to_take[NUM_AXIS];
 #ifdef RAMP_ACCELERATION
+  float max_start_speed_units_per_second[] = _MAX_START_SPEED_UNITS_PER_SECOND;                        // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
+  long max_acceleration_units_per_sq_second[] = _MAX_ACCELERATION_UNITS_PER_SQ_SECOND;                 // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
+  long max_travel_acceleration_units_per_sq_second[] = _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND;   // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
+
   unsigned long axis_max_interval[NUM_AXIS];
   unsigned long axis_steps_per_sqr_second[NUM_AXIS];
   unsigned long axis_travel_steps_per_sqr_second[NUM_AXIS];
@@ -318,17 +331,19 @@ unsigned long stepper_inactive_time = 0;
       char* end = buf + strlen(buf) - 1;
       
       file.writeError = false;
-      if((npos = strchr(buf, 'N')) != NULL){
-          begin = strchr(npos, ' ') + 1;
-          end = strchr(npos, '*') - 1;
+      if((npos = strchr(buf, 'N')) != NULL)
+      {
+        begin = strchr(npos, ' ') + 1;
+        end = strchr(npos, '*') - 1;
       }
       end[1] = '\r';
       end[2] = '\n';
       end[3] = '\0';
       //SerialMgr.cur()->println(begin);
       file.write(begin);
-      if (file.writeError){
-          SerialMgr.cur()->println("error writing to file");
+      if (file.writeError)
+      {
+        SerialMgr.cur()->println("error writing to file");
       }
   }
 #endif
@@ -344,8 +359,8 @@ unsigned long stepper_inactive_time = 0;
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void EmergencyStop() {
-  
+void EmergencyStop()
+{
   V3_I2C_Command( V3_LONG_BEEP, false ) ;                         // beep long x1
   PauseID = 0;                                                    // clear PauseID
   kill() ;                                                        // Now disable the x,y,z and e motors and switch off the heaters etc.
@@ -549,6 +564,8 @@ void setup()
 #endif
 
 #ifdef V3  // V3 specific code
+  HSW_Enable = EEPROM.read(HOOD_SWITCH_EEPROM) & HOODSWITCH_BIT;              // get the hood switch state from the EEPROM
+  MuteBeeps  = EEPROM.read(MUTE_BEEP_EEPROM);                                // get the hood switch state from the EEPROM
   Z_MAX_LENGTH_M240 = Read_Z_MAX_LENGTH_M240_FromEEPROM();
 #endif
 
@@ -613,84 +630,89 @@ void loop() {
 #endif   // ifdef V3
 }
 
-inline void get_command() {
-  
+inline void get_command()
+{
 //  SerialMgr.cur()->println("get_command"); 
-  while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE) {
+  while( SerialMgr.cur()->available() > 0  && buflen < BUFSIZE)
+  {
     serial_char = SerialMgr.cur()->read();
     if(serial_char == '\n' || serial_char == '\r' || serial_char == ':' || serial_count >= (MAX_CMD_SIZE - 1) ) 
     {
       if(!serial_count) return; //if empty line
       cmdbuffer[bufindw][serial_count] = 0; //terminate string
-      if(!comment_mode){
-    fromsd[bufindw] = false;
-  if(strstr(cmdbuffer[bufindw], "N") != NULL)
-  {
-    strchr_pointer = strchr(cmdbuffer[bufindw], 'N');
-    gcode_N = (strtol(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL, 10));
-    if(gcode_N != gcode_LastN+1 && (strstr(cmdbuffer[bufindw], "M110") == NULL) ) {
-      SerialMgr.cur()->print("Serial Error: Line Number is not Last Line Number+1, Last Line:");
-      SerialMgr.cur()->println(gcode_LastN);
-      //SerialMgr.cur()->println(gcode_N);
-      FlushSerialRequestResend();
-      serial_count = 0;
-      return;
-    }
+      if(!comment_mode)
+      {
+        fromsd[bufindw] = false;
+        if(strstr(cmdbuffer[bufindw], "N") != NULL)
+        {
+          strchr_pointer = strchr(cmdbuffer[bufindw], 'N');
+          gcode_N = (strtol(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL, 10));
+          if(gcode_N != gcode_LastN+1 && (strstr(cmdbuffer[bufindw], "M110") == NULL) )
+          {
+            SerialMgr.cur()->print("Serial Error: Line Number is not Last Line Number+1, Last Line:");
+            SerialMgr.cur()->println(gcode_LastN);
+            //SerialMgr.cur()->println(gcode_N);
+            FlushSerialRequestResend();
+            serial_count = 0;
+            return;
+          }
     
-    if(strstr(cmdbuffer[bufindw], "*") != NULL)
-    {
-      byte checksum = 0;
-      byte count = 0;
-      while(cmdbuffer[bufindw][count] != '*') checksum = checksum^cmdbuffer[bufindw][count++];
-      strchr_pointer = strchr(cmdbuffer[bufindw], '*');
-  
-      if( (int)(strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL)) != checksum) {
-        SerialMgr.cur()->print("Error: checksum mismatch, Last Line:");
-        SerialMgr.cur()->println(gcode_LastN);
-        FlushSerialRequestResend();
-        serial_count = 0;
-        return;
-      }
-      //if no errors, continue parsing
-    }
-    else 
-    {
-      SerialMgr.cur()->print("Error: No Checksum with line number, Last Line:");
-      SerialMgr.cur()->println(gcode_LastN);
-      FlushSerialRequestResend();
-      serial_count = 0;
-      return;
-    }
-    
-    gcode_LastN = gcode_N;
-    //if no errors, continue parsing
-  }
-  else  // if we don't receive 'N' but still see '*'
-  {
-    if((strstr(cmdbuffer[bufindw], "*") != NULL))
-    {
-      SerialMgr.cur()->print("Error: No Line Number with checksum, Last Line:");
-      SerialMgr.cur()->println(gcode_LastN);
-      serial_count = 0;
-      return;
-    }
-  }
-	if((strstr(cmdbuffer[bufindw], "G") != NULL)){
-		strchr_pointer = strchr(cmdbuffer[bufindw], 'G');
-		switch((int)((strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL)))){
-		case 0:
-		case 1:
-              #ifdef SDSUPPORT
+          if(strstr(cmdbuffer[bufindw], "*") != NULL)
+          {
+            byte checksum = 0;
+            byte count = 0;
+            while(cmdbuffer[bufindw][count] != '*') checksum = checksum^cmdbuffer[bufindw][count++];
+            strchr_pointer = strchr(cmdbuffer[bufindw], '*');
+            
+            if( (int)(strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL)) != checksum) 
+            {
+              SerialMgr.cur()->print("Error: checksum mismatch, Last Line:");
+              SerialMgr.cur()->println(gcode_LastN);
+              FlushSerialRequestResend();
+              serial_count = 0;
+              return;
+            }
+            //if no errors, continue parsing
+          }
+          else 
+          {
+            SerialMgr.cur()->print("Error: No Checksum with line number, Last Line:");
+            SerialMgr.cur()->println(gcode_LastN);
+            FlushSerialRequestResend();
+            serial_count = 0;
+            return;
+          }
+          
+          gcode_LastN = gcode_N;
+          //if no errors, continue parsing
+        }
+        else  // if we don't receive 'N' but still see '*'
+        {
+          if((strstr(cmdbuffer[bufindw], "*") != NULL))
+          {
+            SerialMgr.cur()->print("Error: No Line Number with checksum, Last Line:");
+            SerialMgr.cur()->println(gcode_LastN);
+            serial_count = 0;
+            return;
+          }
+        }
+	if((strstr(cmdbuffer[bufindw], "G") != NULL)) 
+        {
+	  strchr_pointer = strchr(cmdbuffer[bufindw], 'G');
+          switch((int)((strtod(&cmdbuffer[bufindw][strchr_pointer - cmdbuffer[bufindw] + 1], NULL))))
+          {
+            case 0:
+            case 1:
+#ifdef SDSUPPORT
               if(savetosd)
                 break;
-              #endif
-			  SerialMgr.cur()->println("ok"); 
-			  break;
-		default:
-			break;
-		}
-
-	}
+#endif
+              SerialMgr.cur()->println("ok"); 
+              break;
+            default:
+              break;
+          }
+        }
         bufindw = (bufindw + 1)%BUFSIZE;
         buflen += 1;
         
@@ -705,22 +727,26 @@ inline void get_command() {
     }
   }
 #ifdef SDSUPPORT
-if(!sdmode || serial_count!=0){
+  if(!sdmode || serial_count!=0)
+  {
     return;
-}
-  while( filesize > sdpos  && buflen < BUFSIZE) {
+  }
+  while( filesize > sdpos  && buflen < BUFSIZE)
+  {
     n = file.read();
     serial_char = (char)n;
     if(serial_char == '\n' || serial_char == '\r' || serial_char == ':' || serial_count >= (MAX_CMD_SIZE - 1) || n == -1) 
     {
         sdpos = file.curPosition();
-        if(sdpos >= filesize){
+        if(sdpos >= filesize)
+        {
             sdmode = false;
             SerialMgr.cur()->println("Done printing file");
         }
       if(!serial_count) return; //if empty line
       cmdbuffer[bufindw][serial_count] = 0; //terminate string
-      if(!comment_mode){
+      if(!comment_mode)
+      {
         fromsd[bufindw] = true;
         buflen += 1;
         bufindw = (bufindw + 1)%BUFSIZE;
@@ -757,24 +783,10 @@ inline void process_commands()
   StatusScreen();
 #endif
 
-/*
-  if(code_seen('T')) {
-    switch((int)code_value()) {
-      case 0:  // Select extruder 0
-        gcode_T0();
-        break;
-        
-      case 1:  // Select extruder 1
-        gcode_T1();
-        break;
-
-    }
-  }
-  else if(code_seen('G')) {        */
-    
-    
-  if(code_seen('G')) {
-    switch((int)code_value()) {
+  if(code_seen('G'))
+  {
+    switch((int)code_value())
+    {
       case 0:  // G0 -> G1
       case 1:  // G1  - Coordinated Movement X Y Z E
         gcode_G0_G1();
@@ -802,11 +814,10 @@ inline void process_commands()
         break;
     }
   }
-
   else if(code_seen('M'))
   {
-    
-    switch((int)code_value()) {
+    switch((int)code_value())
+    {
       case 4: // M4 - Ask for status
         gcode_M4();
         break;
@@ -1001,13 +1012,11 @@ inline void process_commands()
       case 236: // M236	Beep Off
         V3_I2C_Command( V3_BEEP_OFF, true ) ;               // sends 236, Beep Off
         break;
-      case 237: // M237	HSW Enable
-        HSW_Enable = 0x01;
-        SerialMgr.cur()->println("M237 OK");
+      case 237: // M237	Hood Switch Enable
+        gcode_M237();
         break;
-      case 238:
-        HSW_Enable = 0x00;
-        SerialMgr.cur()->println("M238 OK");
+      case 238: // M237	Hood Switch disable
+        gcode_M238();
         break;
       case 239: // M239	Short Beep x 1
         V3_I2C_Command( V3_SHORT_BEEP, true ) ;             // sends 239, Short Beep
@@ -1048,7 +1057,23 @@ inline void process_commands()
         ClearToSend();        
         return;
     }
-    
+  }
+  else if(code_seen('T'))    /*         */
+  {
+    switch((int)code_value())
+    {
+      case 0:  // Select extruder 0
+        gcode_T0();
+        break;
+        
+      case 1:  // Select extruder 1
+        gcode_T1();
+        break;
+      default: // unknown tool number
+        SerialMgr.cur()->print("Unknown Tool: ");
+        SerialMgr.cur()->println((int)code_value());
+        break;
+    }
   }
   else
   {
@@ -1094,36 +1119,8 @@ void ClearToSend() {
 }
 
 /**************************************************
- ************ T, G and M Code Handlers ************
+ ************ G, M and G Code Handlers ************
  **************************************************/
-
-////////////////////////////////
-// T Codes
-// 
-// The T codes operate on pin 28
-////////////////////////////////
-
-////////////////////////////////
-// T0 - Select Extruder 0
-//
-////////////////////////////////
-
-inline void gcode_T0()
-{
-  pinMode(TOOL_PIN, OUTPUT);
-  digitalWrite(TOOL_PIN, LOW);
-}
-  
-////////////////////////////////
-// T1 - Select Extruder 1
-//
-////////////////////////////////
-
-inline void gcode_T1()
-{
-  pinMode(TOOL_PIN, OUTPUT);
-  digitalWrite(TOOL_PIN, HIGH);
-}
 
 ////////////////////////////////
 // G Codes
@@ -1169,7 +1166,10 @@ inline void gcode_G28() {
 #ifdef V3 // V3 specific code
   V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  }
   delay(2000);                                                  // wait for beeps end   
 #endif   // ifdef V3
   saved_feedrate = feedrate;
@@ -1257,7 +1257,10 @@ inline void gcode_G28() {
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  }
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
 #endif // ifdef V3
 }
@@ -1283,7 +1286,10 @@ int   iS_Param;
 #ifdef V3 // V3 specific code
   V3_I2C_Command( V3_BUTTON_GREEN_FLASH, false ) ;              // front green flashing
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-  V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_3_SHORT_BEEP, false ) ;                    // 3 short beep
+  }
   delay(2000);                                                  // wait for beeps end   
 #endif   // ifdef V3
 
@@ -1350,7 +1356,10 @@ int   iS_Param;
   previous_millis_cmd = millis();
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  }
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
 #endif // ifdef V3
 }
@@ -1858,7 +1867,10 @@ inline void gcode_M104() {
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                       // beep long x1
+  }
 #endif // ifdef V3
 }
         
@@ -1957,7 +1969,10 @@ inline void gcode_M109()
 #ifdef V3
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  }
 #endif // ifdef V3
 }
 
@@ -1995,7 +2010,7 @@ inline void gcode_M115() {
   SerialMgr.cur()->print(" UUID:");
   SerialMgr.cur()->println(uuid);
 /*
-  //SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
+  SerialMgr.cur()->print("FIRMWARE_NAME:Sprinter FIRMWARE_URL:http%%3A/github.com/kliment/Sprinter/ PROTOCOL_VERSION:1.0 MACHINE_TYPE:Mendel EXTRUDER_COUNT:1 UUID:");
   SerialMgr.cur()->print("FIRMWARE_NAME:rp3d.com FIRMWARE_URL:http://rp3d.com/  PROTOCOL_VERSION:1.0 MACHINE_TYPE:rp3d EXTRUDER_COUNT:1 UUID:");
   SerialMgr.cur()->println(uuid);
 */
@@ -2055,7 +2070,10 @@ inline void gcode_M140() {
 #ifdef V3
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                    // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                   // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                      // beep long x1
+  }
 #endif // ifdef V3
 }
 
@@ -2095,7 +2113,10 @@ inline void gcode_M190() {
 #ifdef V3  // V3 specific code
   V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                      // blue on front
   V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                     // nozzle white
-  V3_I2C_Command( V3_LONG_BEEP, false ) ;                        // beep long x1
+  if(!MuteBeeps)
+  {
+    V3_I2C_Command( V3_LONG_BEEP, false ) ;                        // beep long x1
+  }
 #endif // ifdef V3
 }
 
@@ -2146,6 +2167,61 @@ inline void gcode_M203() {
   if(code_seen('Z')){
     EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
   }
+}
+
+
+////////////////////////////////
+// M237 - HSW Enable
+//
+// M237 ; Hood switch Enable
+// M237 S1 ; Hood switch Enable and store result in EEPROM
+// M237 S2 ; Mute Beep Enable and store result in EEPROM
+////////////////////////////////
+
+inline void gcode_M237() 
+{	
+  HSW_Enable = 0x01;
+  if(code_seen('S'))
+  {
+    switch((int)code_value())
+    {
+      case 1:
+        EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+        break;
+      case 2:
+        MuteBeeps = false;
+        EEPROM.write(MUTE_BEEP_EEPROM, MuteBeeps);         // store in EEPROM
+        break;
+    }
+  }
+  SerialMgr.cur()->println("M237 OK");
+}
+
+////////////////////////////////
+// M237 - Hood switch disable
+//
+// M238 ; Hood switch disable
+// M238 S1 ; Hood switch disable and store result in EEPROM
+// M238 S2 ; Mute Beep disable and store result in EEPROM
+////////////////////////////////
+
+inline void gcode_M238()
+{ 
+  HSW_Enable = 0x00;
+  if(code_seen('S'))
+  {
+    switch((int)code_value())
+    {
+      case 1:
+        EEPROM.write(HOOD_SWITCH_EEPROM, HSW_Enable);       // store in EEPROM
+        break;
+      case 2:
+        MuteBeeps = true;
+        EEPROM.write(MUTE_BEEP_EEPROM, MuteBeeps);         // store in EEPROM
+        break;
+    }
+  }
+  SerialMgr.cur()->println("M238 OK");
 }
 
 ////////////////////////////////
@@ -2332,6 +2408,35 @@ inline void gcode_M499()
 }
         
 #endif // M499_SUPPORT
+
+////////////////////////////////
+// T Codes
+// 
+// The T codes operate on pin 28
+////////////////////////////////
+
+////////////////////////////////
+// T0 - Select Extruder 0
+//
+////////////////////////////////
+
+inline void gcode_T0()
+{
+  pinMode(TOOL_PIN, OUTPUT);
+  digitalWrite(TOOL_PIN, LOW);
+}
+  
+////////////////////////////////
+// T1 - Select Extruder 1
+//
+////////////////////////////////
+
+inline void gcode_T1()
+{
+  pinMode(TOOL_PIN, OUTPUT);
+  digitalWrite(TOOL_PIN, HIGH);
+}
+
 
 ////////////////////////////////
 // End of T, G and M codes

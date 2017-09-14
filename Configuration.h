@@ -5,6 +5,12 @@
 #define V3
 
 //-----------------------------------------------------------------------
+//// The number of Extruders. Uncomment the one that describes your 3D printer
+//-----------------------------------------------------------------------
+#define _EXTRUDERS "1"
+//#define _EXTRUDERS "2"
+
+//-----------------------------------------------------------------------
 //// Nozzel offset from X=0 Y=0 on the build plate
 //-----------------------------------------------------------------------
 // change to 0 if you do not need a offset 20160329
@@ -38,27 +44,29 @@
 //-----------------------------------------------------------------------
 //// SETTINGS FOR Stepper driver type
 //-----------------------------------------------------------------------
-// Un-Comment out if you are using DRV8825 Stepper drivers for X and Y axis 
+// Un-Comment if you are using DRV8825 Stepper drivers for X and Y axis 
 // the default is commented out for an un-modified V3 printer only use this
-// setting if you have Bill Green's Stepper Mod fitted.
+// setting if you have Bill Green's Stepper Mod fitted with DRV8825 steppers
+// drivers in the X and Y Axis.
 #define STEPPER_DRIVER_X_Y_DRV8825      
 
 //-----------------------------------------------------------------------
 //// Calibration variables
 //-----------------------------------------------------------------------
 // X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-//  float axis_steps_per_unit[] = {91.4286, 91.4286, 4000, 910};
-//  float axis_steps_per_unit[] = {80.00,     80.00, 2560, 910};
+//  #define _AXIS_STEP_PER_UNIT {91.4286, 91.4286, 4000, 910};
+//  #define _AXIS_STEP_PER_UNIT {80.00,     80.00, 2560, 910};
 
 //// Calibration variables
 // X, Y, Z, E steps per unit - V3 
-//  float axis_steps_per_unit[] = {78.82, 78.82,78.82,99.6150};   //V3-Z-belt fitted with A4988 stepper drivers for X, Y, Z and E 
-//  float axis_steps_per_unit[] = {78.82, 78.82,400,99.6150};     //V3-Z-screw fitted with A4988 stepper drivers for X, Y, Z and E 
+//  #define _AXIS_STEP_PER_UNIT {78.82, 78.82,78.82,99.6150};   //V3-Z-belt fitted with A4988 stepper drivers for X, Y, Z and E 
+//  #define _AXIS_STEP_PER_UNIT {78.82, 78.82,400,99.6150};     //V3-Z-screw fitted with A4988 stepper drivers for X, Y, Z and E 
+
 #ifndef STEPPER_DRIVER_X_Y_DRV8825
-  float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150};      //V3-Z-screw2 fitted with A4988 stepper drivers for X, Y, Z and E (the default for the V3 )
-#else
-  float axis_steps_per_unit[] = {157.64, 157.64, 2560, 99.6150};    //V3-Z-screw2 with X and Y fitted with DRV8825 stepper drivers and A4988 stepper drivers for Z and E
-#endif
+  #define _AXIS_STEP_PER_UNIT {78.82, 78.82, 2560, 99.6150}     //V3-Z-screw2 fitted with A4988 stepper drivers for X, Y, Z and E (the default for the V3 )
+#else  // else of #ifndef STEPPER_DRIVER_X_Y_DRV8825
+  #define _AXIS_STEP_PER_UNIT {157.64, 157.64, 2560, 99.6150}   //V3-Z-screw2 with X and Y fitted with DRV8825 stepper drivers and A4988 stepper drivers for Z and E
+#endif  //  #ifndef STEPPER_DRIVER_X_Y_DRV8825
 
 //-----------------------------------------------------------------------
 //// Endstop Settings
@@ -154,11 +162,19 @@ const bool INVERT_E_DIR = true;
 //// MOVEMENT SETTINGS
 //-----------------------------------------------------------------------
   const int NUM_AXIS = 4; // The axis order in all axis related arrays is X, Y, Z, E
+  /*
 //  float max_feedrate[] = {3000, 3000, 800, 10000}; //V3 Z-belt
   float max_feedrate[] = {3000, 3000, 350, 10000}; //V3 Z-screw
 //  float homing_feedrate[] = {1500,1500,800}; //V3 Z-blet
   float homing_feedrate[] = {1500,1500,350}; //V3 Z-screw
-  bool axis_relative_modes[] = {false, false, false, false};
+  bool axis_relative_modes[] = {false, false, false, false};    */
+  
+  //#define _MAX_FEEDRATE {3000, 3000, 800, 10000};       //V3 Z-belt   (mm/sec)
+  #define _MAX_FEEDRATE {3000, 3000, 350, 10000}        //V3 Z-screw   (mm/sec)
+  //#define _HOMING_FEEDRATE  {1500,1500,800};            //V3 Z-belt   (mm/min) !!
+  #define _HOMING_FEEDRATE  {1500,1500,350};            //V3 Z-screw   (mm/min) !!
+  #define _AXIS_RELATIVE_MODES {false, false, false, false}
+  
 
 // Min step delay in microseconds. If you are experiencing missing steps, try to raise the delay microseconds, but be aware this
 // If you enable this, make sure STEP_DELAY_RATIO is disabled.
@@ -176,12 +192,11 @@ const bool INVERT_E_DIR = true;
 
 // Acceleration settings
 #ifdef RAMP_ACCELERATION
-// X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
-  float max_start_speed_units_per_second[] = {25.0,25.0,25.0,10.0};
-//  long max_acceleration_units_per_sq_second[] = {1000,1000,1000,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-blet
-  long max_acceleration_units_per_sq_second[] = {1000,1000,50,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
-  //long max_travel_acceleration_units_per_sq_second[] = {500,500,500,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-blet
-  long max_travel_acceleration_units_per_sq_second[] = {500,500,50,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
+  #define _MAX_START_SPEED_UNITS_PER_SECOND {25.0,25.0,25.0,10.0}              // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
+//  #define _MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,1000,250}           // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-belt
+  #define _MAX_ACCELERATION_UNITS_PER_SQ_SECOND {5000,5000,50,5000}            // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
+//  #define _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {500,500,500,500};      // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-belt
+  #define _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {500,500,50,500}        // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
 #endif
 
 //-----------------------------------------------------------------------
@@ -189,7 +204,7 @@ const bool INVERT_E_DIR = true;
 //-----------------------------------------------------------------------
 // This may be useful if you have multiple machines and wish to identify them by using the M115 command.
 // By default we set it to zeros.
-  const char uuid[] = "00000000-0000-0000-0000-000000000000";
+#define _DEF_CHAR_UUID "00000000-0000-0000-0000-000000000000"
 // 
 
 //-----------------------------------------------------------------------

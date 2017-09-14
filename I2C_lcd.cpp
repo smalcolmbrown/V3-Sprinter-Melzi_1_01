@@ -85,13 +85,20 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // custom charecter defines
-  #define LCD_DEGREE_CHAR 1
-  #define LCD_THERMOMETER 2
-  #define LCD_BEDTEMP_CHAR 3
-  #define LCD_FAN_L_CHAR 4
-  #define LCD_FAN_R_CHAR 5
-  #define LCD_CLOCK_CHAR 6
-  #define LCD_FEEDRATE_CHAR 7
+  #define LCD_DEGREE_CHAR     1
+  #define LCD_THERMOMETER     2
+  #define LCD_BEDTEMP_CHAR    3
+  #define LCD_FAN_L_CHAR      4
+  #define LCD_FAN_R_CHAR      5
+  #define LCD_CLOCK_CHAR      6
+  #define LCD_FEEDRATE_CHAR   7
+  #define LCD_PROGRESS_CHAR_1 8
+  #define LCD_PROGRESS_CHAR_2 9
+  #define LCD_PROGRESS_CHAR_3 10
+  #define LCD_T_L_CORNER      1
+  #define LCD_T_R_CORNER      2
+  #define LCD_B_L_CORNER      3
+  #define LCD_B_R_CORNER      4
 
 // LCD connection defines
   #define BACKLIGHT_PIN  3
@@ -122,6 +129,7 @@
 void ConvertleadingSpacesToZeros( char* source );
 void PrinterState();
 void Init_LCD();
+void CreateCustonChars();
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -274,6 +282,34 @@ byte byCorner[4][8] = { { B00000,
                           B00000,
                           B00000
                        } };
+byte byProgress[3][8] = { {
+                          B00000,
+                          B10000,
+                          B10000,
+                          B10000,
+                          B10000,
+                          B10000,
+                          B10000,
+                          B00000
+                        }, {
+                          B00000,
+                          B10100,
+                          B10100,
+                          B10100,
+                          B10100,
+                          B10100,
+                          B10100,
+                          B00000
+                        }, {
+                          B00000,
+                          B10101,
+                          B10101,
+                          B10101,
+                          B10101,
+                          B10101,
+                          B10101,
+                          B00000
+                        } };
                           
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -376,7 +412,8 @@ void StatusScreen(){
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
-void SplashScreen() {
+void SplashScreen()
+{
 
   char szDashes[] = "-------------------------------------";
   int iLen = max(strlen(pszFirmware[FIRMWARE_NAME]), strlen(pszFirmware[FIRMWARE_MACHINENAME])) + 2 ;
@@ -384,9 +421,11 @@ void SplashScreen() {
   
   Init_LCD();
   for (byte i = 1; i < 5; i++)
+  {
     lcd.createChar(i, byCorner[i-1]);
+  }
 
-  sprintf( szTemp, "%c%s%c", 1, szDashes, 2 );
+  sprintf( szTemp, "%c%s%c", LCD_T_L_CORNER, szDashes, LCD_T_R_CORNER );
 //  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,0); 
   lcd.setCursor(0, 0); 
   lcd.print( szTemp );
@@ -398,7 +437,7 @@ void SplashScreen() {
 //  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,2); 
   lcd.setCursor(0, 2); 
   lcd.print( szTemp );
-  sprintf( szTemp, "%c%s%c", 3, szDashes, 4);
+  sprintf( szTemp, "%c%s%c", LCD_B_L_CORNER, szDashes, LCD_B_R_CORNER);
 //  lcd.setCursor((LCD_WIDTH/2)-(strlen(szTemp)/2) ,3); 
   lcd.setCursor(0, 3); 
   lcd.print( szTemp );
@@ -409,16 +448,10 @@ void SplashScreen() {
   strcpy(szTemp, pszFirmware[FIRMWARE_VERSION] + 5);
   lcd.setCursor(iLen+3, 2); 
   lcd.print( szTemp );
-  delay(4000);
-  
-  lcd.createChar(LCD_DEGREE_CHAR,byDegree);
-  lcd.createChar(LCD_THERMOMETER,byThermometer); 
-  lcd.createChar(LCD_BEDTEMP_CHAR,byBedTemp);
-  lcd.createChar(LCD_FAN_L_CHAR,byFanLeft);
-  lcd.createChar(LCD_FAN_R_CHAR,byFanRight);
-  lcd.createChar(LCD_CLOCK_CHAR,byClock);
-  lcd.createChar(LCD_FEEDRATE_CHAR,byFeedRate);
 
+  delay(4000);
+
+  CreateCustonChars();
   bNewStatusScreen = true;
 }
 
@@ -515,4 +548,21 @@ void Init_LCD() {
 #endif // #ifdef LCD_I2C_PANELOLU2
 
 
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//void CreateCustonChars()
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+void CreateCustonChars()
+{
+  lcd.createChar(LCD_DEGREE_CHAR, byDegree);
+  lcd.createChar(LCD_THERMOMETER, byThermometer); 
+  lcd.createChar(LCD_BEDTEMP_CHAR,  byBedTemp);
+  lcd.createChar(LCD_FAN_L_CHAR, byFanLeft);
+  lcd.createChar(LCD_FAN_R_CHAR, byFanRight);
+  lcd.createChar(LCD_CLOCK_CHAR, byClock);
+  lcd.createChar(LCD_FEEDRATE_CHAR, byFeedRate);
+  
 }
