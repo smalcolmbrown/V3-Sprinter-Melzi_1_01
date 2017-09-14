@@ -103,3 +103,9 @@ Changes to system reporting.
 
 **2017/09/04 Build 0107 changes**  
 Removed Tool select patch to allow for two extruders T0 and T1 due to problems with Matter control and S3D  
+
+**2017/09/14 Build 0108**  
+fixed T0 and T1  
+Hood Switch disable / enable now stored in EEPROM  
+bleep mute option in M237 /M238 stored in EEPROM  
+Extrudes number can now be set in Configuration.h
