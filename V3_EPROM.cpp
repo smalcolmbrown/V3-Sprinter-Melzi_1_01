@@ -57,15 +57,17 @@ void EEPROM_StoreSettings()
 
   //PID Settings
   
-  #ifdef PIDTEMP
-   EEPROM_write_setting(Kp_address, Kp);     //Kp
-   EEPROM_write_setting(Ki_address, Ki);     //Ki
-   EEPROM_write_setting(Kd_address, Kd);     //Kd
-  #else
-   EEPROM_write_setting(Kp_address, _KP_TERM);     //Kp
-   EEPROM_write_setting(Ki_address, _KI_TERM);     //Ki
-   EEPROM_write_setting(Kd_address, _KD_TERM);     //Kd
-  #endif
+#ifdef PIDTEMP
+  EEPROM_write_setting(Kp_address, Kp);     //Kp
+  EEPROM_write_setting(Ki_address, Ki);     //Ki
+  EEPROM_write_setting(Kd_address, Kd);     //Kd
+#else
+  // dummy settings for non PID builds
+  
+  EEPROM_write_setting(Kp_address, _KP_TERM);     //Kp
+  EEPROM_write_setting(Ki_address, _KI_TERM);     //Ki
+  EEPROM_write_setting(Kd_address, _KD_TERM);     //Kd
+#endif
   
 
   char ver2[4]=EEPROM_VERSION;

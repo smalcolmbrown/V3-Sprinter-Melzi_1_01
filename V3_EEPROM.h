@@ -30,14 +30,15 @@
 
 extern float axis_steps_per_unit[4]; 
 extern float max_feedrate[4];
+extern float homing_feedrate[3];
 extern long  max_acceleration_units_per_sq_second[4];
 
-#define axis_steps_per_unit_address (EEPROM_OFFSET + 4*sizeof(char))
-#define max_feedrate_address (axis_steps_per_unit_address + 4*sizeof(float))
-#define max_acceleration_units_per_sq_second_address (max_feedrate_address + 4*sizeof(float))
-#define Kp_address (max_acceleration_units_per_sq_second_address + 4*sizeof(long))
-#define Ki_address (Kp_address + sizeof(float))
-#define Kd_address (Ki_address + sizeof(float))
+#define axis_steps_per_unit_address                      (EEPROM_OFFSET + 4*sizeof(char))
+#define max_feedrate_address                             (axis_steps_per_unit_address + 4*sizeof(float))
+#define max_acceleration_units_per_sq_second_address     (max_feedrate_address + 4*sizeof(float))
+#define Kp_address                                       (max_acceleration_units_per_sq_second_address + 4*sizeof(long))
+#define Ki_address                                       (Kp_address + sizeof(float))
+#define Kd_address                                       (Ki_address + sizeof(float))
 
 extern void EEPROM_RetrieveSettings(bool def, bool printout );
 extern void EEPROM_printSettings();

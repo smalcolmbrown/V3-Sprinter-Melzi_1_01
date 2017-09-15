@@ -163,7 +163,7 @@ int status = STATUS_OK; //
 int error_code = ERROR_CODE_NO_ERROR; //0=Nothing, 1=Heater thermistor error
 
 float max_feedrate[4] = _MAX_FEEDRATE;
-float homing_feedrate[] = _HOMING_FEEDRATE;
+float homing_feedrate[3] = _HOMING_FEEDRATE;
 bool axis_relative_modes[] = _AXIS_RELATIVE_MODES;
 
 //Led counter (for blinking the led in different timings)
@@ -2461,6 +2461,10 @@ inline void gcode_M501()
   {
     axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
   }
+#ifdef PIDTEMP
+  temp_iState_min = -pid_i_max / Ki;
+  temp_iState_max = pid_i_max / Ki;
+#endif
 }
 
 ////////////////////////////////
@@ -2475,6 +2479,10 @@ inline void gcode_M502()
   {
     axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
   }
+#ifdef PIDTEMP
+  temp_iState_min = -pid_i_max / Ki;
+  temp_iState_max = pid_i_max / Ki;
+#endif
 }
 
 ////////////////////////////////

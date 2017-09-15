@@ -14,7 +14,7 @@
 //// Select LCD Type 
 //-----------------------------------------------------------------------
 // comment out LCD displays that are not fitted.
-#define LCD_I2C_SAINSMART_YWROBOT    1      // using PCF8574 0x27
+//#define LCD_I2C_SAINSMART_YWROBOT    1      // using PCF8574 0x27
 //#define LCD_I2C_SAINSMART_YWROBOT_A  1      // using PCF8574A 0x3f
 //#define LCD_I2C_PANELOLU2            1      // using MCP23017 0x20
 //-----------------------------------------------------------------------
