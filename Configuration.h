@@ -108,14 +108,6 @@
 #endif
 
 //-----------------------------------------------------------------------
-//// ARC Function (G2/G3 Command)
-//-----------------------------------------------------------------------
-//Uncomment to aktivate the arc (circle) function (G2/G3 Command)
-//Without SD function an ARC function the used Flash is smaller 31 kb
-#define USE_ARC_FUNCTION
-
-
-//-----------------------------------------------------------------------
 //// ADVANCED SETTINGS - to tweak parameters
 //-----------------------------------------------------------------------
 
@@ -224,8 +216,6 @@ const bool INVERT_E_DIR = true;
 // Uncomment the following line to enable PID support. This is untested and could be disastrous. Be careful.
 #define PIDTEMP 1
 #ifdef PIDTEMP
-//  int pid_max = 255;         // limits current to nozzle
-//  int pid_i_max = 80;        //130;//125;
   #define _PID_MAX 255       // limits current to nozzle
   #define _PID_I_MAX 80      //130;//125;
   #define _KP_TERM 2         //1.10;

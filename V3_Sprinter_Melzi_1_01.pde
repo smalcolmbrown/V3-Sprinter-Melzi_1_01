@@ -169,9 +169,6 @@ bool axis_relative_modes[] = _AXIS_RELATIVE_MODES;
 //Led counter (for blinking the led in different timings)
 int led_counter = 0;
 
-//adjustable feed factor for online tuning printer speed
-volatile int feedmultiply=100; //100->original / 200 -> Factor 2 / 50 -> Factor 0.5
-
 //Stepper Movement Variables
 
 char axis_codes[NUM_AXIS] = {'X', 'Y', 'Z', 'E'};
@@ -639,20 +636,6 @@ void loop() {
   check_PauseID();
 #endif   // ifdef V3
 }
-
-//------------------------------------------------
-//Check Uart buffer while arc function ist calc a circle
-//------------------------------------------------
-
-void check_buffer_while_arc()
-{
-  if(buflen < (BUFSIZE-1))
-  {
-    get_command();
-  }
-}
-
-
 
 inline void get_command()
 {
