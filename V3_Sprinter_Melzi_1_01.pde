@@ -8,6 +8,7 @@
 //#include "Configuration.h"
 //#include "pins.h"
 #include "Configuration.h"
+#include "thermistortables.h"
 #include "Sprinter.h"
 #include "Enumcodes.h"
 #include "SerialManager.h"
@@ -135,7 +136,7 @@
 // T0  - Select Extruder 0
 // T1  - Select Extruder 1
 
-#define _VERSION_TEXT "1.01.0108"           // make sure you update this
+#define _VERSION_TEXT "1.01.0109"           // make sure you update this
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High", "User Abort" };
@@ -167,6 +168,9 @@ bool axis_relative_modes[] = _AXIS_RELATIVE_MODES;
 
 //Led counter (for blinking the led in different timings)
 int led_counter = 0;
+
+//adjustable feed factor for online tuning printer speed
+volatile int feedmultiply=100; //100->original / 200 -> Factor 2 / 50 -> Factor 0.5
 
 //Stepper Movement Variables
 
@@ -220,7 +224,6 @@ float Z_MAX_LENGTH_M240 = 120.00;    // set low to prevent a head crash
   EI2C_Bus i2c;
 #endif
               
-
 // comm variables
 #define MAX_CMD_SIZE 96
 #define BUFSIZE 8
@@ -249,8 +252,13 @@ int bt = 0 ;       // Heated Bed temperature in C
 int ett = 0 ;      // Extruder target temperature in C
 int btt = 0 ;      // Heated Bed target temperature in C
 
+int nzone = _NZONE;           // setting for the V1.01 firmware release 
+
 
 #ifdef PIDTEMP
+  float Kp = _KP_TERM;
+  float Ki = _KI_TERM;
+  float Kd = _KD_TERM;
   int temp_iState = 0;
   int temp_dState = 0;
   int pTerm;
@@ -258,6 +266,8 @@ int btt = 0 ;      // Heated Bed target temperature in C
   int dTerm;
   int output;
   int error;
+  int pid_max = _PID_MAX;         // limits current to nozzle
+  int pid_i_max = _PID_I_MAX;        //130;//125;
   int temp_iState_min = -pid_i_max / Ki;
   int temp_iState_max = pid_i_max / Ki;
 #endif
@@ -630,6 +640,20 @@ void loop() {
 #endif   // ifdef V3
 }
 
+//------------------------------------------------
+//Check Uart buffer while arc function ist calc a circle
+//------------------------------------------------
+
+void check_buffer_while_arc()
+{
+  if(buflen < (BUFSIZE-1))
+  {
+    get_command();
+  }
+}
+
+
+
 inline void get_command()
 {
 //  SerialMgr.cur()->println("get_command"); 
@@ -792,6 +816,7 @@ inline void process_commands()
         gcode_G0_G1();
         return;
         //break;
+
       case 4:  // G4  - Dwell S<seconds> or P<milliseconds>
         gcode_G4();
         break;
@@ -1052,6 +1077,25 @@ inline void process_commands()
         gcode_M499() ;
         break;
 #endif // M499_SUPPORT
+
+#ifdef USE_EEPROM_SETTINGS
+
+      case 500: // Store settings in EEPROM
+        gcode_M500();
+        break;
+      case 501: // Read settings from EEPROM
+        gcode_M501();
+        break;
+      
+      case 502: // Revert to default settings
+        gcode_M502();
+        break;
+      
+      case 503: // print settings currently in memory
+        gcode_M503();
+        break;  
+
+#endif 
 
       default:
         ClearToSend();        
@@ -2409,6 +2453,59 @@ inline void gcode_M499()
         
 #endif // M499_SUPPORT
 
+
+#ifdef USE_EEPROM_SETTINGS
+
+////////////////////////////////
+// M500 - Store settings in EEPROM
+//
+////////////////////////////////
+
+inline void gcode_M500()
+{
+  EEPROM_StoreSettings();
+}
+
+////////////////////////////////
+// M501 - Read settings from EEPROM
+//
+////////////////////////////////
+
+inline void gcode_M501()
+{
+  EEPROM_RetrieveSettings(false,true);
+  for(int8_t i=0; i < NUM_AXIS; i++)
+  {
+    axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
+  }
+}
+
+////////////////////////////////
+// M502 - Revert to default settings
+//
+////////////////////////////////
+
+inline void gcode_M502()
+{
+  EEPROM_RetrieveSettings(true,true);
+  for(int8_t i=0; i < NUM_AXIS; i++)
+  {
+    axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
+  }
+}
+
+////////////////////////////////
+// M503 - print settings currently in memory
+//
+////////////////////////////////
+
+inline void gcode_M503()
+{
+  EEPROM_printSettings();
+}
+
+#endif 
+
 ////////////////////////////////
 // T Codes
 // 
@@ -3367,4 +3464,5 @@ void check_heater(){
   }
 
 }
+
 
