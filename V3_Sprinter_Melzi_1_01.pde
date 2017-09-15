@@ -133,6 +133,11 @@
 // M355 - Case light on or off (uses pin A1 on J16) can be changed in Configuration.h
 // M499 - Forces printer into Error mode for Testing only. Comment out in Configuration.h for production release
 
+// M500 - Store settings in EEPROM
+// M501 - Read settings from EEPROM
+// M502 - Revert to default settings 
+// M503 - print settings currently in memory
+
 // T0  - Select Extruder 0
 // T1  - Select Extruder 1
 
@@ -1062,22 +1067,18 @@ inline void process_commands()
 #endif // M499_SUPPORT
 
 #ifdef USE_EEPROM_SETTINGS
-
-      case 500: // Store settings in EEPROM
+      case 500: // M500 - Store settings in EEPROM
         gcode_M500();
         break;
-      case 501: // Read settings from EEPROM
+      case 501: // M501 - Read settings from EEPROM
         gcode_M501();
         break;
-      
-      case 502: // Revert to default settings
+      case 502: // M502 - Revert to default settings
         gcode_M502();
         break;
-      
-      case 503: // print settings currently in memory
+      case 503: // M503 - Print settings currently in memory
         gcode_M503();
         break;  
-
 #endif 
 
       default:
