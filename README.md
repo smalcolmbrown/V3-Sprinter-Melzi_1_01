@@ -5,10 +5,10 @@ Nominally called Version 1.01
 
 Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 
-Based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi
-V3 parts http://rp3d.com/ 
-I2C_lcd  Suusi Malcolm-Brown
-T0 and T1 Bill Green
+Based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi  
+V3 parts http://rp3d.com/ and Eaglemoss  
+I2C_lcd  Suusi Malcolm-Brown  
+T0 and T1 Bill Green  
 
 Licence: GPL
 
