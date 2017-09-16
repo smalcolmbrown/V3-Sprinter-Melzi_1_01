@@ -108,4 +108,4 @@ Removed Tool select patch to allow for two extruders T0 and T1 due to problems w
 fixed T0 and T1  
 Hood Switch disable / enable now stored in EEPROM  
 bleep mute option in M237 /M238 stored in EEPROM  
-Extrudes number can now be set in Configuration.h
+The number of Extruders can now be set in Configuration.h
