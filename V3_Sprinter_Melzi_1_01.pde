@@ -89,6 +89,7 @@
 // M190 - Wait for bed current temp to reach target temp.
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
+// M205 - Echos PID to terminal
 
 // V3 mods for non standard M Codes
 
@@ -136,7 +137,7 @@
 // M500 - Store settings in EEPROM
 // M501 - Read settings from EEPROM
 // M502 - Revert to default settings 
-// M503 - print settings currently in memory
+// M503 - Print settings currently in memory
 
 // T0  - Select Extruder 0
 // T1  - Select Extruder 1
@@ -258,9 +259,10 @@ int nzone = _NZONE;           // setting for the V1.01 firmware release
 
 
 #ifdef PIDTEMP
-  float Kp = _KP_TERM;
-  float Ki = _KI_TERM;
-  float Kd = _KD_TERM;
+  
+  float Kp = _PID_KP;
+  float Ki = _PID_KI;
+  float Kd = _PID_KD;
   int temp_iState = 0;
   int temp_dState = 0;
   int pTerm;
@@ -272,22 +274,38 @@ int nzone = _NZONE;           // setting for the V1.01 firmware release
   int pid_i_max = _PID_I_MAX;        //130;//125;
   int temp_iState_min = -pid_i_max / Ki;
   int temp_iState_max = pid_i_max / Ki;
+  
 #endif
+
 #ifdef SMOOTHING
+  
   uint32_t nma = 0;
+  
 #endif
+
 #ifdef WATCHPERIOD
+  
   int watch_raw = -1000;
   unsigned long watchmillis = 0;
+  
 #endif
+
 #ifdef MINTEMP
+  
   int minttemp = temp2analogh(MINTEMP);
+  
 #endif
+
 #ifdef MAXTEMP
-int maxttemp = temp2analogh(MAXTEMP);
+
+  int maxttemp = temp2analogh(MAXTEMP);
+  
 #endif
+
 #ifdef MAXTEMPBED
-int maxbtemp = temp2analogh(MAXTEMPBED);
+  
+  int maxbtemp = temp2analogh(MAXTEMPBED);
+  
 #endif
 
   
@@ -363,6 +381,7 @@ unsigned long stepper_inactive_time = 0;
 
 
 #ifdef V3 // V3 specific code
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // void EmergencyStop() - p
@@ -406,6 +425,7 @@ me when you already have a kill() function that does all that. S M-B 2016/12/15
     }    // end of while(1)
 */
 }
+
 #endif   // ifdef V3
 
 #ifdef LCD_SUPPORTED
@@ -935,14 +955,24 @@ inline void process_commands()
         break;
       
 #ifdef RAMP_ACCELERATION
+
       case 201: // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
         gcode_M201();
         break;
       case 202: // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
         gcode_M202();
         break;
-#endif
-      
+
+#endif  //  #ifdef RAMP_ACCELERATION
+
+#ifdef PIDTEMP
+
+      case 205:
+        gcode_M205();
+        break;
+
+#endif  //  #ifdef PIDTEMP
+
 #ifdef V3  // V3 specific code
       case 203: // M203 - set Z height adjustment
         gcode_M203();
@@ -1040,18 +1070,22 @@ inline void process_commands()
 #endif  // ifdef V3
 
 #ifdef  EXPERIMENTAL_I2CBUS
+
       case 260: // M260 -  i2c Send Data
         gcode_M260();
         break;
       case 261: // Mm261 - i2c Request Data
         gcode_M261();
         break;
+
 #endif //   EXPERIMENTAL_I2CBUS
 
 #ifdef PIDTEMP
+
       case 301: // M301 - Set PID parameters
         gcode_M301();
         break;
+
 #endif // PIDTEMP
 
 #ifdef M355_SUPPORT
@@ -2197,6 +2231,26 @@ inline void gcode_M203() {
   }
 }
 
+#ifdef PIDTEMP
+
+////////////////////////////////
+// M205 advanced settings
+//
+////////////////////////////////
+
+inline void gcode_M205()
+{
+  SerialMgr.cur()->print("ok o:");
+  SerialMgr.cur()->print(output);
+  SerialMgr.cur()->print(", p:");
+  SerialMgr.cur()->print(pTerm);
+  SerialMgr.cur()->print(", i:");
+  SerialMgr.cur()->print(iTerm);
+  SerialMgr.cur()->print(", d:");
+  SerialMgr.cur()->print(dTerm);
+}
+
+#endif  //  #ifdef PIDTEMP
 
 ////////////////////////////////
 // M237 - HSW Enable
@@ -2226,7 +2280,7 @@ inline void gcode_M237()
 }
 
 ////////////////////////////////
-// M237 - Hood switch disable
+// M238 - Hood switch disable
 //
 // M238 ; Hood switch disable
 // M238 S1 ; Hood switch disable and store result in EEPROM
@@ -2462,10 +2516,14 @@ inline void gcode_M501()
   {
     axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
   }
+
 #ifdef PIDTEMP
+
   temp_iState_min = -pid_i_max / Ki;
   temp_iState_max = pid_i_max / Ki;
-#endif
+  
+#endif  //  #ifdef PIDTEMP
+
 }
 
 ////////////////////////////////
@@ -2481,9 +2539,12 @@ inline void gcode_M502()
     axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
   }
 #ifdef PIDTEMP
+  
   temp_iState_min = -pid_i_max / Ki;
   temp_iState_max = pid_i_max / Ki;
-#endif
+  
+#endif  //  #ifdef PIDTEMP
+
 }
 
 ////////////////////////////////

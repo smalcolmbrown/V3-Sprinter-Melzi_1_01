@@ -218,9 +218,9 @@ const bool INVERT_E_DIR = true;
 #ifdef PIDTEMP
   #define _PID_MAX 255       // limits current to nozzle
   #define _PID_I_MAX 80      //130;//125;
-  #define _KP_TERM 2         //1.10;
-  #define _KI_TERM 0.01 
-  #define _KD_TERM 20.0      //0.01;
+  #define _PID_KP 2         //1.10;
+  #define _PID_KI 0.01 
+  #define _PID_KD 20.0      //0.01;
 #endif
 
 //-----------------------------------------------------------------------

@@ -162,9 +162,9 @@ void EEPROM_RetrieveSettings(bool def, bool printout)
       }
       
       #ifdef PIDTEMP
-       Kp = _KP_TERM;
-       Ki = _KI_TERM;
-       Kd = _KD_TERM;
+       Kp = _PID_KP;
+       Ki = _PID_KI;
+       Kd = _PID_KD;
       #endif
 
       SerialMgr.cur()->println("Using Default settings");
