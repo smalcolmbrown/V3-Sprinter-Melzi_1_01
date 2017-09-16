@@ -588,16 +588,24 @@ even when the power is turned off and on again.
    #### Usage
    Enables the hood switch buzzer warning.
    #### Parameters
-   None.
+   *This command can be used without any additional parameters.*  
+   Since build 0108
+   **Snnn** mute options
    #### Example 
-   M237                          ; Enables hood switch buzzer warning
+   M237    ; Enables hood switch buzzer warning  
+   M237 S1 ; Hood switch Enable and store result in EEPROM  
+   M237 S2 ; Mute Beep Enable and store result in EEPROM  
 ### M238 - Hood switch warning buzzer disable
    #### Usage
    Disables the hood switch buzzer warning.
    #### Parameters
-   None.
+   *This command can be used without any additional parameters.*  
+   Since build 0108
+   **Snnn** mute options
    #### Example 
-   M238                          ; Disables hood switch buzzer warning
+   M238    ; Disables hood switch buzzer warning  
+   M238 S1 ; Hood switch disable and store result in EEPROM  
+   M238 S2 ; Mute Beep disable and store result in EEPROM  
 ### M239 - Short Beep
    #### Usage
    Short Beep. Sends 239 to V3_I2C device, 
@@ -676,8 +684,44 @@ These M codes have been added since the official Eaglemoss firmware release.
    M355 S1 ; Enable lights  
    M355 S0 ; Disable lights  
    M355    ; Report status  
-   ### Date implemented
-   2017/08/18  Build 0105
+   ### Date implemented  
+   2017/08/18  Build 0105  
+### M500: Store parameters in EEPROM  
+   #### Usage  
+   Save current parameters to EEPROM.  
+   #### Parameters
+   None  
+   #### Example
+   M500 ; Save current parameters to EEPROM.  
+   ### Date implemented  
+   Build 0109  
+### M501: Read parameters from EEPROM  
+   #### Usage
+   Set the active parameters to those stored in the EEPROM. This is useful to revert parameters after experimenting with them.  
+   #### Parameters
+   None  
+   #### Example
+   M501 ; Read parameters from EEPROM  
+   ### Date implemented  
+   Build 0109  
+### M502: Revert to the default "factory settings."  
+   #### Usage  
+   This command resets all tunable parameters to their default values, as set in the firmware. This doesn't reset any parameters stored in the EEPROM, so it must be followed with M500 if you want to do that.  
+   #### Parameters  
+   None  
+   #### Example  
+   M500 ; Revert to the default "factory settings."  
+   ### Date implemented  
+   Build 0109  
+### M503: Print settings currently in memory  
+   #### Usage  
+   This command asks the firmware to reply with the current print settings stored in EEPROM. The reply output includes the G-Code commands to produce each setting. For example, the Steps Per Unit values are displayed as an M92 command.
+   #### Parameters  
+   None  
+   #### Example  
+   M500 ; Sends settings currently in memory to the terminal  
+   ### Date implemented  
+   Build 0109  
 ## 1.f New Supported Unofficial M Codes
 These unofficial non standard M codes have been added since the official Eaglemoss firmware release.
 ### M499 - Force Error
