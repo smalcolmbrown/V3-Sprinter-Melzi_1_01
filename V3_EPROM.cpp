@@ -69,7 +69,7 @@ void EEPROM_StoreSettings()
   EEPROM_write_setting(EEPROM_PID_I_MAX, pid_i_max);
   EEPROM_write_setting(EEPROM_NZONE, nzone);
 #else
-  // default settings for non PID builds
+  // store default settings for non PID builds
   EEPROM_write_setting(EEPROM_KP, _KP_TERM);     //Kp
   EEPROM_write_setting(EEPROM_KI, _KI_TERM);     //Ki
   EEPROM_write_setting(EEPROM_KD, _KD_TERM);     //Kd

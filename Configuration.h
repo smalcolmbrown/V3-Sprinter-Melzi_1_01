@@ -193,7 +193,7 @@ const bool INVERT_E_DIR = true;
 #ifdef RAMP_ACCELERATION
   #define _MAX_START_SPEED_UNITS_PER_SECOND {25.0,25.0,25.0,10.0}              // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
 //  #define _MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,1000,250}           // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-belt
-  #define _MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,250}            // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
+  #define _MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,250}            // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw 
 //  #define _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {500,500,500,500};      // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-belt
   #define _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {500,500,50,500}        // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
 #endif
