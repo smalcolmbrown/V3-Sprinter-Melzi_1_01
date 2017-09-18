@@ -7,7 +7,9 @@ Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
 
 Based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi  
 V3 parts http://rp3d.com/ and Eaglemoss  
-I2C_lcd  Suusi Malcolm-Brown  
+M500, M501, M502, M503 EEPROM Parts by Kliment Sprinter  
+Experimenatl I2C bus pinched from MARLIN  
+I2C_lcd  Suusi Malcolm-Brown and MARLIN
 T0 and T1 Bill Green  
 
 Licence: GPL  
