@@ -77,6 +77,7 @@
 //        or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 // M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 // M92  - Set axis_steps_per_unit - same syntax as G92
+// M93  - Send axis_steps_per_unit
 // M104 - Set extruder target temp
 // M105 - Read current temp
 // M106 - Fan on
@@ -89,6 +90,7 @@
 // M190 - Wait for bed current temp to reach target temp.
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
+// M203 - Set max feedrate
 // M205 - Echos PID to terminal
 
 // V3 mods for non standard M Codes
@@ -257,12 +259,13 @@ int btt = 0 ;      // Heated Bed target temperature in C
 
 int nzone = _NZONE;           // setting for the V1.01 firmware release 
 
-
 #ifdef PIDTEMP
   
-  float Kp = _PID_KP;
-  float Ki = _PID_KI;
-  float Kd = _PID_KD;
+  float Kp        = _PID_KP;
+  float Ki        = _PID_KI;
+  float Kd        = _PID_KD;
+  int   pid_max   = _PID_MAX;         // limits current to nozzle
+  int   pid_i_max = _PID_I_MAX;        //130;//125;
   int temp_iState = 0;
   int temp_dState = 0;
   int pTerm;
@@ -270,8 +273,6 @@ int nzone = _NZONE;           // setting for the V1.01 firmware release
   int dTerm;
   int output;
   int error;
-  int pid_max = _PID_MAX;         // limits current to nozzle
-  int pid_i_max = _PID_I_MAX;        //130;//125;
   int temp_iState_min = -pid_i_max / Ki;
   int temp_iState_max = pid_i_max / Ki;
   
@@ -562,12 +563,19 @@ void setup()
   #if (E_STEP_PIN > -1) 
     SET_OUTPUT(E_STEP_PIN);
   #endif  
+  
+  #ifdef USE_EEPROM_SETTINGS
+    //first Value --> Init with default
+    //second value --> Print settings to UART
+    EEPROM_RetrieveSettings(false,false);
+  #endif
+  
+  #ifdef PIDTEMP
+    updatePID();
+  #endif  
+  
   #ifdef RAMP_ACCELERATION
-  for(int i=0; i < NUM_AXIS; i++){
-        axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);
-        axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
-        axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
-    }
+  updateRampAcceleration();
   #endif
     
 #ifdef HEATER_USES_MAX6675
@@ -919,6 +927,9 @@ inline void process_commands()
         break;
       case 92: // M92  - Set axis_steps_per_unit - same syntax as G92
         gcode_M92();
+        break;
+      case 93: // M93  - Send axis_steps_per_unit
+        gcode_M93();
         break;
       case 104: // M104 - Set extruder target temp
         gcode_M104();
@@ -1887,11 +1898,26 @@ inline void gcode_M92() {
   // should also be used in setup() as well
 #ifdef RAMP_ACCELERATION
    long temp_max_intervals[NUM_AXIS];
-    for(int i=0; i < NUM_AXIS; i++) {
-      axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);//TODO: do this for
-      // all steps_per_unit related variables
-    }
+   updateRampAcceleration();
 #endif
+}
+
+////////////////////////////////
+// M93 - Send axis_steps_per_unit
+//
+////////////////////////////////
+
+inline void gcode_M93()
+{
+  SerialMgr.cur()->print("ok ");
+  SerialMgr.cur()->print("X:");
+  SerialMgr.cur()->print(axis_steps_per_unit[X_AXIS]);
+  SerialMgr.cur()->print("Y:");
+  SerialMgr.cur()->print(axis_steps_per_unit[Y_AXIS]);
+  SerialMgr.cur()->print("Z:");
+  SerialMgr.cur()->print(axis_steps_per_unit[Z_AXIS]);
+  SerialMgr.cur()->print("E:");
+  SerialMgr.cur()->println(axis_steps_per_unit[E_AXIS]);
 }
 
 ////////////////////////////////
@@ -2189,22 +2215,33 @@ inline void gcode_M190() {
 // TODO: update for all axis, use for loop?
 ////////////////////////////////
 
-inline void gcode_M201() {
-  for(int i=0; i < NUM_AXIS; i++) {
-    if(code_seen(axis_codes[i])) {
-      axis_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+inline void gcode_M201()
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    {
+//      axis_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+      max_acceleration_units_per_sq_second[i] = code_value();
+      axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
     }
   }
 }
+
 
 ////////////////////////////////
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 ////////////////////////////////
 
-inline void gcode_M202() {
-  for(int i=0; i < NUM_AXIS; i++) {
-    if(code_seen(axis_codes[i])) { 
-      axis_travel_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+inline void gcode_M202()
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    { 
+//      axis_travel_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+      max_travel_acceleration_units_per_sq_second[i] = code_value();
+      axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
     }
   }
 }
@@ -2212,22 +2249,18 @@ inline void gcode_M202() {
 #endif  // ifdef RAMP_ACCELERATION
 
 ////////////////////////////////
-// M203 - Set Z height adjustment
-// Znnn nnn = +/- 1.27 mm
-//
-// M203: Record Z adjustment
-// Example: M203 Z-0.75
-// This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set,
-// even when the power is turned off and on again.
-// If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
-// If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed.
-// The maximum adjustment is +/-1.27mm.
+// M203 - Set max feedrate (mm/s)
 //
 ////////////////////////////////
 
-inline void gcode_M203() {
-  if(code_seen('Z')){
-    EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
+inline void gcode_M203()
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    {
+      max_feedrate[i] = code_value();
+    }
   }
 }
 
@@ -2432,8 +2465,7 @@ inline void gcode_M301()
   SerialMgr.cur()->println(pid_i_max);
   SerialMgr.cur()->print("NZONE ");
   SerialMgr.cur()->println(nzone);
-  temp_iState_min = -pid_i_max / Ki;
-  temp_iState_max = pid_i_max / Ki;
+  updatePID();
 }
 
 #endif //PIDTEMP
@@ -2512,15 +2544,11 @@ inline void gcode_M500()
 inline void gcode_M501()
 {
   EEPROM_RetrieveSettings(false,true);
-  for(int8_t i=0; i < NUM_AXIS; i++)
-  {
-    axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
-  }
+  updateRampAcceleration();
 
 #ifdef PIDTEMP
 
-  temp_iState_min = -pid_i_max / Ki;
-  temp_iState_max = pid_i_max / Ki;
+  updatePID();
   
 #endif  //  #ifdef PIDTEMP
 
@@ -2534,14 +2562,11 @@ inline void gcode_M501()
 inline void gcode_M502()
 {
   EEPROM_RetrieveSettings(true,true);
-  for(int8_t i=0; i < NUM_AXIS; i++)
-  {
-    axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
-  }
+  updateRampAcceleration();
+
 #ifdef PIDTEMP
   
-  temp_iState_min = -pid_i_max / Ki;
-  temp_iState_max = pid_i_max / Ki;
+  updatePID();
   
 #endif  //  #ifdef PIDTEMP
 
@@ -2592,18 +2617,58 @@ inline void gcode_T1()
 // End of T, G and M codes
 ////////////////////////////////
 
+////////////////////////////////
+// void updateRampAcceleration()
+//
+////////////////////////////////
 
-inline void get_coordinates() {
-  for(int i=0; i < NUM_AXIS; i++) {
-    if(code_seen(axis_codes[i])) {
+inline void updateRampAcceleration()
+{
+  for(int8_t i=0; i < NUM_AXIS; i++)
+  {
+    axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);
+    axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
+    axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
+  }
+}
+
+#ifdef PIDTEMP
+
+////////////////////////////////
+// void updatePID
+//
+////////////////////////////////
+
+inline void updatePID()
+{
+  temp_iState_min = -pid_i_max / Ki;
+  temp_iState_max = pid_i_max / Ki;
+}
+
+#endif  //  #ifdef PIDTEMP
+
+
+////////////////////////////////
+// void get_coordinates()
+//
+////////////////////////////////
+
+inline void get_coordinates() 
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    {
       destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
     } else {
       destination[i] = current_position[i];                                                       //Are these else lines really needed?
     }
   }
-  if(code_seen('F')) {
+  if(code_seen('F'))
+  {
     next_feedrate = code_value();
-    if(next_feedrate > 0.0) {
+    if(next_feedrate > 0.0)
+    {
       feedrate = next_feedrate;
     }
   }

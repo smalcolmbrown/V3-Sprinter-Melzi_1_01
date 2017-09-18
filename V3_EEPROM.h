@@ -25,20 +25,25 @@
 // the default values are used whenever there is a change to the data, to prevent
 // wrong data being written to the variables.
 // ALSO:  always make sure the variables in the Store and retrieve sections are in the same order.
-#define EEPROM_VERSION "S01"
+#define EEPROM_VERSION "S00"
 
 
 extern float axis_steps_per_unit[4]; 
 extern float max_feedrate[4];
-extern float homing_feedrate[3];
 extern long  max_acceleration_units_per_sq_second[4];
+extern long  max_travel_acceleration_units_per_sq_second[4];
+extern int   nzone;
 
-#define axis_steps_per_unit_address                      (EEPROM_OFFSET + 4*sizeof(char))
-#define max_feedrate_address                             (axis_steps_per_unit_address + 4*sizeof(float))
-#define max_acceleration_units_per_sq_second_address     (max_feedrate_address + 4*sizeof(float))
-#define Kp_address                                       (max_acceleration_units_per_sq_second_address + 4*sizeof(long))
-#define Ki_address                                       (Kp_address + sizeof(float))
-#define Kd_address                                       (Ki_address + sizeof(float))
+#define EEPROM_AXIS_STEPS_PER_UNIT                              (EEPROM_OFFSET + 4*sizeof(char))
+#define EEPROM_MAX_FEEDRATE                                     (EEPROM_AXIS_STEPS_PER_UNIT + 4*sizeof(float))
+#define EEPROM_MAX_ACCELERATION_UNITS_PRER_SQ_SECOND            (EEPROM_MAX_FEEDRATE + 4*sizeof(float))
+#define EEPROM_MAX_TRAVEL_ACCELERATION_UNITS_PRER_SQ_SECOND     (EEPROM_MAX_ACCELERATION_UNITS_PRER_SQ_SECOND + 4*sizeof(long))
+#define EEPROM_KP                                               (EEPROM_MAX_TRAVEL_ACCELERATION_UNITS_PRER_SQ_SECOND + 4*sizeof(long))
+#define EEPROM_KI                                               (EEPROM_KP + sizeof(float))
+#define EEPROM_KD                                               (EEPROM_KI + sizeof(float))
+#define EEPROM_PID_MAX                                          (EEPROM_KD + sizeof(float))
+#define EEPROM_PID_I_MAX                                        (EEPROM_PID_MAX + sizeof(int))
+#define EEPROM_NZONE                                            (EEPROM_PID_I_MAX + sizeof(int))
 
 extern void EEPROM_RetrieveSettings(bool def, bool printout );
 extern void EEPROM_printSettings();
