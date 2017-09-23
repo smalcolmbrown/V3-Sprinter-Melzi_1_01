@@ -3186,6 +3186,8 @@ void manage_heater() {
   #endif
   #ifdef MAXTEMP
     if(current_raw >= maxttemp) {
+      status = STATUS_ERROR;
+      error_code = ERROR_CODE_HOTEND_TEMPERATURE_HIGH;
       target_raw = 0;
       BBB();
     }
@@ -3260,14 +3262,19 @@ void manage_heater() {
     #ifdef MINTEMP
       if(current_bed_raw <= minttemp)
       {
-          target_bed_raw = 0;
-          BBB();
+        status = STATUS_ERROR;
+        error_code = ERROR_CODE_BED_TEMPERATURE;
+        target_bed_raw = 0;
+        BBB();
       }
     #endif
     #ifdef MAXTEMPBED
-      if(current_bed_raw >= maxbtemp) {
-          target_bed_raw = 0;
-          BBB();
+      if(current_bed_raw >= maxbtemp)
+      {
+        status = STATUS_ERROR;
+        error_code = ERROR_CODE_BED_TEMPERATURE_HIGH;
+        target_bed_raw = 0;
+        BBB();
       }
     #endif
 
