@@ -109,3 +109,9 @@ fixed T0 and T1
 Hood Switch disable / enable now stored in EEPROM  
 bleep mute option in M237 /M238 stored in EEPROM  
 Extrudes number can now be set in Configuration.h
+
+**2017/09/23 Build 0109**  
+Now stores PID and Ramp acceleration variables in EEPROM  
+Now allows max feedrate to be adjusted via M203  
+Fixed M201 and M202 fixed error in max_acceleration_units_per_sq_second (thanks Bill)  
+Fixed Error codes in manager_heater() - now sets them correctly before calling BBB() All previous version forgot to set the error codes for Bed Temperature High or Low and Extruder temperature high  
