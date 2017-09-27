@@ -8,6 +8,7 @@
 //#include "Configuration.h"
 //#include "pins.h"
 #include "Configuration.h"
+#include "thermistortables.h"
 #include "Sprinter.h"
 #include "Enumcodes.h"
 #include "SerialManager.h"
@@ -76,6 +77,7 @@
 //        or use S<seconds> to specify an inactivity timeout, after which the steppers will be disabled.  S0 to disable the timeout.
 // M85  - Set inactivity shutdown timer with parameter S<seconds>. To disable set zero (default)
 // M92  - Set axis_steps_per_unit - same syntax as G92
+// M93  - Send axis_steps_per_unit
 // M104 - Set extruder target temp
 // M105 - Read current temp
 // M106 - Fan on
@@ -88,6 +90,8 @@
 // M190 - Wait for bed current temp to reach target temp.
 // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
+// M203 - Set max feedrate
+// M205 - Echos PID to terminal
 
 // V3 mods for non standard M Codes
 
@@ -132,10 +136,15 @@
 // M355 - Case light on or off (uses pin A1 on J16) can be changed in Configuration.h
 // M499 - Forces printer into Error mode for Testing only. Comment out in Configuration.h for production release
 
+// M500 - Store settings in EEPROM
+// M501 - Read settings from EEPROM
+// M502 - Revert to default settings 
+// M503 - Print settings currently in memory
+
 // T0  - Select Extruder 0
 // T1  - Select Extruder 1
 
-#define _VERSION_TEXT "1.01.0108"           // make sure you update this
+#define _VERSION_TEXT "1.01.0109"           // make sure you update this
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High", "User Abort" };
@@ -162,7 +171,7 @@ int status = STATUS_OK; //
 int error_code = ERROR_CODE_NO_ERROR; //0=Nothing, 1=Heater thermistor error
 
 float max_feedrate[4] = _MAX_FEEDRATE;
-float homing_feedrate[] = _HOMING_FEEDRATE;
+float homing_feedrate[3] = _HOMING_FEEDRATE;
 bool axis_relative_modes[] = _AXIS_RELATIVE_MODES;
 
 //Led counter (for blinking the led in different timings)
@@ -220,7 +229,6 @@ float Z_MAX_LENGTH_M240 = 120.00;    // set low to prevent a head crash
   EI2C_Bus i2c;
 #endif
               
-
 // comm variables
 #define MAX_CMD_SIZE 96
 #define BUFSIZE 8
@@ -249,8 +257,15 @@ int bt = 0 ;       // Heated Bed temperature in C
 int ett = 0 ;      // Extruder target temperature in C
 int btt = 0 ;      // Heated Bed target temperature in C
 
+int nzone = _NZONE;           // setting for the V1.01 firmware release 
 
 #ifdef PIDTEMP
+  
+  float Kp        = _PID_KP;
+  float Ki        = _PID_KI;
+  float Kd        = _PID_KD;
+  int   pid_max   = _PID_MAX;         // limits current to nozzle
+  int   pid_i_max = _PID_I_MAX;        //130;//125;
   int temp_iState = 0;
   int temp_dState = 0;
   int pTerm;
@@ -260,22 +275,38 @@ int btt = 0 ;      // Heated Bed target temperature in C
   int error;
   int temp_iState_min = -pid_i_max / Ki;
   int temp_iState_max = pid_i_max / Ki;
+  
 #endif
+
 #ifdef SMOOTHING
+  
   uint32_t nma = 0;
+  
 #endif
+
 #ifdef WATCHPERIOD
+  
   int watch_raw = -1000;
   unsigned long watchmillis = 0;
+  
 #endif
+
 #ifdef MINTEMP
+  
   int minttemp = temp2analogh(MINTEMP);
+  
 #endif
+
 #ifdef MAXTEMP
-int maxttemp = temp2analogh(MAXTEMP);
+
+  int maxttemp = temp2analogh(MAXTEMP);
+  
 #endif
+
 #ifdef MAXTEMPBED
-int maxbtemp = temp2analogh(MAXTEMPBED);
+  
+  int maxbtemp = temp2analogh(MAXTEMPBED);
+  
 #endif
 
   
@@ -351,6 +382,7 @@ unsigned long stepper_inactive_time = 0;
 
 
 #ifdef V3 // V3 specific code
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // void EmergencyStop() - p
@@ -394,6 +426,7 @@ me when you already have a kill() function that does all that. S M-B 2016/12/15
     }    // end of while(1)
 */
 }
+
 #endif   // ifdef V3
 
 #ifdef LCD_SUPPORTED
@@ -530,12 +563,19 @@ void setup()
   #if (E_STEP_PIN > -1) 
     SET_OUTPUT(E_STEP_PIN);
   #endif  
+  
+  #ifdef USE_EEPROM_SETTINGS
+    //first Value --> Init with default
+    //second value --> Print settings to UART
+    EEPROM_RetrieveSettings(false,false);
+  #endif
+  
+  #ifdef PIDTEMP
+    updatePID();
+  #endif  
+  
   #ifdef RAMP_ACCELERATION
-  for(int i=0; i < NUM_AXIS; i++){
-        axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);
-        axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
-        axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
-    }
+  updateRampAcceleration();
   #endif
     
 #ifdef HEATER_USES_MAX6675
@@ -792,6 +832,7 @@ inline void process_commands()
         gcode_G0_G1();
         return;
         //break;
+
       case 4:  // G4  - Dwell S<seconds> or P<milliseconds>
         gcode_G4();
         break;
@@ -887,6 +928,9 @@ inline void process_commands()
       case 92: // M92  - Set axis_steps_per_unit - same syntax as G92
         gcode_M92();
         break;
+      case 93: // M93  - Send axis_steps_per_unit
+        gcode_M93();
+        break;
       case 104: // M104 - Set extruder target temp
         gcode_M104();
         break;
@@ -922,14 +966,24 @@ inline void process_commands()
         break;
       
 #ifdef RAMP_ACCELERATION
+
       case 201: // M201 - Set max acceleration in units/s^2 for print moves (M201 X1000 Y1000)
         gcode_M201();
         break;
       case 202: // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
         gcode_M202();
         break;
-#endif
-      
+
+#endif  //  #ifdef RAMP_ACCELERATION
+
+#ifdef PIDTEMP
+
+      case 205:
+        gcode_M205();
+        break;
+
+#endif  //  #ifdef PIDTEMP
+
 #ifdef V3  // V3 specific code
       case 203: // M203 - set Z height adjustment
         gcode_M203();
@@ -1027,18 +1081,22 @@ inline void process_commands()
 #endif  // ifdef V3
 
 #ifdef  EXPERIMENTAL_I2CBUS
+
       case 260: // M260 -  i2c Send Data
         gcode_M260();
         break;
       case 261: // Mm261 - i2c Request Data
         gcode_M261();
         break;
+
 #endif //   EXPERIMENTAL_I2CBUS
 
 #ifdef PIDTEMP
+
       case 301: // M301 - Set PID parameters
         gcode_M301();
         break;
+
 #endif // PIDTEMP
 
 #ifdef M355_SUPPORT
@@ -1052,6 +1110,21 @@ inline void process_commands()
         gcode_M499() ;
         break;
 #endif // M499_SUPPORT
+
+#ifdef USE_EEPROM_SETTINGS
+      case 500: // M500 - Store settings in EEPROM
+        gcode_M500();
+        break;
+      case 501: // M501 - Read settings from EEPROM
+        gcode_M501();
+        break;
+      case 502: // M502 - Revert to default settings
+        gcode_M502();
+        break;
+      case 503: // M503 - Print settings currently in memory
+        gcode_M503();
+        break;  
+#endif 
 
       default:
         ClearToSend();        
@@ -1825,11 +1898,26 @@ inline void gcode_M92() {
   // should also be used in setup() as well
 #ifdef RAMP_ACCELERATION
    long temp_max_intervals[NUM_AXIS];
-    for(int i=0; i < NUM_AXIS; i++) {
-      axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);//TODO: do this for
-      // all steps_per_unit related variables
-    }
+   updateRampAcceleration();
 #endif
+}
+
+////////////////////////////////
+// M93 - Send axis_steps_per_unit
+//
+////////////////////////////////
+
+inline void gcode_M93()
+{
+  SerialMgr.cur()->print("ok ");
+  SerialMgr.cur()->print("X:");
+  SerialMgr.cur()->print(axis_steps_per_unit[X_AXIS]);
+  SerialMgr.cur()->print("Y:");
+  SerialMgr.cur()->print(axis_steps_per_unit[Y_AXIS]);
+  SerialMgr.cur()->print("Z:");
+  SerialMgr.cur()->print(axis_steps_per_unit[Z_AXIS]);
+  SerialMgr.cur()->print("E:");
+  SerialMgr.cur()->println(axis_steps_per_unit[E_AXIS]);
 }
 
 ////////////////////////////////
@@ -2127,22 +2215,33 @@ inline void gcode_M190() {
 // TODO: update for all axis, use for loop?
 ////////////////////////////////
 
-inline void gcode_M201() {
-  for(int i=0; i < NUM_AXIS; i++) {
-    if(code_seen(axis_codes[i])) {
-      axis_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+inline void gcode_M201()
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    {
+//      axis_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+      max_acceleration_units_per_sq_second[i] = code_value();
+      axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
     }
   }
 }
+
 
 ////////////////////////////////
 // M202 - Set max acceleration in units/s^2 for travel moves (M202 X1000 Y1000)
 ////////////////////////////////
 
-inline void gcode_M202() {
-  for(int i=0; i < NUM_AXIS; i++) {
-    if(code_seen(axis_codes[i])) { 
-      axis_travel_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+inline void gcode_M202()
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    { 
+//      axis_travel_steps_per_sqr_second[i] = code_value() * axis_steps_per_unit[i];
+      max_travel_acceleration_units_per_sq_second[i] = code_value();
+      axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
     }
   }
 }
@@ -2150,25 +2249,41 @@ inline void gcode_M202() {
 #endif  // ifdef RAMP_ACCELERATION
 
 ////////////////////////////////
-// M203 - Set Z height adjustment
-// Znnn nnn = +/- 1.27 mm
-//
-// M203: Record Z adjustment
-// Example: M203 Z-0.75
-// This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set,
-// even when the power is turned off and on again.
-// If the first layer is too close to the bed, you need to effectively move the bed down, so the Z value will be negative.
-// If the nozzle is too far from the bed during the first layer, the Z value should be positive to raise the bed.
-// The maximum adjustment is +/-1.27mm.
+// M203 - Set max feedrate (mm/s)
 //
 ////////////////////////////////
 
-inline void gcode_M203() {
-  if(code_seen('Z')){
-    EEPROM.write(Z_ADJUST_BYTE,code_value()*100);
+inline void gcode_M203()
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    {
+      max_feedrate[i] = code_value();
+    }
   }
 }
 
+#ifdef PIDTEMP
+
+////////////////////////////////
+// M205 advanced settings
+//
+////////////////////////////////
+
+inline void gcode_M205()
+{
+  SerialMgr.cur()->print("ok o:");
+  SerialMgr.cur()->print(output);
+  SerialMgr.cur()->print(", p:");
+  SerialMgr.cur()->print(pTerm);
+  SerialMgr.cur()->print(", i:");
+  SerialMgr.cur()->print(iTerm);
+  SerialMgr.cur()->print(", d:");
+  SerialMgr.cur()->print(dTerm);
+}
+
+#endif  //  #ifdef PIDTEMP
 
 ////////////////////////////////
 // M237 - HSW Enable
@@ -2198,7 +2313,7 @@ inline void gcode_M237()
 }
 
 ////////////////////////////////
-// M237 - Hood switch disable
+// M238 - Hood switch disable
 //
 // M238 ; Hood switch disable
 // M238 S1 ; Hood switch disable and store result in EEPROM
@@ -2350,8 +2465,7 @@ inline void gcode_M301()
   SerialMgr.cur()->println(pid_i_max);
   SerialMgr.cur()->print("NZONE ");
   SerialMgr.cur()->println(nzone);
-  temp_iState_min = -pid_i_max / Ki;
-  temp_iState_max = pid_i_max / Ki;
+  updatePID();
 }
 
 #endif //PIDTEMP
@@ -2409,6 +2523,67 @@ inline void gcode_M499()
         
 #endif // M499_SUPPORT
 
+
+#ifdef USE_EEPROM_SETTINGS
+
+////////////////////////////////
+// M500 - Store settings in EEPROM
+//
+////////////////////////////////
+
+inline void gcode_M500()
+{
+  EEPROM_StoreSettings();
+}
+
+////////////////////////////////
+// M501 - Read settings from EEPROM
+//
+////////////////////////////////
+
+inline void gcode_M501()
+{
+  EEPROM_RetrieveSettings(false,true);
+  updateRampAcceleration();
+
+#ifdef PIDTEMP
+
+  updatePID();
+  
+#endif  //  #ifdef PIDTEMP
+
+}
+
+////////////////////////////////
+// M502 - Revert to default settings
+//
+////////////////////////////////
+
+inline void gcode_M502()
+{
+  EEPROM_RetrieveSettings(true,true);
+  updateRampAcceleration();
+
+#ifdef PIDTEMP
+  
+  updatePID();
+  
+#endif  //  #ifdef PIDTEMP
+
+}
+
+////////////////////////////////
+// M503 - print settings currently in memory
+//
+////////////////////////////////
+
+inline void gcode_M503()
+{
+  EEPROM_printSettings();
+}
+
+#endif 
+
 ////////////////////////////////
 // T Codes
 // 
@@ -2442,18 +2617,58 @@ inline void gcode_T1()
 // End of T, G and M codes
 ////////////////////////////////
 
+////////////////////////////////
+// void updateRampAcceleration()
+//
+////////////////////////////////
 
-inline void get_coordinates() {
-  for(int i=0; i < NUM_AXIS; i++) {
-    if(code_seen(axis_codes[i])) {
+inline void updateRampAcceleration()
+{
+  for(int8_t i=0; i < NUM_AXIS; i++)
+  {
+    axis_max_interval[i] = 100000000.0 / (max_start_speed_units_per_second[i] * axis_steps_per_unit[i]);
+    axis_steps_per_sqr_second[i] = max_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
+    axis_travel_steps_per_sqr_second[i] = max_travel_acceleration_units_per_sq_second[i] * axis_steps_per_unit[i];
+  }
+}
+
+#ifdef PIDTEMP
+
+////////////////////////////////
+// void updatePID
+//
+////////////////////////////////
+
+inline void updatePID()
+{
+  temp_iState_min = -pid_i_max / Ki;
+  temp_iState_max = pid_i_max / Ki;
+}
+
+#endif  //  #ifdef PIDTEMP
+
+
+////////////////////////////////
+// void get_coordinates()
+//
+////////////////////////////////
+
+inline void get_coordinates() 
+{
+  for(int i=0; i < NUM_AXIS; i++)
+  {
+    if(code_seen(axis_codes[i]))
+    {
       destination[i] = (float)code_value() + (axis_relative_modes[i] || relative_mode)*current_position[i];
     } else {
       destination[i] = current_position[i];                                                       //Are these else lines really needed?
     }
   }
-  if(code_seen('F')) {
+  if(code_seen('F'))
+  {
     next_feedrate = code_value();
-    if(next_feedrate > 0.0) {
+    if(next_feedrate > 0.0)
+    {
       feedrate = next_feedrate;
     }
   }
@@ -2971,6 +3186,8 @@ void manage_heater() {
   #endif
   #ifdef MAXTEMP
     if(current_raw >= maxttemp) {
+      status = STATUS_ERROR;
+      error_code = ERROR_CODE_HOTEND_TEMPERATURE_HIGH;
       target_raw = 0;
       BBB();
     }
@@ -3045,14 +3262,19 @@ void manage_heater() {
     #ifdef MINTEMP
       if(current_bed_raw <= minttemp)
       {
-          target_bed_raw = 0;
-          BBB();
+        status = STATUS_ERROR;
+        error_code = ERROR_CODE_BED_TEMPERATURE;
+        target_bed_raw = 0;
+        BBB();
       }
     #endif
     #ifdef MAXTEMPBED
-      if(current_bed_raw >= maxbtemp) {
-          target_bed_raw = 0;
-          BBB();
+      if(current_bed_raw >= maxbtemp)
+      {
+        status = STATUS_ERROR;
+        error_code = ERROR_CODE_BED_TEMPERATURE_HIGH;
+        target_bed_raw = 0;
+        BBB();
       }
     #endif
 
@@ -3367,4 +3589,5 @@ void check_heater(){
   }
 
 }
+
 

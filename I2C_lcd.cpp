@@ -347,6 +347,7 @@ void PrinterState( ){
   }
 }
 
+#ifdef LCD_SUPPORTED
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -566,3 +567,5 @@ void CreateCustonChars()
   lcd.createChar(LCD_FEEDRATE_CHAR, byFeedRate);
   
 }
+
+#endif
