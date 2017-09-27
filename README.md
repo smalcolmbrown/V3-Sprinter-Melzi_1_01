@@ -1,29 +1,31 @@
 # V3-Sprinter-Melzi_1_01
-The original Eaglemoss V3 3D printer firmware cleaned up and modified. 
+The original Eaglemoss V3 3D printer firmware cleaned up and modified.  
 
-Nominally called Version 1.01
+Nominally called Version 1.01  
 
-Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.
+Tonokip RepRap firmware rewrite based off of Hydra-mmm firmware.  
 
-Based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi
-V3 parts http://rp3d.com/ 
-I2C_lcd  Suusi Malcolm-Brown
-T0 and T1 Bill Green
+Based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi  
+V3 parts http://rp3d.com/ and Eaglemoss  
+M500, M501, M502, M503 EEPROM Parts by Kliment Sprinter  
+Experimenatl I2C bus pinched from MARLIN  
+I2C_lcd  Suusi Malcolm-Brown and MARLIN
+T0 and T1 Bill Green  
 
-Licence: GPL
+Licence: GPL  
 
-Arduino 0023 is required for the build and upload.
+Arduino 0023 is required for the build and upload.  
 
 Almost all V3 specific code and all V3 specific variables have been moved to two new files unsurpringly called V3.cpp and V3.h
-added a function to handle the V3 I2C device and the necessay defines 
+added a function to handle the V3 I2C device and the necessay defines  
 
-All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required
+All instances of V3 specific code on Sprinter_Melzi_Play.pde is now enclosed in #ifdef V3, #else and #endif as required  
 
-I2C_LCD needs F Malpartida's NewLiquidCrystal library. Download the repository from https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads and put it in your documents/arduino/libraries folder and restart your ide.
+I2C_LCD needs F Malpartida's NewLiquidCrystal library. Download the repository from https://bitbucket.org/fmalpartida/new-liquidcrystal/downloads and put it in your documents/arduino/libraries folder and restart your ide.  
 
-You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to compile in Arduino 0023 
+You need to modify libuary file LiquidCrystal_I2C_ByVac.h to get the program to compile in Arduino 0023  
 
-An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C) 
+An already modified version can be downloaded from here. [LiquidCrystal_I2C](https://github.com/smalcolmbrown/LiquidCrystal_I2C)  
 
 Since build 1.01.0105 you will need to install the [LiquidTWI2](https://github.com/lincomatic/LiquidTWI2) library  
 
@@ -108,10 +110,4 @@ Removed Tool select patch to allow for two extruders T0 and T1 due to problems w
 fixed T0 and T1  
 Hood Switch disable / enable now stored in EEPROM  
 bleep mute option in M237 /M238 stored in EEPROM  
-Extrudes number can now be set in Configuration.h
 
-**2017/09/23 Build 0109**  
-Now stores PID and Ramp acceleration variables in EEPROM  
-Now allows max feedrate to be adjusted via M203  
-Fixed M201 and M202 fixed error in max_acceleration_units_per_sq_second (thanks Bill)  
-Fixed Error codes in manager_heater() - now sets them correctly before calling BBB() All previous version forgot to set the error codes for Bed Temperature High or Low and Extruder temperature high  
