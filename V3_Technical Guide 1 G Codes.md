@@ -679,10 +679,12 @@ These M codes have been added since the official Eaglemoss firmware release.
    PID Tuning refers to a control algorithm used in some repraps to tune heating behavior for hot ends and heated beds. This command generates Proportional (Kp), Integral (Ki), and Derivative (Kd) values for the hotend.
    #### Parameters
    *This command can be used without any additional parameters.*  
-   **M303 S<temperature>** 
-   #### Example
-   **M303**      ; runs the PID Tuning at 150 C
-   **M303 S200** ; runs the PID Tuning at 200 C
+   **S<temperature>**  
+   #### Example  
+   **M303**      ; runs the PID Tuning at 150 C  
+   **M303 S200** ; runs the PID Tuning at 200 C  
+   ### Date implemented
+   Build 0110  
 ### M355: Turn case lights on/off  
    #### Usage
    turns the case light On or Off  
@@ -737,7 +739,7 @@ These unofficial non standard M codes have been added since the official Eaglemo
    #### Usage
    Sets the status and error codes for testing error handler and beep codes. Needs the M499_SUPPORT define in Confiruation.h
    #### Parameters
-   **ennn** The error nimber (1, 2, 3 or 4)
+   **ennn** The error nimber (1, 2, 3 or 4) 
    #### Example
    M499 E1 ; Sets the Status flag to error and the error code to Extruder thermistor open circuit  
    M499 E2 ; Sets the Status flag to error and the error code to Heated Bed thermistor open circuit  
@@ -745,8 +747,25 @@ These unofficial non standard M codes have been added since the official Eaglemo
    M499 E4 ; Sets the Status flag to error and the error code to Heated Bed thermistor short circuit  
    ### Date implemented
    2017/08/04  
-## 1.e New Supported Standard M Codes
-These M codes have been added since the official Eaglemoss firmware release.  
+### M601 - Echo Extruder Jitter
+   #### Usage
+   Echos the Extruder Jitter maximum and minimum or temperature control quality to the terminal.
+   #### Parameters
+   None 
+   #### Example
+   M601 ; Echo extruder jitter to the terminal  
+   ### Date implemented
+   Build 0110  
+### M602 - Reset Echo Extruder Jitter
+   #### Usage
+   Echos the Extruder Jitter or temperature control quality to the terminal.
+   #### Parameters
+   None
+   #### Example
+   M602 ; Reset the extruder jitter maximum and minimum.  
+   ### Date implemented
+   Build 0110  ## 1.e New Supported Standard M Codes
+These T codes have been added since the official Eaglemoss firmware release.  
 ### T0 - Select Tool 0
    #### Usage
    Selects the first extruder E0 in a two exruder system   
