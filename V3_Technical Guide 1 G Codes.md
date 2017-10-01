@@ -674,9 +674,18 @@ These M codes have been added since the official Eaglemoss firmware release.
    M261 A99 B5 ; Request 5 bytes from Address 99
    ### Date implemented
    2017/08/04  
+### M303: Run PID tuning 
+   #### Usage
+   PID Tuning refers to a control algorithm used in some repraps to tune heating behavior for hot ends and heated beds. This command generates Proportional (Kp), Integral (Ki), and Derivative (Kd) values for the hotend.
+   #### Parameters
+   *This command can be used without any additional parameters.*  
+   **M303 S<temperature>** 
+   #### Example
+   **M303**      ; runs the PID Tuning at 150 C
+   **M303 S200** ; runs the PID Tuning at 200 C
 ### M355: Turn case lights on/off  
    #### Usage
-  turns the case light On or Off  
+   turns the case light On or Off  
    #### Parameters
    *This command can be used without any additional parameters.*  
    **Snnn** S0 = OFF, S1 = On  
