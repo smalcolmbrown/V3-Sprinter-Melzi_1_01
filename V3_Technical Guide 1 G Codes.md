@@ -764,7 +764,8 @@ These unofficial non standard M codes have been added since the official Eaglemo
    #### Example
    M602 ; Reset the extruder jitter maximum and minimum.  
    ### Date implemented
-   Build 0110  ## 1.e New Supported Standard M Codes
+   Build 0110  
+## 1.e New Supported Standard M Codes
 These T codes have been added since the official Eaglemoss firmware release.  
 ### T0 - Select Tool 0
    #### Usage
