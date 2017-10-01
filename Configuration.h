@@ -213,7 +213,7 @@ const bool INVERT_E_DIR = true;
 //-----------------------------------------------------------------------
 //// PID settings:
 //-----------------------------------------------------------------------
-// Uncomment the following line to enable PID support. This is untested and could be disastrous. Be careful.
+// Uncomment the following line to enable PID support. This is untested for thermocouples and could be disastrous. Be careful.
 #define PIDTEMP 1
 #ifdef PIDTEMP
   #define _PID_MAX 255       // limits current to nozzle
@@ -222,6 +222,14 @@ const bool INVERT_E_DIR = true;
   #define _PID_KI 0.01 
   #define _PID_KD 20.0      //0.01;
 #endif
+
+//-----------------------------------------------------------------------
+//// PID autotune settings:
+//-----------------------------------------------------------------------
+// Uncomment the following line to enable PID autotune support.  This is untested and could be disastrous. Be careful. 
+// Make sure that you carefully monitor the hot end temperatute and if you detect thermal runaway switch off the the 3D printer immediately
+#define PID_AUTOTUNE
+
 
 //-----------------------------------------------------------------------
 //// SETTINGS FOR Z PROBE FUNCTION (Command G29 and G30)
@@ -285,6 +293,13 @@ const bool INVERT_E_DIR = true;
 #define PRINT_EEPROM_SETTING
 
 //-----------------------------------------------------------------------
+//// Settings for M600 and M601 heater debugging
+//-----------------------------------------------------------------------
+// Measure the MIN/MAX Value of the Hotend Temp and show it with
+// Command M601 / Command M602 Reset the MIN/MAX Value
+#define DEBUG_HEATER_TEMP
+
+//-----------------------------------------------------------------------
 //// Setting for the software control of fans
 // a V3 has two fans extruder and work fan. Only the work fan is software controlable
 //-----------------------------------------------------------------------
@@ -295,7 +310,6 @@ const bool INVERT_E_DIR = true;
 //-----------------------------------------------------------------------
 //  #define NZONE = 5;//2;      // setting for the 2016 and 2017 Eaglemoss firmware releases
   #define _NZONE 2         // setting for the V1.01 firmware release
-
 
 //-----------------------------------------------------------------------
 //// Sets the Initial speed of the work cooling fan

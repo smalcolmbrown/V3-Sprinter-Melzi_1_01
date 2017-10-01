@@ -141,10 +141,13 @@
 // M502 - Revert to default settings 
 // M503 - Print settings currently in memory
 
+// M601  show Extruder Temp jitter
+// M602  reset Extruder Temp jitter
+
 // T0  - Select Extruder 0
 // T1  - Select Extruder 1
 
-#define _VERSION_TEXT "1.01.0109"           // make sure you update this
+#define _VERSION_TEXT "1.01.0110"           // make sure you update this
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High", "User Abort" };
@@ -252,6 +255,11 @@ int current_raw = 0;
 int target_bed_raw = 0;
 int current_bed_raw = 0;
 
+int current_raw_maxval = -32000;    // variables for jitter calculation max raw
+int current_raw_minval = 32000;     // variables for jitter calculation min raw
+int tt_maxval;                      // variables for jitter calculation max in degrees C
+int tt_minval;                      // variables for jitter calculation min in degrees C
+
 int tt = 0 ;       // Extruder temperature in C
 int bt = 0 ;       // Heated Bed temperature in C
 int ett = 0 ;      // Extruder target temperature in C
@@ -276,7 +284,14 @@ int nzone = _NZONE;           // setting for the V1.01 firmware release
   int temp_iState_min = -pid_i_max / Ki;
   int temp_iState_max = pid_i_max / Ki;
   
-#endif
+#endif  //  PIDTEMP
+
+#ifdef PID_AUTOTUNE
+
+#define HEATER_CURRENT 255
+
+#endif  // PID_AUTOTUNE
+
 
 #ifdef SMOOTHING
   
@@ -976,6 +991,10 @@ inline void process_commands()
 
 #endif  //  #ifdef RAMP_ACCELERATION
 
+      case 203: // M203 - Set max feedrate (mm/s)
+        gcode_M203();
+        break;
+
 #ifdef PIDTEMP
 
       case 205:
@@ -985,9 +1004,6 @@ inline void process_commands()
 #endif  //  #ifdef PIDTEMP
 
 #ifdef V3  // V3 specific code
-      case 203: // M203 - set Z height adjustment
-        gcode_M203();
-        break;
       case 211: // M211 - red on
         V3_I2C_Command( V3_NOZZLE_RED, true ) ;              // sends 211, Red LED on
         break;
@@ -1097,6 +1113,13 @@ inline void process_commands()
         gcode_M301();
         break;
 
+
+  #ifdef PID_AUTOTUNE
+      case 303: // M303 PID autotune
+        gcode_M303();
+        break;
+  #endif // PID_AUTOTUNE
+
 #endif // PIDTEMP
 
 #ifdef M355_SUPPORT
@@ -1125,6 +1148,18 @@ inline void process_commands()
         gcode_M503();
         break;  
 #endif 
+
+#ifdef DEBUG_HEATER_TEMP
+
+      case 601: // M601  show Extruder Temp jitter
+        gcode_M602(); 
+        break;
+        
+      case 602: // M602  reset Extruder Temp jitter
+        gcode_M602(); 
+        break;
+        
+#endif
 
       default:
         ClearToSend();        
@@ -2468,6 +2503,23 @@ inline void gcode_M301()
   updatePID();
 }
 
+  #ifdef PID_AUTOTUNE
+
+////////////////////////////////
+// M303 - PID autotune
+////////////////////////////////
+
+inline void gcode_M303()
+{
+  float help_temp = 150.0;
+  if (code_seen('S')) help_temp=code_value();
+  PID_autotune(help_temp);
+}
+
+  #endif  //  PID_AUTOTUNE
+
+//---------------- END AUTOTUNE PID ------------------------------
+
 #endif //PIDTEMP
 
 
@@ -2583,6 +2635,46 @@ inline void gcode_M503()
 }
 
 #endif 
+
+#ifdef DEBUG_HEATER_TEMP
+
+////////////////////////////////
+// M601  show Extruder Temp jitter
+//
+////////////////////////////////
+
+inline void gcode_M601() 
+{
+#if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675)|| defined HEATER_USES_AD595
+
+  if(current_raw_maxval > 0)
+    tt_maxval = analog2temp(current_raw_maxval);
+  if(current_raw_minval < 10000)  
+    tt_minval = analog2temp(current_raw_minval);
+
+#endif
+        
+  SerialMgr.cur()->print("Tmin:");
+  SerialMgr.cur()->print(tt_minval); 
+  SerialMgr.cur()->print(" / Tmax:");
+  SerialMgr.cur()->print(tt_maxval); 
+  SerialMgr.cur()->println(" ");
+}
+
+////////////////////////////////
+// M602  reset Extruder Temp jitter
+//
+////////////////////////////////
+
+inline void gcode_M602() 
+{
+  current_raw_minval = 32000;
+  current_raw_maxval = -32000;
+        
+  SerialMgr.cur()->println("T Minmax Reset ");
+}
+
+#endif
 
 ////////////////////////////////
 // T Codes
@@ -3147,53 +3239,61 @@ void manage_heater() {
     return;
   }
   previous_millis_heater = millis();
-  #ifdef HEATER_USES_THERMISTOR
-    current_raw = analogRead(TEMP_0_PIN); 
-    #ifdef DEBUG_HEAT_MGMT
-      log_int("_HEAT_MGMT - analogRead(TEMP_0_PIN)", current_raw);
-      log_int("_HEAT_MGMT - NUMTEMPS", NUMTEMPS);
-    #endif
-    // When using thermistor, when the heater is colder than targer temp, we get a higher analog reading than target, 
-    // this switches it up so that the reading appears lower than target for the control logic.
-    current_raw = 1023 - current_raw;
-  #elif defined HEATER_USES_AD595
-    current_raw = analogRead(TEMP_0_PIN);    
-  #elif defined HEATER_USES_MAX6675
-    current_raw = read_max6675();
-  #endif
-  #ifdef SMOOTHING
+  current_raw = GetHotEndTemperature();
+
+  //MIN / MAX save to display the jitter of Heaterbarrel
+  if(current_raw > current_raw_maxval) current_raw_maxval = current_raw;
+  if(current_raw < current_raw_minval) current_raw_minval = current_raw;
+
+#ifdef SMOOTHING
   if (!nma) nma = SMOOTHFACTOR * current_raw;
   nma = (nma + current_raw) - (nma / SMOOTHFACTOR);
   current_raw = nma / SMOOTHFACTOR;
-  #endif
-  #ifdef WATCHPERIOD
-    if(watchmillis && millis() - watchmillis > WATCHPERIOD){
-        if(watch_raw + 1 >= current_raw){
-            target_raw = 0;
-            WRITE(HEATER_0_PIN,LOW);
-        }else{
-            watchmillis = 0;
-        }
-    }
-  #endif
-  #ifdef MINTEMP
-    if(current_raw <= minttemp) {
-      status = STATUS_ERROR;
-      error_code = ERROR_CODE_HOTEND_TEMPERATURE;
+#endif  // SMOOTHING
+  
+#ifdef WATCHPERIOD
+  if(watchmillis && millis() - watchmillis > WATCHPERIOD)
+  {
+    if(watch_raw + 1 >= current_raw)
+    {
       target_raw = 0;
-      BBB();
+      WRITE(HEATER_0_PIN,LOW);
     }
-  #endif
-  #ifdef MAXTEMP
-    if(current_raw >= maxttemp) {
-      status = STATUS_ERROR;
-      error_code = ERROR_CODE_HOTEND_TEMPERATURE_HIGH;
-      target_raw = 0;
-      BBB();
+    else
+    {
+      watchmillis = 0;
     }
-  #endif
-  #if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675) || defined (HEATER_USES_AD595)
-    #ifdef PIDTEMP
+  }
+#endif  // WATCHPERIOD
+
+#ifdef MINTEMP
+
+  if(current_raw <= minttemp)
+  {
+    status = STATUS_ERROR;
+    error_code = ERROR_CODE_HOTEND_TEMPERATURE;
+    target_raw = 0;
+    BBB();
+  }
+
+#endif  // MINTEMP
+
+#ifdef MAXTEMP
+
+  if(current_raw >= maxttemp)
+  {
+    status = STATUS_ERROR;
+    error_code = ERROR_CODE_HOTEND_TEMPERATURE_HIGH;
+    target_raw = 0;
+    BBB();
+  }
+
+#endif //  MAXTEMP
+
+#if (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675) || defined (HEATER_USES_AD595)
+
+  #ifdef PIDTEMP
+
       error = target_raw - current_raw;
       pTerm = Kp * error;
       temp_iState += error;
@@ -3203,96 +3303,117 @@ void manage_heater() {
       temp_dState = current_raw;
       output=constrain(pTerm + iTerm - dTerm, 0, pid_max);
       analogWrite(HEATER_0_PIN, output);
-    #else
+
+  #else  // ! PIDTEMP
+
       if(current_raw >= target_raw)
       {
         WRITE(HEATER_0_PIN,LOW);
       }
-      else 
+      else
       {
         WRITE(HEATER_0_PIN,HIGH);
       }
-    #endif
-  #endif
+
+  #endif  //  PIDTEMP
+
+#endif  //  (TEMP_0_PIN > -1) || defined (HEATER_USES_MAX6675) || defined (HEATER_USES_AD595)
   
   //LED handling is put in here for convinient handling
-  #if LED_PIN>-1
-    if (status==STATUS_ERROR) //on error, blink fast
-    {
-        TOGGLE(LED_PIN);
-    }
-    else if (target_raw > minttemp) //on heated hotend, blink slow
-    {
-        if ((led_counter++) > 4)
-        {
-            led_counter = 0;
-            TOGGLE(LED_PIN);
-        }
-    }
-    else
-    {
-        WRITE(LED_PIN,HIGH); //In idle, just on
-    }
-  #endif
 
+#if LED_PIN>-1
 
+  if (status==STATUS_ERROR) //on error, blink fast
+  {
+    TOGGLE(LED_PIN);
+  }
+  else if (target_raw > minttemp) //on heated hotend, blink slow
+  {
+    if ((led_counter++) > 4)
+    {
+      led_counter = 0;
+      TOGGLE(LED_PIN);
+    }
+  }
+  else
+  {
+    WRITE(LED_PIN,HIGH); //In idle, just on
+  }
+
+#endif  //  LED_PIN>-1
    
   if(millis() - previous_millis_bed_heater < BED_CHECK_INTERVAL)
     return;
   previous_millis_bed_heater = millis();
-  #ifndef TEMP_1_PIN
+
+#ifndef TEMP_1_PIN
+
     return;
-  #endif
-  #if TEMP_1_PIN == -1
+
+#endif
+
+#if TEMP_1_PIN == -1
+
     return;
-  #else
+
+#else
   
   #ifdef BED_USES_THERMISTOR
   
-    current_bed_raw = analogRead(TEMP_1_PIN);   
+  current_bed_raw = analogRead(TEMP_1_PIN);   
+  
     #ifdef DEBUG_HEAT_MGMT
-      log_int("_HEAT_MGMT - analogRead(TEMP_1_PIN)", current_bed_raw);
-      log_int("_HEAT_MGMT - BNUMTEMPS", BNUMTEMPS);
-    #endif               
   
-    // If using thermistor, when the heater is colder than targer temp, we get a higher analog reading than target, 
-    // this switches it up so that the reading appears lower than target for the control logic.
-    current_bed_raw = 1023 - current_bed_raw;
-
-    #ifdef MINTEMP
-      if(current_bed_raw <= minttemp)
-      {
-        status = STATUS_ERROR;
-        error_code = ERROR_CODE_BED_TEMPERATURE;
-        target_bed_raw = 0;
-        BBB();
-      }
-    #endif
-    #ifdef MAXTEMPBED
-      if(current_bed_raw >= maxbtemp)
-      {
-        status = STATUS_ERROR;
-        error_code = ERROR_CODE_BED_TEMPERATURE_HIGH;
-        target_bed_raw = 0;
-        BBB();
-      }
-    #endif
-
+  log_int("_HEAT_MGMT - analogRead(TEMP_1_PIN)", current_bed_raw);
+  log_int("_HEAT_MGMT - BNUMTEMPS", BNUMTEMPS);
+  
+    #endif  //  DEBUG_HEAT_MGMT
+  
+  // If using thermistor, when the heater is colder than targer temp, we get a higher analog reading than target, 
+  // this switches it up so that the reading appears lower than target for the control logic.
+  current_bed_raw = 1023 - current_bed_raw;
+  
   #elif defined BED_USES_AD595
-    current_bed_raw = analogRead(TEMP_1_PIN);                  
+  
+  current_bed_raw = analogRead(TEMP_1_PIN); 
+    
+  #endif  //  defined BED_USES_AD595
 
-  #endif
+  #ifdef MINTEMP
   
+  if(current_bed_raw <= minttemp)
+  {
+    status = STATUS_ERROR;
+    error_code = ERROR_CODE_BED_TEMPERATURE;
+    target_bed_raw = 0;
+    BBB();
+  }
   
-    if(current_bed_raw >= target_bed_raw)
-    {
-      WRITE(HEATER_1_PIN,LOW);
-    }
-    else 
-    {
-      WRITE(HEATER_1_PIN,HIGH);
-    }
-    #endif
+  #endif  //  MINTEMP
+
+  #ifdef MAXTEMPBED
+  
+  if(current_bed_raw >= maxbtemp)
+  {
+    status = STATUS_ERROR;
+    error_code = ERROR_CODE_BED_TEMPERATURE_HIGH;
+    target_bed_raw = 0;
+    BBB();
+  }
+  
+  #endif  //  MAXTEMPBED
+  
+  if(current_bed_raw >= target_bed_raw)
+  {
+    WRITE(HEATER_1_PIN,LOW);
+  }
+  else
+  {
+    WRITE(HEATER_1_PIN,HIGH);
+  }
+
+#endif  //  TEMP_1_PIN == -1
+
 }
 
 
@@ -3482,12 +3603,13 @@ void log_ulong_array(char* message, unsigned long value[], int array_lenght) {
 //
 //////////////////////////////////////////////////////////////////////////
 
-void ErrorBleepCodes(){
-  
+void ErrorBleepCodes()
+{
   V3_I2C_Command( V3_LONG_BEEP, false ) ;                         // beep long
   delay(2000);
   
-  for (int i = 1 ; i <= error_code ; i++) {
+  for (int i = 1 ; i <= error_code ; i++)
+  {
     V3_I2C_Command( V3_SHORT_BEEP, false ) ;                      // beep short x1
     delay(1000);                                                  // 1 second delay
   }
@@ -3513,15 +3635,17 @@ void ErrorBleepCodes(){
 //
 //////////////////////////////////////////////////////////////////////////
 
-void BBB(){
+void BBB()
+{
   // BBB short beep x3 chris 2017-04-01
   // sorry chris i dont think so the code you used was for 1 short beep
   // but in practice it was 1 continus beep due to the ininte loop
                                                               
   V3_I2C_Command( V3_NOZZLE_RED_FLASH, false ) ;                  // nozzle RGB LED Red Flashing
   V3_I2C_Command( V3_BUTTON_RED_FLASH, false ) ;                  // button RGB LED Red Flashing
-  while(1){
-                                                                  // loop forever
+  while(1)
+  {
+    // loop forever
     pinMode(HEATER_0_PIN, OUTPUT);
     pinMode(HEATER_1_PIN, OUTPUT);
     target_bed_raw = 0;                                           // stop bed heater
@@ -3551,19 +3675,21 @@ void BBB(){
 //
 //////////////////////////////////////////////////////////////////////////
 
-void check_heater(){
+void check_heater()
+{
   // check the nozzle temparatue is within safe limits
-  current_raw = analogRead(TEMP_0_PIN);
-  current_raw = 1023 - current_raw;                               // NTC
-  if(current_raw <= minttemp) {
-                                                                  // Temperature below MINTEMP 
+  current_raw = GetHotEndTemperature();                           // NTC
+  if(current_raw <= minttemp)
+  {
+    // Temperature below MINTEMP 
     status = STATUS_ERROR;
     error_code = ERROR_CODE_HOTEND_TEMPERATURE;
     target_raw = 0;                                               // switch off the Extruder target
     BBB();                                                        // call the error handler
   }
-  if(current_raw >= maxttemp) {
-                                                                   // Temperature above MAXTEMP 
+  if(current_raw >= maxttemp)
+  {
+    // Temperature above MAXTEMP 
     status = STATUS_ERROR;
     error_code = ERROR_CODE_HOTEND_TEMPERATURE_HIGH;
     target_raw = 0;                                               // switch off the Extruder target
@@ -3573,15 +3699,17 @@ void check_heater(){
   // check the bed temparature is within the safe limits
   current_bed_raw = analogRead(TEMP_1_PIN);
   current_bed_raw = 1023 - current_bed_raw;                       // NTC
-  if(current_bed_raw <= minttemp) {
-                                                                  // bed temperature below MINTEMP
+  if(current_bed_raw <= minttemp)
+  {
+    // bed temperature below MINTEMP
     status = STATUS_ERROR;
     error_code = ERROR_CODE_BED_TEMPERATURE;
     target_bed_raw = 0;                                           // switch off the Extruder target
     BBB();
   }
-  if(current_bed_raw >= maxbtemp) {
-                                                                  // bed temparature above MAXTEMPBED
+  if(current_bed_raw >= maxbtemp)
+  {
+    // bed temparature above MAXTEMPBED
     status = STATUS_ERROR;
     error_code = ERROR_CODE_BED_TEMPERATURE_HIGH;
     target_bed_raw = 0;                                           // switch off the Extruder target
@@ -3589,5 +3717,280 @@ void check_heater(){
   }
 
 }
+
+//------------------------------------------------
+//Function the check the Analog OUT pin for not using the Timer1
+//------------------------------------------------
+
+void analogWrite_check(uint8_t check_pin, int val)
+{
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) 
+  //Atmega168/328 can't use OCR1A and OCR1B
+  //These are pins PB1/PB2 or on Arduino D9/D10
+    if((check_pin != 9) && (check_pin != 10))
+    {
+        analogWrite(check_pin, val);
+    }
+#endif
+  
+#if defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__) 
+  //Atmega664P/1284P can't use OCR1A and OCR1B
+  //These are pins PD4/PD5 or on Arduino D12/D13
+    if((check_pin != 12) && (check_pin != 13))
+    {
+        analogWrite(check_pin, val);
+    }
+ #endif
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__) 
+  //Atmega1280/2560 can't use OCR1A, OCR1B and OCR1C
+  //These are pins PB5,PB6,PB7 or on Arduino D11,D12 and D13
+    if((check_pin != 11) && (check_pin != 12) && (check_pin != 13))
+    {
+        analogWrite(check_pin, val);
+    }
+ #endif  
+}
+
+//////////////////////////////////////////////////////////////////////////
+//
+// int GetHotEndTemperature() 
+// 
+// called by manage_heater(), PID_autotune(), check_heater()
+//////////////////////////////////////////////////////////////////////////
+
+int GetHotEndTemperature()
+{
+#ifdef HEATER_USES_THERMISTOR
+    current_raw = analogRead(TEMP_0_PIN); 
+  #ifdef DEBUG_HEAT_MGMT
+      log_int("_HEAT_MGMT - analogRead(TEMP_0_PIN)", current_raw);
+      log_int("_HEAT_MGMT - NUMTEMPS", NUMTEMPS);
+  #endif
+    // When using thermistor, when the heater is colder than targer temp, we get a higher analog reading than target, 
+    // this switches it up so that the reading appears lower than target for the control logic.
+    current_raw = 1023 - current_raw;
+#elif defined HEATER_USES_AD595
+    current_raw = analogRead(TEMP_0_PIN);    
+#elif defined HEATER_USES_MAX6675
+    current_raw = read_max6675();
+#endif
+return current_raw;
+}
+
+#ifdef PID_AUTOTUNE
+
+//-------------------- START PID AUTOTUNE ---------------------------
+// Based on PID relay test 
+// Thanks to Erik van der Zalm for this idea to use it for Marlin
+// Some information see:
+// http://brettbeauregard.com/blog/2012/01/arduino-pid-autotune-library/
+//------------------------------------------------------------------
+
+void PID_autotune(int PIDAT_test_temp)
+{
+  float PIDAT_input                  = 0;
+  int PIDAT_input_help               = 0;
+  unsigned char PIDAT_count_input    = 0;
+
+  float PIDAT_max, PIDAT_min;
+ 
+  unsigned char PIDAT_PWM_val        = HEATER_CURRENT;                    // 255
+  
+  unsigned char PIDAT_cycles         = 0;
+  bool PIDAT_heating                 = true;
+
+  unsigned long PIDAT_temp_millis    = millis();
+  unsigned long PIDAT_t1             = PIDAT_temp_millis;
+  unsigned long PIDAT_t2             = PIDAT_temp_millis;
+  unsigned long PIDAT_T_check_AI_val = PIDAT_temp_millis;
+
+  unsigned char PIDAT_cycle_cnt      = 0;
+  
+  long PIDAT_t_high;
+  long PIDAT_t_low;
+
+  long PIDAT_bias                    = HEATER_CURRENT/2;                  // 127
+  long PIDAT_d                       = HEATER_CURRENT/2;                  // 127
+  
+  float PIDAT_Ku, PIDAT_Tu;
+  float PIDAT_Kp, PIDAT_Ki, PIDAT_Kd;
+  
+  #define PIDAT_TIME_FACTOR ((HEATER_CHECK_INTERVAL*256.0) / 1000.0)      // 28.672
+  
+  SerialMgr.cur()->println("PID Autotune start");
+
+  ett                                = PIDAT_test_temp;                   // save the target temparature
+  
+#ifdef BED_USES_THERMISTOR
+
+   WRITE(HEATER_1_PIN,LOW);                                               // switch off the heated bed
+
+#endif
+  
+  for(;;) 
+  {
+    if((millis() - PIDAT_T_check_AI_val) > 100 )
+    {
+      // if it is 100 ms since the last time we read the hot end temperaure update it
+      PIDAT_T_check_AI_val = millis();                // restart the timer
+      PIDAT_cycle_cnt++;                              // increment the cycle count
+      current_raw = GetHotEndTemperature();           // read the hot end temperature
+      tt = analog2temp(current_raw);                  // save the temp is degrees C for screen
+      PIDAT_input_help += tt;                         // add the helper value currently 0
+      PIDAT_count_input++;                            // increment something :)
+
+#ifdef LCD_SUPPORTED
+
+      StatusScreen();                                 // display the temerature on the LCD every 0.1 seconds
+
+#endif
+    }  // if((millis() - PIDAT_T_check_AI_val) > 100 )
+    
+    if(PIDAT_cycle_cnt >= 10 )
+    {
+      
+      PIDAT_cycle_cnt   = 0;
+      PIDAT_input       = (float)PIDAT_input_help / (float)PIDAT_count_input;
+      PIDAT_input_help  = 0;
+      PIDAT_count_input = 0;
+      
+      PIDAT_max=max(PIDAT_max,PIDAT_input);
+      PIDAT_min=min(PIDAT_min,PIDAT_input);
+      
+      if(PIDAT_heating == true && PIDAT_input > PIDAT_test_temp) 
+      {
+        if(millis() - PIDAT_t2 > 5000) 
+        { 
+          PIDAT_heating = false;
+          PIDAT_PWM_val = (PIDAT_bias - PIDAT_d);
+          PIDAT_t1      = millis();
+          PIDAT_t_high  = PIDAT_t1 - PIDAT_t2;
+          PIDAT_max     = PIDAT_test_temp;
+        }
+      }
+      
+      if(PIDAT_heating == false && PIDAT_input < PIDAT_test_temp) 
+      {
+        if(millis() - PIDAT_t1 > 5000) 
+        {
+          PIDAT_heating = true;
+          PIDAT_t2 = millis();
+          PIDAT_t_low = PIDAT_t2 - PIDAT_t1;
+          
+          if(PIDAT_cycles > 0) 
+          {
+            PIDAT_bias += (PIDAT_d*(PIDAT_t_high - PIDAT_t_low))/(PIDAT_t_low + PIDAT_t_high);
+            PIDAT_bias = constrain(PIDAT_bias, 20 ,HEATER_CURRENT - 20);
+            if(PIDAT_bias > (HEATER_CURRENT/2))
+            {
+              PIDAT_d = (HEATER_CURRENT - 1) - PIDAT_bias;
+            }
+            else
+            {
+              PIDAT_d = PIDAT_bias;
+            }
+
+            SerialMgr.cur()->print(" bias: "); SerialMgr.cur()->print(PIDAT_bias);
+            SerialMgr.cur()->print(" d: ");    SerialMgr.cur()->print(PIDAT_d);
+            SerialMgr.cur()->print(" min: ");  SerialMgr.cur()->print(PIDAT_min);
+            SerialMgr.cur()->print(" max: ");  SerialMgr.cur()->println(PIDAT_max);
+            
+            if(PIDAT_cycles > 2) 
+            {
+              PIDAT_Ku = (4.0*PIDAT_d)/(3.14159*(PIDAT_max-PIDAT_min));
+              PIDAT_Tu = ((float)(PIDAT_t_low + PIDAT_t_high)/1000.0);
+              
+              SerialMgr.cur()->print(" Ku: "); SerialMgr.cur()->print(PIDAT_Ku);
+              SerialMgr.cur()->print(" Tu: "); SerialMgr.cur()->println(PIDAT_Tu);
+
+              PIDAT_Kp = 0.60*PIDAT_Ku;
+              PIDAT_Ki = 2*PIDAT_Kp/PIDAT_Tu;
+              PIDAT_Kd = PIDAT_Kp*PIDAT_Tu/8;
+              SerialMgr.cur()->println(" Clasic PID");
+              SerialMgr.cur()->print(" Kp: "); SerialMgr.cur()->println(PIDAT_Kp);
+              SerialMgr.cur()->print(" Ki: "); SerialMgr.cur()->println(PIDAT_Ki);
+              SerialMgr.cur()->print(" Kd: "); SerialMgr.cur()->println(PIDAT_Kd);
+//              SerialMgr.cur()->print(" CFG Kp: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Kp*256));
+//              SerialMgr.cur()->print(" CFG Ki: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Ki*PIDAT_TIME_FACTOR));
+//              SerialMgr.cur()->print(" CFG Kd: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Kd*PIDAT_TIME_FACTOR));
+              
+              PIDAT_Kp = 0.30*PIDAT_Ku;
+              PIDAT_Ki = PIDAT_Kp/PIDAT_Tu;
+              PIDAT_Kd = PIDAT_Kp*PIDAT_Tu/3;
+              SerialMgr.cur()->println(" Some overshoot");
+              SerialMgr.cur()->print(" Kp: "); SerialMgr.cur()->println(PIDAT_Kp);
+              SerialMgr.cur()->print(" Ki: "); SerialMgr.cur()->println(PIDAT_Ki);
+              SerialMgr.cur()->print(" Kd: "); SerialMgr.cur()->println(PIDAT_Kd);
+//              SerialMgr.cur()->print(" CFG Kp: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Kp*256));
+//              SerialMgr.cur()->print(" CFG Ki: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Ki*PIDAT_TIME_FACTOR));
+//              SerialMgr.cur()->print(" CFG Kd: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Kd*PIDAT_TIME_FACTOR));
+
+              PIDAT_Kp = 0.20*PIDAT_Ku;
+              PIDAT_Ki = 2*PIDAT_Kp/PIDAT_Tu;
+              PIDAT_Kd = PIDAT_Kp*PIDAT_Tu/3;
+              SerialMgr.cur()->println(" No overshoot ");
+              SerialMgr.cur()->print(" Kp: "); SerialMgr.cur()->println(PIDAT_Kp);
+              SerialMgr.cur()->print(" Ki: "); SerialMgr.cur()->println(PIDAT_Ki);
+              SerialMgr.cur()->print(" Kd: "); SerialMgr.cur()->println(PIDAT_Kd);
+//              SerialMgr.cur()->print(" CFG Kp: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Kp*256));
+//              SerialMgr.cur()->print(" CFG Ki: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Ki*PIDAT_TIME_FACTOR));
+//              SerialMgr.cur()->print(" CFG Kd: "); SerialMgr.cur()->println((unsigned int)(PIDAT_Kd*PIDAT_TIME_FACTOR));
+              /*
+              */
+            }
+          }
+          PIDAT_PWM_val = (PIDAT_bias + PIDAT_d);
+          PIDAT_cycles++;
+          PIDAT_min = PIDAT_test_temp;
+        }
+      } 
+      
+      #ifdef PID_SOFT_PWM
+        g_heater_pwm_val = PIDAT_PWM_val;
+      #else
+        analogWrite(HEATER_0_PIN, PIDAT_PWM_val);
+//        analogWrite_check(HEATER_0_PIN, PIDAT_PWM_val);      // kliments version
+        #if LED_PIN>-1
+          analogWrite(LED_PIN, PIDAT_PWM_val);
+//          analogWrite_check(LED_PIN, PIDAT_PWM_val);         // kliments version
+        #endif
+      #endif  
+    }
+    
+    if((PIDAT_input > (PIDAT_test_temp + 55)) || (PIDAT_input > 255))
+    {
+      SerialMgr.cur()->println("PID Autotune failed! Temperature to high");
+      ett = 0;                                                // reset extruder target temperature
+      return;
+    }
+    
+    if(millis() - PIDAT_temp_millis > 2000) 
+    {
+      PIDAT_temp_millis = millis();
+      SerialMgr.cur()->print("ok T:");
+      SerialMgr.cur()->print(PIDAT_input);   
+      SerialMgr.cur()->print(" @:");
+      SerialMgr.cur()->println((unsigned char)PIDAT_PWM_val*1);       
+    }
+    
+    if(((millis() - PIDAT_t1) + (millis() - PIDAT_t2)) > (10L*60L*1000L*2L)) 
+    {
+      SerialMgr.cur()->println("PID Autotune failed! timeout");
+      ett = 0;                                                // reset extruder target temperature
+      return;
+    }
+    
+    if(PIDAT_cycles > 5) 
+    {
+      SerialMgr.cur()->println("PID Autotune finished ! Place the Kp, Ki and Kd constants in the configuration.h");
+      return;
+    }
+  }
+}
+
+//---------------- END AUTOTUNE PID ------------------------------
+
+#endif  //  PID_AUTOTUNE
 
 
