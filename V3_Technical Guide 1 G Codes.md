@@ -391,7 +391,7 @@ These unofficial non standard M codes are unique to the official Eaglemoss firmw
    None
    #### Example
    M5                           ; Reset Status and Clears Error flag.
-### M203 - Record Z adjustment
+### M203 - Record Z adjustment - Depricated Build 0109
    ### Useage
    This records a Z offset in non-volatile memory in RepRap's microcontroller where it remains active until next set, 
 even when the power is turned off and on again.  
@@ -402,6 +402,20 @@ even when the power is turned off and on again.
    **Znnn** the Max Z adjustment
    #### Example: 
    M203 Z-0.75  ;
+   ### Date depricated:
+   Build 0109
+### M203 - Set maximum feedrate - Since Build 0109
+   ### Useage
+   Sets the maximum feedrates that your machine can do
+   #### Parameters
+   **Xnnn** Maximum feedrate for X axis
+   **Ynnn** Maximum feedrate for Y axis
+   **Znnn** Maximum feedrate for Z axis
+   **Ennn** Maximum feedrate for extruder drives
+   #### Example: 
+   M203 X6000 Y6000 Z300 E10000
+   ### Date implemented:
+   Build 0109
 ### M211 - Set extruder LED Red LED
    #### Usage
    Sets the extruder LED Red. Sends 211 to V3_I2C device.
@@ -679,7 +693,7 @@ These M codes have been added since the official Eaglemoss firmware release.
    PID Tuning refers to a control algorithm used in some repraps to tune heating behavior for hot ends and heated beds. This command generates Proportional (Kp), Integral (Ki), and Derivative (Kd) values for the hotend.
    #### Parameters
    *This command can be used without any additional parameters.*  
-   **S<temperature>**  
+   **Snnn** The temperture at which to run PID tuning MAX 240 C
    #### Example  
    **M303**      ; runs the PID Tuning at 150 C  
    **M303 S200** ; runs the PID Tuning at 200 C  
