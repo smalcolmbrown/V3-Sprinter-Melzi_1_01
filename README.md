@@ -122,5 +122,4 @@ Fixed Error codes in manager_heater() - now sets them correctly before calling B
 Added M601  show Extruder Temp jitter  
 Added M602  reset Extruder Temp jitter  
 Added M303 PID auto-tune  
-Minor bug fixes and streamlined reading Extruder temperature for consistency.  
- fixes for Extruder temperature measurement. Streamlined Extruder temperature measurement.
+Minor bug fixes and streamlined reading Extruder temperature for consistency. 
