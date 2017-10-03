@@ -49,7 +49,7 @@ void V3_I2C_Command ( int iCommand, boolean bEchoCommand ) {
   Wire.endTransmission();                     // end transmission
   if( bEchoCommand ) {
     sprintf( szChar, "M%d OK", iCommand );    // create echo string
-    SerialMgr.cur()->println("M233 OK");      // echo result to serial manager
+    SerialMgr.cur()->println(szChar);         // echo result to serial manager
   }
 }
 
