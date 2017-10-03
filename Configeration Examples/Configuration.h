@@ -5,6 +5,12 @@
 #define V3
 
 //-----------------------------------------------------------------------
+//// The number of Extruders. Uncomment the one that describes your 3D printer
+//-----------------------------------------------------------------------
+#define _EXTRUDERS "1"
+//#define _EXTRUDERS "2"
+
+//-----------------------------------------------------------------------
 //// Nozzel offset from X=0 Y=0 on the build plate
 //-----------------------------------------------------------------------
 // change to 0 if you do not need a offset 20160329
@@ -38,27 +44,29 @@
 //-----------------------------------------------------------------------
 //// SETTINGS FOR Stepper driver type
 //-----------------------------------------------------------------------
-// Un-Comment out if you are using DRV8825 Stepper drivers for X and Y axis 
+// Un-Comment if you are using DRV8825 Stepper drivers for X and Y axis 
 // the default is commented out for an un-modified V3 printer only use this
-// setting if you have Bill Green's Stepper Mod fitted.
+// setting if you have Bill Green's Stepper Mod fitted with DRV8825 steppers
+// drivers in the X and Y Axis.
 #define STEPPER_DRIVER_X_Y_DRV8825      
 
 //-----------------------------------------------------------------------
 //// Calibration variables
 //-----------------------------------------------------------------------
 // X, Y, Z, E steps per unit - Metric Prusa Mendel with Wade extruder:
-//  float axis_steps_per_unit[] = {91.4286, 91.4286,4000,910};
-//  float axis_steps_per_unit[] = {80.00, 80.00,2560,910};
+//  #define _AXIS_STEP_PER_UNIT {91.4286, 91.4286, 4000, 910};
+//  #define _AXIS_STEP_PER_UNIT {80.00,     80.00, 2560, 910};
 
 //// Calibration variables
 // X, Y, Z, E steps per unit - V3 
-//  float axis_steps_per_unit[] = {78.82, 78.82,78.82,99.6150};   //V3-Z-belt fitted with A4988 stepper drivers for X, Y, Z and E 
-//  float axis_steps_per_unit[] = {78.82, 78.82,400,99.6150};     //V3-Z-screw fitted with A4988 stepper drivers for X, Y, Z and E 
+//  #define _AXIS_STEP_PER_UNIT {78.82, 78.82,78.82,99.6150};   //V3-Z-belt fitted with A4988 stepper drivers for X, Y, Z and E 
+//  #define _AXIS_STEP_PER_UNIT {78.82, 78.82,400,99.6150};     //V3-Z-screw fitted with A4988 stepper drivers for X, Y, Z and E 
+
 #ifndef STEPPER_DRIVER_X_Y_DRV8825
-  float axis_steps_per_unit[] = {78.82, 78.82, 2560, 99.6150};      //V3-Z-screw2 fitted with A4988 stepper drivers for X, Y, Z and E (the default for the V3 )
-#else
-  float axis_steps_per_unit[] = {157.64, 157.64, 2560, 99.6150};    //V3-Z-screw2 with X and Y fitted with DRV8825 stepper drivers and A4988 stepper drivers for Z and E
-#endif
+  #define _AXIS_STEP_PER_UNIT {78.82, 78.82, 2560, 99.6150}     //V3-Z-screw2 fitted with A4988 stepper drivers for X, Y, Z and E (the default for the V3 )
+#else  // else of #ifndef STEPPER_DRIVER_X_Y_DRV8825
+  #define _AXIS_STEP_PER_UNIT {157.64, 157.64, 2560, 99.6150}   //V3-Z-screw2 with X and Y fitted with DRV8825 stepper drivers and A4988 stepper drivers for Z and E
+#endif  //  #ifndef STEPPER_DRIVER_X_Y_DRV8825
 
 //-----------------------------------------------------------------------
 //// Endstop Settings
@@ -99,7 +107,6 @@
   #error Uncomment #define V3 at the start of the file Configuration.h
 #endif
 
-
 //-----------------------------------------------------------------------
 //// ADVANCED SETTINGS - to tweak parameters
 //-----------------------------------------------------------------------
@@ -135,6 +142,10 @@ const bool INVERT_E_DIR = true;
   const bool min_software_endstops = false; //If true, axis won't move to coordinates less than zero.
   const bool max_software_endstops = true;  //If true, axis won't move to coordinates greater than the defined lengths below.
 
+
+//-----------------------------------------------------------------------
+//// Heated bed extent
+//-----------------------------------------------------------------------
 #ifdef V3
   const int X_MAX_LENGTH = 140;
   const int Y_MAX_LENGTH = 140;
@@ -143,7 +154,6 @@ const bool INVERT_E_DIR = true;
   const int X_MAX_LENGTH = 220;    
   const int Y_MAX_LENGTH = 220;
   const int Z_MAX_LENGTH = 240;
-
 #endif
 
 
@@ -151,11 +161,19 @@ const bool INVERT_E_DIR = true;
 //// MOVEMENT SETTINGS
 //-----------------------------------------------------------------------
   const int NUM_AXIS = 4; // The axis order in all axis related arrays is X, Y, Z, E
+  /*
 //  float max_feedrate[] = {3000, 3000, 800, 10000}; //V3 Z-belt
   float max_feedrate[] = {3000, 3000, 350, 10000}; //V3 Z-screw
 //  float homing_feedrate[] = {1500,1500,800}; //V3 Z-blet
   float homing_feedrate[] = {1500,1500,350}; //V3 Z-screw
-  bool axis_relative_modes[] = {false, false, false, false};
+  bool axis_relative_modes[] = {false, false, false, false};    */
+  
+  //#define _MAX_FEEDRATE {3000, 3000, 800, 10000};       //V3 Z-belt   (mm/sec)
+  #define _MAX_FEEDRATE {3000, 3000, 350, 10000}        //V3 Z-screw   (mm/sec)
+  //#define _HOMING_FEEDRATE  {1500,1500,800};            //V3 Z-belt   (mm/min) !!
+  #define _HOMING_FEEDRATE  {1500,1500,350};            //V3 Z-screw   (mm/min) !!
+  #define _AXIS_RELATIVE_MODES {false, false, false, false}
+  
 
 // Min step delay in microseconds. If you are experiencing missing steps, try to raise the delay microseconds, but be aware this
 // If you enable this, make sure STEP_DELAY_RATIO is disabled.
@@ -173,12 +191,11 @@ const bool INVERT_E_DIR = true;
 
 // Acceleration settings
 #ifdef RAMP_ACCELERATION
-// X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
-  float max_start_speed_units_per_second[] = {25.0,25.0,25.0,10.0};
-//  long max_acceleration_units_per_sq_second[] = {1000,1000,1000,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-blet
-  long max_acceleration_units_per_sq_second[] = {1000,1000,50,250}; // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw
-  //long max_travel_acceleration_units_per_sq_second[] = {500,500,500,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-blet
-  long max_travel_acceleration_units_per_sq_second[] = {500,500,50,500}; // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
+  #define _MAX_START_SPEED_UNITS_PER_SECOND {25.0,25.0,25.0,10.0}              // X, Y, Z, E maximum start speed for accelerated moves. E default values are good for skeinforge 40+, for older versions raise them a lot.
+//  #define _MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,1000,250}           // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-belt
+  #define _MAX_ACCELERATION_UNITS_PER_SQ_SECOND {1000,1000,50,250}            // X, Y, Z and E max acceleration in mm/s^2 for printing moves or retracts. V3 Z-screw 
+//  #define _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {500,500,500,500};      // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-belt
+  #define _MAX_TRAVEL_ACCELERATION_UNITS_PER_SQ_SECOND {500,500,50,500}        // X, Y, Z max acceleration in mm/s^2 for travel moves. V3 Z-screw
 #endif
 
 //-----------------------------------------------------------------------
@@ -186,7 +203,7 @@ const bool INVERT_E_DIR = true;
 //-----------------------------------------------------------------------
 // This may be useful if you have multiple machines and wish to identify them by using the M115 command.
 // By default we set it to zeros.
-  const char uuid[] = "00000000-0000-0000-0000-000000000000";
+#define _DEF_CHAR_UUID "00000000-0000-0000-0000-000000000000"
 // 
 
 //-----------------------------------------------------------------------
@@ -196,15 +213,23 @@ const bool INVERT_E_DIR = true;
 //-----------------------------------------------------------------------
 //// PID settings:
 //-----------------------------------------------------------------------
-// Uncomment the following line to enable PID support. This is untested and could be disastrous. Be careful.
+// Uncomment the following line to enable PID support. This is untested for thermocouples and could be disastrous. Be careful.
 #define PIDTEMP 1
 #ifdef PIDTEMP
-  int pid_max = 255; // limits current to nozzle
-  int pid_i_max = 80;//130;//125;
-  double Kp = 2;//1.10;
-  double Ki = 0.01;
-  double Kd = 20.0;//0.01;
+  #define _PID_MAX 255       // limits current to nozzle
+  #define _PID_I_MAX 80      //130;//125;
+  #define _PID_KP 2         //1.10;
+  #define _PID_KI 0.01 
+  #define _PID_KD 20.0      //0.01;
 #endif
+
+//-----------------------------------------------------------------------
+//// PID autotune settings:
+//-----------------------------------------------------------------------
+// Uncomment the following line to enable PID autotune support.  This is untested and could be disastrous. Be careful. 
+// Make sure that you carefully monitor the hot end temperatute and if you detect thermal runaway switch off the the 3D printer immediately
+#define PID_AUTOTUNE
+
 
 //-----------------------------------------------------------------------
 //// SETTINGS FOR Z PROBE FUNCTION (Command G29 and G30)
@@ -245,15 +270,34 @@ const bool INVERT_E_DIR = true;
 // comment out if no M355 support 
 #define M355_SUPPORT
 
-#ifdef M355_SUPPORT
-  #define CASE_LIGHT 30          // A1 on J16
-#endif
 
 //-----------------------------------------------------------------------
 //// SETTINGS FOR M499  - Force Error mode(Command M499)
 //-----------------------------------------------------------------------
 // comment out if no M499 support (only used to test BBB() error reporting)
 //#define M499_SUPPORT
+
+//-----------------------------------------------------------------------
+//// STORE SETTINGS TO EEPROM
+//-----------------------------------------------------------------------
+// the microcontroller can store settings in the EEPROM
+// M500 - stores paramters in EEPROM
+// M501 - reads parameters from EEPROM (if you need reset them after you changed them temporarily).
+// M502 - reverts to the default "factory settings". You still need to store them in EEPROM afterwards if you want to.
+// M503 - Print settings
+// define this to enable eeprom support
+#define USE_EEPROM_SETTINGS
+
+// to disable EEPROM Serial responses and decrease program space by ~1000 byte: comment this out:
+// please keep turned on if you can.
+#define PRINT_EEPROM_SETTING
+
+//-----------------------------------------------------------------------
+//// Settings for M600 and M601 heater debugging
+//-----------------------------------------------------------------------
+// Measure the MIN/MAX Value of the Hotend Temp and show it with
+// Command M601 / Command M602 Reset the MIN/MAX Value
+#define DEBUG_HEATER_TEMP
 
 //-----------------------------------------------------------------------
 //// Setting for the software control of fans
@@ -264,9 +308,8 @@ const bool INVERT_E_DIR = true;
 //-----------------------------------------------------------------------
 //// M109 target window - machine will deem to have reached target temperature when nozzle reaches Temp = target - NZONE.
 //-----------------------------------------------------------------------
-//  int nzone = 5;//2;      // setting for the 2016 and 2017 Eaglemoss firmware releases
-  int nzone = 2;          // setting for the V1.01 firmware release 
-
+//  #define NZONE = 5;//2;      // setting for the 2016 and 2017 Eaglemoss firmware releases
+  #define _NZONE 2         // setting for the V1.01 firmware release
 
 //-----------------------------------------------------------------------
 //// Sets the Initial speed of the work cooling fan
@@ -356,693 +399,7 @@ const bool INVERT_E_DIR = true;
 //#define DEBUG_PID
 
 
-// Thermistor lookup table for RepRap Temperature Sensor Boards (http://reprap.org/wiki/Thermistor)
-// Made with the online thermistor table generator by nathan7 at http://calculator.josefprusa.cz/
-// new table from july 2017 V3 firmware update
-// r0: 100000
-// t0: 25
-// r1: 0
-// r2: 10000
-// beta: 3950
-// max adc: 1023
-#define NUMTEMPS 100
-short temptable[NUMTEMPS][2] = {
-	{	1	,	500	},
-	{	12	,	300	},
-	{	14	,	288	},
-	{	23	,	254	},
-	{	31	,	234	},
-	{	40	,	220	},
-	{	66	,	192	},
-	{	80	,	182	},
-	{	92	,	175	},
-	{	109	,	167	},
-	{	120	,	162	},
-	{	124	,	160	},
-	{	131	,	157	},
-	{	142	,	153	},
-	{	147	,	151	},
-	{	156	,	148	},
-	{	163	,	146	},
-	{	181	,	141	},
-	{	196	,	137	},
-	{	218	,	132	},
-	{	278	,	120	},
-	{	295	,	117	},
-	{	307	,	115	},
-	{	319	,	113	},
-	{	325	,	112	},
-	{	338	,	110	},
-	{	345	,	109	},
-	{	352	,	108	},
-	{	359	,	107	},
-	{	366	,	106	},
-	{	373	,	105	},
-	{	380	,	104	},
-	{	387	,	103	},
-	{	394	,	102	},
-	{	401	,	101	},
-	{	409	,	100	},
-	{	416	,	99	},
-	{	424	,	98	},
-	{	432	,	97	},
-	{	439	,	96	},
-	{	447	,	95	},
-	{	455	,	94	},
-	{	462	,	93	},
-	{	470	,	92	},
-	{	478	,	91	},
-	{	486	,	90	},
-	{	494	,	89	},
-	{	502	,	88	},
-	{	511	,	87	},
-	{	519	,	86	},
-	{	527	,	85	},
-	{	535	,	84	},
-	{	543	,	83	},
-	{	552	,	82	},
-	{	560	,	81	},
-	{	568	,	80	},
-	{	576	,	79	},
-	{	585	,	78	},
-	{	593	,	77	},
-	{	601	,	76	},
-	{	610	,	75	},
-	{	618	,	74	},
-	{	626	,	73	},
-	{	634	,	72	},
-	{	643	,	71	},
-	{	651	,	70	},
-	{	659	,	69	},
-	{	667	,	68	},
-	{	675	,	67	},
-	{	691	,	65	},
-	{	707	,	63	},
-	{	714	,	62	},
-	{	722	,	61	},
-	{	737	,	59	},
-	{	744	,	58	},
-	{	752	,	57	},
-	{	766	,	55	},
-	{	773	,	54	},
-	{	787	,	52	},
-	{	794	,	51	},
-	{	807	,	49	},
-	{	814	,	48	},
-	{	826	,	46	},
-	{	833	,	45	},
-	{	845	,	43	},
-	{	856	,	41	},
-	{	862	,	40	},
-	{	872	,	38	},
-	{	883	,	36	},
-	{	892	,	34	},
-	{	902	,	32	},
-	{	915	,	29	},
-	{	923	,	27	},
-	{	935	,	24	},
-	{	942	,	22	},
-	{	952	,	19	},
-	{	963	,	15	},
-	{	973	,	11	},
-	{	981	,	7	},
-	{	990	,	2	},
-};
-// Thermistor lookup table for RS thermistor 198-961
-// Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
-// ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=10000 --beta=3960 --max-adc=1023
-// r0: 100000
-// t0: 25
-// r1: 0
-// r2: 10000
-// beta: 3960
-// max adc: 1023
-/*#define NUMTEMPS 30
-short temptable[NUMTEMPS][2] = {
-   {1, 704},
-   {15, 280},
-   {21, 266},
-   {41, 234},
-   {61, 208},
-   {81, 191},
-   {101, 178},
-   {121, 168},
-   {141, 159},
-   {161, 152},
-   {181, 146},
-   {221, 135},
-   {261, 126},
-   {301, 118},
-   {341, 111},
-   {381, 105},
-   {421, 99},
-   {461, 94},
-   {501, 88},
-   {541, 83},
-   {581, 78},
-   {621, 73},
-   {661, 68},
-   {741, 58},
-   {781, 52},
-   {821, 46},
-   {861, 40},
-   {901, 32},
-   {981, 7},
-   {1008, 0}
-};
-*/
-// ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=4700 --beta=3960 --max-adc=1023
-// r0: 100000
-// t0: 25
-// r1: 0
-// r2: 4700
-// beta: 3960
-// max adc: 1023
-/*#define NUMTEMPS 30
-short temptable[NUMTEMPS][2] = {
-   {1, 929},
-   {36, 299},
-   {71, 246},
-   {106, 217},
-   {141, 198},
-   {176, 184},
-   {211, 173},
-   {246, 163},
-   {281, 154},
-   {316, 147},
-   {351, 140},
-   {386, 134},
-   {421, 128},
-   {456, 122},
-   {491, 117},
-   {526, 112},
-   {561, 107},
-   {596, 102},
-   {631, 97},
-   {666, 91},
-   {701, 86},
-   {736, 81},
-   {771, 76},
-   {806, 70},
-   {841, 63},
-   {876, 56},
-   {911, 48},
-   {946, 38},
-   {981, 23},
-   {1016, 0}
-};
-*/
-#ifdef REPRAPPRO_HUXLEY
-//bed temp table, 100k EPCOS
-#define BNUMTEMPS 20
-const short bedtemptable[BNUMTEMPS][2] = {
-   {1, 549},
-   {11, 274},
-   {21, 228},
-   {31, 204},
-   {41, 188},
-   {51, 176},
-   {61, 166},
-   {71, 159},
-   {81, 152},
-   {91, 146},
-   {101, 141},
-   {111, 137},
-   {121, 133},
-   {131, 131},
-   {141, 129},
-   {151, 127},
-   {161, 125},
-   {171, 123},
-   {181, 120},
-   {191, 119},
-   {201, 117},
-   {211, 115},
-   {221, 113},
-   {231, 112},
-   {241, 110},
-   {251, 109},
-   {261, 108},
-   {271, 107},
-   {281, 106},
-   {291, 105},
-   {301, 104},
-   {311, 103},
-   {321, 102},
-   {331, 101},
-   {341, 100},
-   {351, 99},
-   {361, 98},
-   {371, 97},
-   {381, 96},
-   {391, 95},
-   {401, 94},
-   {411, 93},
-   {421, 92},
-   {431, 91},
-   {441, 90},
-   {451, 89},
-   {461, 88},
-   {471, 87},
-   {481, 86},
-   {491, 85},
-   {501, 84},
-   {511, 83},
-   {521, 82},
-   {531, 81},
-   {541, 80},
-   {551, 79},
-   {561, 78},
-   {571, 77},
-   {581, 76},
-   {591, 75},
-   {601, 74},
-   {611, 73},
-   {621, 72},
-   {631, 71},
-   {641, 70},
-   {651, 69},
-   {661, 68},
-   {671, 67},
-   {681, 66},
-   {691, 65},
-   {701, 63},
-   {711, 62},
-   {721, 61},
-   {731, 59},
-   {741, 58},
-   {751, 57},
-   {761, 55},
-   {771, 54},
-   {781, 52},
-   {791, 51},
-   {801, 49},
-   {811, 48},
-   {821, 46},
-   {831, 45},
-   {841, 43},
-   {851, 41},
-   {861, 40},
-   {871, 38},
-   {881, 36},
-   {891, 34},
-   {901, 32},
-   {911, 29},
-   {921, 27},
-   {931, 24},
-   {941, 22},
-   {951, 19},
-   {961, 15},
-   {971, 11},
-   {981, 7},
-   {991, 2},
-};
-#endif
 
-//#ifdef REPRAPPRO_MENDEL
-#ifdef RP3D.COM_PANGU
-// Thermistor lookup table for RepRap Temperature Sensor Boards (http://reprap.org/wiki/Thermistor)
-// Made with the online thermistor table generator by nathan7 at http://calculator.josefprusa.cz/
-// r0: 100000
-// t0: 25
-// r1: 0
-// r2: 10000
-// beta: 3950
-// max adc: 1023
-#define BNUMTEMPS 100
-const short bedtemptable[BNUMTEMPS][2] = {
-   {1, 549},
-   {11, 274},
-   {21, 228},
-   {31, 204},
-   {41, 188},
-   {51, 176},
-   {61, 166},
-   {71, 159},
-   {81, 152},
-   {91, 146},
-   {101, 141},
-   {111, 137},
-   {121, 133},
-   {131, 131},
-   {141, 129},
-   {151, 127},
-   {161, 125},
-   {171, 123},
-   {181, 120},
-   {191, 119},
-   {201, 117},
-   {211, 115},
-   {221, 113},
-   {231, 112},
-   {241, 110},
-   {251, 109},
-   {261, 108},
-   {271, 107},
-   {281, 106},
-   {291, 105},
-   {301, 104},
-   {311, 103},
-   {321, 102},
-   {331, 101},
-   {341, 100},
-   {351, 99},
-   {361, 98},
-   {371, 97},
-   {381, 96},
-   {391, 95},
-   {401, 94},
-   {411, 93},
-   {421, 92},
-   {431, 91},
-   {441, 90},
-   {451, 89},
-   {461, 88},
-   {471, 87},
-   {481, 86},
-   {491, 85},
-   {501, 84},
-   {511, 83},
-   {521, 82},
-   {531, 81},
-   {541, 80},
-   {551, 79},
-   {561, 78},
-   {571, 77},
-   {581, 76},
-   {591, 75},
-   {601, 74},
-   {611, 73},
-   {621, 72},
-   {631, 71},
-   {641, 70},
-   {651, 69},
-   {661, 68},
-   {671, 67},
-   {681, 66},
-   {691, 65},
-   {701, 63},
-   {711, 62},
-   {721, 61},
-   {731, 59},
-   {741, 58},
-   {751, 57},
-   {761, 55},
-   {771, 54},
-   {781, 52},
-   {791, 51},
-   {801, 49},
-   {811, 48},
-   {821, 46},
-   {831, 45},
-   {841, 43},
-   {851, 41},
-   {861, 40},
-   {871, 38},
-   {881, 36},
-   {891, 34},
-   {901, 32},
-   {911, 29},
-   {921, 27},
-   {931, 24},
-   {941, 22},
-   {951, 19},
-   {961, 15},
-   {971, 11},
-   {981, 7},
-   {991, 2},
-};
-
-// Thermistor lookup table for RS thermistor 198-961
-// Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
-// ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=10000 --beta=3960 --max-adc=1023
-// r0: 100000
-// t0: 25
-// r1: 0
-// r2: 10000
-// beta: 3960
-// max adc: 1023
-/*#define BNUMTEMPS 30
-const short bedtemptable[BNUMTEMPS][2] = {
-   {1, 704},
-   {15, 280},
-   {21, 266},
-   {41, 234},
-   {61, 208},
-   {81, 191},
-   {101, 178},
-   {121, 168},
-   {141, 159},
-   {161, 152},
-   {181, 146},
-   {221, 135},
-   {261, 126},
-   {301, 118},
-   {341, 111},
-   {381, 105},
-   {421, 99},
-   {461, 94},
-   {501, 88},
-   {541, 83},
-   {581, 78},
-   {621, 73},
-   {661, 68},
-   {741, 58},
-   {781, 52},
-   {821, 46},
-   {861, 40},
-   {901, 32},
-   {981, 7},
-   {1008, 0}
-};
-*/
-/*
-// RS thermistor 484-0149; EPCOS B57550G103J
-// Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
-// ./createTemperatureLookup.py --r0=10000 --t0=25 --r1=0 --r2=4700 --beta=3480 --max-adc=1023
-// r0: 10000
-// t0: 25
-// r1: 0
-// r2: 4700
-// beta: 3480
-// max adc: 1023
-#define BNUMTEMPS 20
-const short bedtemptable[BNUMTEMPS][2] = {
-   {1, 599},
-   {54, 160},
-   {107, 123},
-   {160, 103},
-   {213, 90},
-   {266, 79},
-   {319, 70},
-   {372, 62},
-   {425, 55},
-   {478, 49},
-   {531, 43},
-   {584, 37},
-   {637, 31},
-   {690, 25},
-   {743, 19},
-   {796, 12},
-   {849, 5},
-   {902, -3},
-   {955, -16},
-   {1008, -42}
-};
-*/
-#endif
-
-#ifdef V3
-// Thermistor lookup table for RepRap Temperature Sensor Boards (http://reprap.org/wiki/Thermistor)
-// Made with the online thermistor table generator by nathan7 at http://calculator.josefprusa.cz/
-// r0: 100000
-// t0: 25
-// r1: 0
-// r2: 10000
-// beta: 3950
-// max adc: 1023
-#define BNUMTEMPS 100
-const short bedtemptable[BNUMTEMPS][2] = {
-	{	1	,	500	},
-	{	12	,	300	},
-	{	14	,	288	},
-	{	23	,	254	},
-	{	31	,	234	},
-	{	40	,	220	},
-	{	66	,	192	},
-	{	80	,	182	},
-	{	92	,	175	},
-	{	109	,	167	},
-	{	120	,	162	},
-	{	124	,	160	},
-	{	131	,	157	},
-	{	142	,	153	},
-	{	147	,	151	},
-	{	156	,	148	},
-	{	163	,	146	},
-	{	181	,	141	},
-	{	196	,	137	},
-	{	218	,	132	},
-	{	278	,	120	},
-	{	295	,	117	},
-	{	307	,	115	},
-	{	319	,	113	},
-	{	325	,	112	},
-	{	338	,	110	},
-	{	345	,	109	},
-	{	352	,	108	},
-	{	359	,	107	},
-	{	366	,	106	},
-	{	373	,	105	},
-	{	380	,	104	},
-	{	387	,	103	},
-	{	394	,	102	},
-	{	401	,	101	},
-	{	409	,	100	},
-	{	416	,	99	},
-	{	424	,	98	},
-	{	432	,	97	},
-	{	439	,	96	},
-	{	447	,	95	},
-	{	455	,	94	},
-	{	462	,	93	},
-	{	470	,	92	},
-	{	478	,	91	},
-	{	486	,	90	},
-	{	494	,	89	},
-	{	502	,	88	},
-	{	511	,	87	},
-	{	519	,	86	},
-	{	527	,	85	},
-	{	535	,	84	},
-	{	543	,	83	},
-	{	552	,	82	},
-	{	560	,	81	},
-	{	568	,	80	},
-	{	576	,	79	},
-	{	585	,	78	},
-	{	593	,	77	},
-	{	601	,	76	},
-	{	610	,	75	},
-	{	618	,	74	},
-	{	626	,	73	},
-	{	634	,	72	},
-	{	643	,	71	},
-	{	651	,	70	},
-	{	659	,	69	},
-	{	667	,	68	},
-	{	675	,	67	},
-	{	691	,	65	},
-	{	707	,	63	},
-	{	714	,	62	},
-	{	722	,	61	},
-	{	737	,	59	},
-	{	744	,	58	},
-	{	752	,	57	},
-	{	766	,	55	},
-	{	773	,	54	},
-	{	787	,	52	},
-	{	794	,	51	},
-	{	807	,	49	},
-	{	814	,	48	},
-	{	826	,	46	},
-	{	833	,	45	},
-	{	845	,	43	},
-	{	856	,	41	},
-	{	862	,	40	},
-	{	872	,	38	},
-	{	883	,	36	},
-	{	892	,	34	},
-	{	902	,	32	},
-	{	915	,	29	},
-	{	923	,	27	},
-	{	935	,	24	},
-	{	942	,	22	},
-	{	952	,	19	},
-	{	963	,	15	},
-	{	973	,	11	},
-	{	981	,	7	},
-	{	990	,	2	},
-};
-
-// Thermistor lookup table for RS thermistor 198-961
-// Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
-// ./createTemperatureLookup.py --r0=100000 --t0=25 --r1=0 --r2=10000 --beta=3960 --max-adc=1023
-// r0: 100000
-// t0: 25
-// r1: 0
-// r2: 10000
-// beta: 3960
-// max adc: 1023
-/*#define BNUMTEMPS 30
-const short bedtemptable[BNUMTEMPS][2] = {
-   {1, 704},
-   {15, 280},
-   {21, 266},
-   {41, 234},
-   {61, 208},
-   {81, 191},
-   {101, 178},
-   {121, 168},
-   {141, 159},
-   {161, 152},
-   {181, 146},
-   {221, 135},
-   {261, 126},
-   {301, 118},
-   {341, 111},
-   {381, 105},
-   {421, 99},
-   {461, 94},
-   {501, 88},
-   {541, 83},
-   {581, 78},
-   {621, 73},
-   {661, 68},
-   {741, 58},
-   {781, 52},
-   {821, 46},
-   {861, 40},
-   {901, 32},
-   {981, 7},
-   {1008, 0}
-};
-*/
-/*
-// RS thermistor 484-0149; EPCOS B57550G103J
-// Made with createTemperatureLookup.py (http://svn.reprap.org/trunk/reprap/firmware/Arduino/utilities/createTemperatureLookup.py)
-// ./createTemperatureLookup.py --r0=10000 --t0=25 --r1=0 --r2=4700 --beta=3480 --max-adc=1023
-// r0: 10000
-// t0: 25
-// r1: 0
-// r2: 4700
-// beta: 3480
-// max adc: 1023
-#define BNUMTEMPS 20
-const short bedtemptable[BNUMTEMPS][2] = {
-   {1, 599},
-   {54, 160},
-   {107, 123},
-   {160, 103},
-   {213, 90},
-   {266, 79},
-   {319, 70},
-   {372, 62},
-   {425, 55},
-   {478, 49},
-   {531, 43},
-   {584, 37},
-   {637, 31},
-   {690, 25},
-   {743, 19},
-   {796, 12},
-   {849, 5},
-   {902, -3},
-   {955, -16},
-   {1008, -42}
-};
-*/
-#endif
 /****************************************************************************************
 * Sanguinololu pin assignment
 *
@@ -1085,12 +442,12 @@ const short bedtemptable[BNUMTEMPS][2] = {
 #define E_STEP_PIN         1
 #define E_DIR_PIN          0
 
-// Z height probe
 
-#define PROBE_PIN          11     // TX1 on V3
-//#define PROBE_PIN          29    //29 on Melzi1284p A2
-
-#define LED_PIN            27
+#define CASE_LIGHT_PIN     30     // Case light pin (A1) 
+//#define PROBE_PIN          29     // Melzi1284p (A2)
+#define PROBE_PIN          11     // Z height probe (TX1) on V3
+#define TOOL_PIN           28     // Tool select pin 
+#define LED_PIN            27     // LED pin (A4)
 
 #define FAN_PIN            4
 
