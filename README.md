@@ -117,3 +117,10 @@ Now allows max feedrate to be adjusted via M203
 The number of Extruders can now be set in Configuration.h  
 Fixed M201 and M202 fixed error in max_acceleration_units_per_sq_second (thanks Bill)  
 Fixed Error codes in manager_heater() - now sets them correctly before calling BBB() All previous version including those from Eaglemoss forgot to set the error codes for Bed Temperature High or Low and Extruder temperature high  
+  
+**2017/10/03 Build 0110**  
+Added M601  show Extruder Temp jitter  
+Added M602  reset Extruder Temp jitter  
+Added M303 PID auto-tune  
+Minor bug fixes and streamlined reading Extruder temperature for consistency.  
+ fixes for Extruder temperature measurement. Streamlined Extruder temperature measurement.
