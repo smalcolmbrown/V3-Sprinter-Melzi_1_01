@@ -34,7 +34,7 @@ unsigned long S_count = 0;            // Steps taken counter
 unsigned long previous_millis_PauseID;
 
 int Fil_out=0;                        //Filament status
-//int Z_estop=20;
+int Z_estop=20;
 
 #define PAUSE_STEP_DELAY 10
 
@@ -53,19 +53,39 @@ extern float current_position[];
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define PAUSE_PLAY
+//#define PAUSE_PLAY
+#define PAUSE_BILL
 
 inline void Z_DN()
 {
   SerialMgr.cur()->println("Filament Run Out");
 
-#ifdef   PAUSE_PLAY
+#ifdef PAUSE_PLAY
 
   fPauseSavedZ = current_position[Z_AXIS];
   destination[Z_AXIS] = fPauseSavedZ + 10 ;
   prepare_move();
   
 #else
+  
+  #ifdef PAUSE_BILL
+
+  pinMode(26,OUTPUT); //Z enable
+  pinMode(3,OUTPUT);  //Z Step
+  pinMode(2,OUTPUT);  //Z Dir
+  
+  digitalWrite(2,HIGH); // set direction
+  digitalWrite(26,LOW); // Enable Z axis
+ 
+  while((digitalRead(Z_estop)==HIGH)&&(S_count < S_to_take)){ // check Z enstop before moving
+    digitalWrite(3,HIGH);
+    delayMicroseconds (7);
+    digitalWrite(3,LOW);
+    delayMicroseconds (7);
+    S_count++;
+  }
+  
+  #else  // pause suusi V1
   
   pinMode(Z_ENABLE_PIN,OUTPUT);      //Z enable  
   pinMode(Z_STEP_PIN,OUTPUT);        //Z Step
@@ -82,6 +102,8 @@ inline void Z_DN()
     delayMicroseconds (PAUSE_STEP_DELAY);
     S_count++;
   }
+  
+  #endif  //  PAUSE_BILL
 
 #endif
 
@@ -104,6 +126,23 @@ inline void Z_UP()
   
 #else
   
+  #ifdef PAUSE_BILL
+  
+  digitalWrite(26,LOW); // Enable Z axis
+  digitalWrite(2,LOW);   // set Z direction
+  
+  while (S_count > 0){        
+    digitalWrite(3,HIGH);
+    delayMicroseconds (10);
+    digitalWrite(3,LOW);
+    delayMicroseconds (10);
+    S_count--;
+  }
+  digitalWrite(26,HIGH);   // disable Z axis
+  Fil_out=0;
+  
+  #else  // pause suusi V1
+  
   WRITE(Z_DIR_PIN,LOW);          // set Z direction
   enable_z();                    // Enable Z axis
   while (S_count > 0)
@@ -116,8 +155,10 @@ inline void Z_UP()
   }
   disable_z();                    // disable Z axis
   Fil_out=0;
-  
-#endif
+
+  #endif  //  PAUSE_BILL
+
+#endif  //  PAUSE_PLAY
 
 }
 
