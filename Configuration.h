@@ -20,14 +20,22 @@
 //-----------------------------------------------------------------------
 //// BASIC SETTINGS: select your board type, thermistor type, axis scaling, and endstop configuration
 //-----------------------------------------------------------------------
-//
+// ToDo: 
 //-----------------------------------------------------------------------
 //// The following define selects which electronics board you have. Please choose the one that matches your setup
 // MEGA/RAMPS up to 1.2  = 3,
-// RAMPS 1.3 = 33
-// Gen6 = 5,
+// RAMPS 1.3/1.4 = 33
+// Gen6 = 5, 
+// Gen6 deluxe = 51
 // Sanguinololu up to 1.1 = 6
-// Sanguinololu 1.2 and above, and Melzi = 62
+// Sanguinololu 1.2 and above = 62
+// Gen 7 @ 16MHZ only= 7
+// Gen 7 @ 20MHZ only= 71
+// Teensylu (at90usb) = 8
+// Printrboard Rev. B (ATMEGA90USB1286) = 9
+// Gen 3 Plus = 21
+// gen 3  Monolithic Electronics = 22
+// Gen3 PLUS for TechZone Gen3 Remix Motherboard = 23
 //-----------------------------------------------------------------------
 #define MOTHERBOARD 62
 
@@ -37,9 +45,13 @@
 // 2 is 200k thermistor
 // 3 is mendel-parts thermistor
 // 4 is 10k thermistor
+// 5 is ParCan supplied 104GT-2 100K
+// 6 is EPCOS 100k
+// 7 is 100k Honeywell thermistor 135-104LAG-J01
+// 8 is Vector 3 100K thermistor (thermistor fed through a 10 K resistor)
 //-----------------------------------------------------------------------
-#define THERMISTORHEATER 1
-#define THERMISTORBED 1
+#define THERMISTORHEATER 8
+#define THERMISTORBED 8
 
 //-----------------------------------------------------------------------
 //// SETTINGS FOR Stepper driver type
@@ -404,84 +416,91 @@ const bool INVERT_E_DIR = true;
 * Sanguinololu pin assignment
 *
 ****************************************************************************************/
+
+/*
+
 #if MOTHERBOARD == 62
-#define MOTHERBOARD 6
-#define SANGUINOLOLU_V_1_2
-#endif
+  #define MOTHERBOARD 6
+  #define SANGUINOLOLU_V_1_2
+#endif  //  MOTHERBOARD == 62
 #if MOTHERBOARD == 6
-#define KNOWN_BOARD 1
-#ifndef __AVR_ATmega644P__
-#ifndef __AVR_ATmega1284P__
-#error Oops!  Make sure you have the appropriate 'Sanguino' selected from the 'Tools -> Boards' menu.
-#endif
-#endif
+  #define KNOWN_BOARD 1
+  #ifndef __AVR_ATmega644P__
+    #ifndef __AVR_ATmega1284P__
+      #error Oops!  Make sure you have the appropriate 'Sanguino' selected from the 'Tools -> Boards' menu.
+    #endif
+  #endif
 
 //x axis pins
 
-#define X_STEP_PIN         15
-#define X_DIR_PIN          21
-#define X_MIN_PIN          18
-#define X_MAX_PIN           -2
+  #define X_STEP_PIN         15
+  #define X_DIR_PIN          21
+  #define X_MIN_PIN          18
+  #define X_MAX_PIN           -2
 
 //y axis pins
 
-#define Y_STEP_PIN         22
-#define Y_DIR_PIN          23
-#define Y_MIN_PIN          19
-#define Y_MAX_PIN          -1
+  #define Y_STEP_PIN         22
+  #define Y_DIR_PIN          23
+  #define Y_MIN_PIN          19
+  #define Y_MAX_PIN          -1
 
 //z axis pins
 
-#define Z_STEP_PIN         3
-#define Z_DIR_PIN          2
-#define Z_MIN_PIN          -1
-#define Z_MAX_PIN          20
+  #define Z_STEP_PIN         3
+  #define Z_DIR_PIN          2
+  #define Z_MIN_PIN          -1
+  #define Z_MAX_PIN          20
 
 //extruder pins
 
-#define E_STEP_PIN         1
-#define E_DIR_PIN          0
+  #define E_STEP_PIN         1
+  #define E_DIR_PIN          0
 
 
-#define CASE_LIGHT_PIN     30     // Case light pin (A1) 
-//#define PROBE_PIN          29     // Melzi1284p (A2)
-#define PROBE_PIN          11     // Z height probe (TX1) on V3
-#define TOOL_PIN           28     // Tool select pin 
-#define LED_PIN            27     // LED pin (A4)
+  #define CASE_LIGHT_PIN     30     // Case light pin (A1) 
+//  #define PROBE_PIN          29     // Melzi1284p (A2)
+  #define PROBE_PIN          11     // Z height probe (TX1) on V3
+  #define TOOL_PIN           28     // Tool select pin 
+  #define LED_PIN            27     // LED pin (A4)
 
-#define FAN_PIN            4
+  #define FAN_PIN            4
 
-#define PS_ON_PIN          -1
-#define KILL_PIN           -1
+  #define PS_ON_PIN          -1
+  #define KILL_PIN           -1
+  #define ALARM_PIN          -1
 
-#define HEATER_0_PIN       13 // (extruder)
+  #define HEATER_0_PIN       13 // (extruder)
 
-#ifdef SANGUINOLOLU_V_1_2
+  #ifdef SANGUINOLOLU_V_1_2
 
-#define HEATER_1_PIN       12 // (bed)
-#define X_ENABLE_PIN       14
-#define Y_ENABLE_PIN       14
-#define Z_ENABLE_PIN       26
-#define E_ENABLE_PIN       14
+    #define HEATER_1_PIN       12 // (bed)
+    #define X_ENABLE_PIN       14
+    #define Y_ENABLE_PIN       14
+    #define Z_ENABLE_PIN       26
+    #define E_ENABLE_PIN       14
 
-#else
+  #else  //  else of SANGUINOLOLU_V_1_2
 
-#define HEATER_1_PIN       14  // (bed)
-#define X_ENABLE_PIN       -1
-#define Y_ENABLE_PIN       -1
-#define Z_ENABLE_PIN       -1
-#define E_ENABLE_PIN       -1
+    #define HEATER_1_PIN       14  // (bed)
+    #define X_ENABLE_PIN       -1
+    #define Y_ENABLE_PIN       -1
+    #define Z_ENABLE_PIN       -1
+    #define E_ENABLE_PIN       -1
 
-#endif
+  #endif  //  SANGUINOLOLU_V_1_2
 
-#define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 33 extruder)
-#define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
-#define SDPOWER          -1
-#define SDSS          31
+  #define TEMP_0_PIN          7   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 33 extruder)
+  #define TEMP_1_PIN          6   // MUST USE ANALOG INPUT NUMBERING NOT DIGITAL OUTPUT NUMBERING!!!!!!!!! (pin 34 bed)
+  #define SDPOWER          -1
+  #define SDSS          31
 
-#ifndef KNOWN_BOARD
-#error Unknown MOTHERBOARD value in configuration.h
-#endif
+  #ifndef KNOWN_BOARD
+    #error Unknown MOTHERBOARD value in configuration.h
+  #endif  //  KNOWN_BOARD
 
-#endif
-#endif
+#endif  //  MOTHERBOARD == 6
+
+      */
+      
+#endif  //   CONFIGURATION_H

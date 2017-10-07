@@ -8,6 +8,7 @@
 //#include "Configuration.h"
 //#include "pins.h"
 #include "Configuration.h"
+#include "pins.h"
 #include "thermistortables.h"
 #include "Sprinter.h"
 #include "Enumcodes.h"
@@ -147,7 +148,7 @@
 // T0  - Select Extruder 0
 // T1  - Select Extruder 1
 
-#define _VERSION_TEXT "1.01.0110"           // make sure you update this
+#define _VERSION_TEXT "1.01.0111"           // make sure you update this
 
 const char* pszStatusString[]    = { "Ok", "SD", "Error", "Finished", "Pause", "Abort" };
 const char* pszErrorCodeString[] = { "No Error", "Extruder Low", "Bed Low", "Extruder High", "Bed High", "User Abort" };
