@@ -1,14 +1,12 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// V3.cpp - Contains the Eaglemoss V3 specific declarations
+// V3.cpp - Contains the Eaglemoss V3 specific functions
 //
-// By Suusi Malcolm-Brown
+// By Suusi Malcolm-Brown - Runout sensor mods by Bill Green
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "SerialManager.h"
 #include "V3.h"
-#include "Configuration.h"
-#include "pins.h"
 #include "sprinter.h"
 #include <stdio.h>
 #include <Wire.h>
@@ -17,169 +15,96 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  External variables
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+extern float destination[] ;                                       // hook to destination position coodinates for moves
+extern float current_position[];                                   // Hook to current position coodinates for moves
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 // variables unique to the V3 3D printer
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-char PauseID = 0x03;                  //rp3d.com pause id
-char HSW_Enable = 0x01;               //rp3d.com M237, M238
-char MuteBeeps = 0x0;                 // 
-int FSW_Counter = 0;                  //rp3d.com Front Switch Counter
-int FSW_status = 1;                   //rp3d.com Front Switch Status
+char PauseID = 0x03;                                               //rp3d.com pause id
+char HSW_Enable = 0x01;                                            //rp3d.com M237, M238
+char MuteBeeps = 0x0;                                              // 
+int FSW_Counter = 0;                                               //rp3d.com Front Switch Counter
+int FSW_status = 1;                                                //rp3d.com Front Switch Status. 1 = Run, -2 = Pause
 
-float fPauseSavedZ;                   // variable to save Z poistion in
-
-unsigned long S_to_take = axis_steps_per_unit[2]*10;  //number of steps required to move Z 10mm
-unsigned long S_count = 0;            // Steps taken counter
 unsigned long previous_millis_PauseID;
+float fPauseSavedZ;                                                // variable to save Z Axis poistion in
 
-int Fil_out=0;                        //Filament status
-int Z_estop=20;
+//unsigned long S_to_take = axis_steps_per_unit[2]*10;               //number of steps required to move Z 10mm
+//unsigned long S_count = 0;                                         // Steps taken counter
 
-#define PAUSE_STEP_DELAY 10
+int Fil_out=0;                                                     // Filament status 0 = we have filement, 1 = No filament
 
 union data {
   float v;
   unsigned char fchar[4];
 } fvalue; 
 
-extern float destination[] ;
-extern float current_position[];
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Move Z Axis Down 10mm
+// inline void Z_DN() - Move Z Axis Down 10mm
+//
+// Called by: check_PauseID()
+//
+// Unique to the V3 3D printer. New with build 0111 - with thanks to Bill Green
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//#define PAUSE_PLAY
-#define PAUSE_BILL
 
 inline void Z_DN()
 {
-  SerialMgr.cur()->println("Filament Run Out");
-
-#ifdef PAUSE_PLAY
-
-  fPauseSavedZ = current_position[Z_AXIS];
-  destination[Z_AXIS] = fPauseSavedZ + 10 ;
-  prepare_move();
   
-#else
+  SerialMgr.cur()->println("Filament Run Out");                   // tell the world
+  fPauseSavedZ = current_position[Z_AXIS];                        // save the Z Axis position
+  destination[Z_AXIS] = fPauseSavedZ + 10 ;                       // add 10 mm to Z Axis
+  prepare_move();                                                 // do the move
   
-  #ifdef PAUSE_BILL
-
-  pinMode(26,OUTPUT); //Z enable
-  pinMode(3,OUTPUT);  //Z Step
-  pinMode(2,OUTPUT);  //Z Dir
-  
-  digitalWrite(2,HIGH); // set direction
-  digitalWrite(26,LOW); // Enable Z axis
- 
-  while((digitalRead(Z_estop)==HIGH)&&(S_count < S_to_take)){ // check Z enstop before moving
-    digitalWrite(3,HIGH);
-    delayMicroseconds (7);
-    digitalWrite(3,LOW);
-    delayMicroseconds (7);
-    S_count++;
-  }
-  
-  #else  // pause suusi V1
-  
-  pinMode(Z_ENABLE_PIN,OUTPUT);      //Z enable  
-  pinMode(Z_STEP_PIN,OUTPUT);        //Z Step
-  pinMode(Z_DIR_PIN,OUTPUT);         //Z Dir
-  
-  WRITE(Z_DIR_PIN,HIGH);             // set Z direction
-  enable_z();                        // Enable Z axis
-  while((READ(Z_MAX_PIN)==HIGH)&&(S_count < S_to_take))
-  { 
-    // check Z enstop before moving
-    WRITE(Z_STEP_PIN, HIGH);
-    delayMicroseconds (PAUSE_STEP_DELAY);
-    WRITE(Z_STEP_PIN, LOW);
-    delayMicroseconds (PAUSE_STEP_DELAY);
-    S_count++;
-  }
-  
-  #endif  //  PAUSE_BILL
-
-#endif
-
 }  
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Move Z axis UP 10mm
+// inline void Z_UP() - Move Z axis UP to its original position
+//
+// Called by: check_PauseID()
+//
+// Unique to the V3 3D printer. New with build 0111 - with thanks to Bill Green
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 inline void Z_UP()
 {
   
-#ifdef   PAUSE_PLAY
+  destination[Z_AXIS] = fPauseSavedZ;                             // set the destination
+  prepare_move();                                                 // do the move
+  Fil_out=0;                                                      // we have filament
+  SerialMgr.cur()->println("Re-start after Filament Run Out");    // tell the world
   
-  destination[Z_AXIS] = fPauseSavedZ;
-  prepare_move();
-  Fil_out=0;
-  
-#else
-  
-  #ifdef PAUSE_BILL
-  
-  digitalWrite(26,LOW); // Enable Z axis
-  digitalWrite(2,LOW);   // set Z direction
-  
-  while (S_count > 0){        
-    digitalWrite(3,HIGH);
-    delayMicroseconds (10);
-    digitalWrite(3,LOW);
-    delayMicroseconds (10);
-    S_count--;
-  }
-  digitalWrite(26,HIGH);   // disable Z axis
-  Fil_out=0;
-  
-  #else  // pause suusi V1
-  
-  WRITE(Z_DIR_PIN,LOW);          // set Z direction
-  enable_z();                    // Enable Z axis
-  while (S_count > 0)
-  {        
-    WRITE(Z_STEP_PIN, HIGH);
-    delayMicroseconds (PAUSE_STEP_DELAY);
-    WRITE(Z_STEP_PIN, LOW);
-    delayMicroseconds (PAUSE_STEP_DELAY);
-    S_count--;
-  }
-  disable_z();                    // disable Z axis
-  Fil_out=0;
-
-  #endif  //  PAUSE_BILL
-
-#endif  //  PAUSE_PLAY
-
 }
-
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // void V3_I2C_Command ( int iCommand, boolean bEchoCommand )
 //
-// 
+// unique to the V3 3D printer
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void V3_I2C_Command ( int iCommand, boolean bEchoCommand ) {
-  char szChar[10];                            // workspace for echo string
-  Wire.beginTransmission( V3_I2C_DEVICE );    // open comms with V3 I2C device
-  Wire.send(iCommand);                        // Send command
-  Wire.endTransmission();                     // end transmission
-  if( bEchoCommand ) {
-    sprintf( szChar, "M%d OK", iCommand );    // create echo string
-    SerialMgr.cur()->println(szChar);         // echo result to serial manager
+void V3_I2C_Command ( int iCommand, boolean bEchoCommand )
+{
+  Wire.beginTransmission( V3_I2C_DEVICE );                        // open comms with V3 I2C device
+  Wire.send(iCommand);                                            // Send command
+  Wire.endTransmission();                                         // end transmission
+  if( bEchoCommand )
+  {
+    SerialMgr.cur()->print( "M" );                                // echo result to serial manager
+    SerialMgr.cur()->println(iCommand);                           // echo result to serial manager
+    SerialMgr.cur()->println(" OK");                              // echo result to serial manager
   }
 }
 
@@ -192,8 +117,10 @@ void V3_I2C_Command ( int iCommand, boolean bEchoCommand ) {
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-float Read_Z_MAX_LENGTH_M240_FromEEPROM() {
-  for(int i = 0; i < 4; i++) {
+float Read_Z_MAX_LENGTH_M240_FromEEPROM()
+{
+  for(int i = 0; i < 4; i++)
+  {
     fvalue.fchar[i] = EEPROM.read(i + Z_MAX_LENGTH_EEPROM);
   }
   Serial.print("PrinterHeight: ");
@@ -210,11 +137,13 @@ float Read_Z_MAX_LENGTH_M240_FromEEPROM() {
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void Write_Z_MAX_LENGTH_M240_ToEEPROM(float fZ_Max_Length) {
+void Write_Z_MAX_LENGTH_M240_ToEEPROM(float fZ_Max_Length)
+{
   fvalue.v = fZ_Max_Length ;
   unsigned char *fpointer;
   fpointer = fvalue.fchar;
-  for(int i = 0; i < 4; i++) {
+  for(int i = 0; i < 4; i++)
+  {
     EEPROM.write(i + Z_MAX_LENGTH_EEPROM,*fpointer);
     fpointer++;
   }
@@ -222,9 +151,11 @@ void Write_Z_MAX_LENGTH_M240_ToEEPROM(float fZ_Max_Length) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//       // setting for the 2016 firmware release
+// void check_PauseID() 
 //
-// unique to V3
+// Checks the hood and front pannel switches. Since build 0111 handles the hood switch being used as a runout sensor
+//
+// Unique to V3  - Runout sensor mods by Bill Green
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -263,7 +194,7 @@ void check_PauseID()
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // this bit bit commented out by eaglemoss / reprap pro coder 
-// thank the stars imagine 3 mins of beeping! >:) so I enabled it :D
+// thank the stars. Imagine 3 mins of beeping! :O so I enabled it >:D
 //
 
   if( (HSW_Enable == HOODSWITCH_ENABLED) && ((PauseID & HOODSWITCH_BIT) == HOODSWITCH_OPEN) )
@@ -271,9 +202,13 @@ void check_PauseID()
     V3_I2C_Command( V3_NOZZLE_RED_FLASH, false ) ;                // nozzel red flashing
     V3_I2C_Command( V3_BUTTON_RED_FLASH, false ) ;                // front red flashing
     V3_I2C_Command( V3_BEEP_FOR_3_MIN, false ) ;                  // Beep every sec, 3 min.
-    FSW_status=-2;                                                // Enter Pause state
-    Fil_out = 1;
-    Z_DN();                                                       // Move Z down
+    if( FSW_status == 1 )
+    {
+      // Enter Pause state
+      FSW_status = ~FSW_status;                                   // Flip the pause status to -2
+      Fil_out = 1;                                                // We do NOT have filament
+      Z_DN();  	                                                  // Move Z down 10mm
+    }  //end of if( FSW_status == 1 )
   }  // end of if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x00) )
 	  
   if( (HSW_Enable == HOODSWITCH_ENABLED) && ((PauseID & HOODSWITCH_BIT) == HOODSWITCH_CLOSED) )
@@ -281,10 +216,8 @@ void check_PauseID()
     V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // front blue
     V3_I2C_Command( V3_BEEP_OFF, false ) ;                        // beep off
     V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
-    Fil_out=0;
+    Fil_out=0;                                                    // We have filament
   }  // end of if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x01) )
-/*
-              */
 
 // Front Button Switch		
 // Long Press: “Emergency Stop” to Main Chip.
