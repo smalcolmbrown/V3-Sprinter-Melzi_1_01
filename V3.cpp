@@ -181,7 +181,7 @@ void check_PauseID()
 //    SerialMgr.cur()->println(c, HEX);                             // print the character
 //    PauseID = c & 0x03;                                           // mask off unwanted bits
     PauseID = c & V3_SWITCHES_MASK;                               // mask off unwanted bits
-    SerialMgr.cur()->println(Fil_out, DEC);                             // print the character
+//    SerialMgr.cur()->println(Fil_out, DEC);                             // print the character
  }
 
   if (HSW_Enable == HOODSWITCH_DISABLED)
