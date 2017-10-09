@@ -60,7 +60,7 @@
 // the default is commented out for an un-modified V3 printer only use this
 // setting if you have Bill Green's Stepper Mod fitted with DRV8825 steppers
 // drivers in the X and Y Axis.
-#define STEPPER_DRIVER_X_Y_DRV8825      
+//#define STEPPER_DRIVER_X_Y_DRV8825      
 
 //-----------------------------------------------------------------------
 //// Calibration variables
@@ -248,7 +248,7 @@ const bool INVERT_E_DIR = true;
 //-----------------------------------------------------------------------
 
 // Comment out (using // at the start of the line) to disable Bed Probe support:
-#define HAS_BED_PROBE 1
+//#define HAS_BED_PROBE 1
 
 #ifdef HAS_BED_PROBE
   #define Z_INCREMENT 0.05                  // increments for probing Z Height
@@ -298,18 +298,18 @@ const bool INVERT_E_DIR = true;
 // M502 - reverts to the default "factory settings". You still need to store them in EEPROM afterwards if you want to.
 // M503 - Print settings
 // define this to enable eeprom support
-#define USE_EEPROM_SETTINGS
+//#define USE_EEPROM_SETTINGS
 
 // to disable EEPROM Serial responses and decrease program space by ~1000 byte: comment this out:
 // please keep turned on if you can.
-#define PRINT_EEPROM_SETTING
+//#define PRINT_EEPROM_SETTING
 
 //-----------------------------------------------------------------------
 //// Settings for M600 and M601 heater debugging
 //-----------------------------------------------------------------------
 // Measure the MIN/MAX Value of the Hotend Temp and show it with
 // Command M601 / Command M602 Reset the MIN/MAX Value
-#define DEBUG_HEATER_TEMP
+//#define DEBUG_HEATER_TEMP
 
 //-----------------------------------------------------------------------
 //// Setting for the software control of fans
