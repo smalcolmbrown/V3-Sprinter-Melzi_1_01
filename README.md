@@ -9,8 +9,10 @@ Based on https://github.com/reprappro/Firmware/tree/master/Sprinter_Melzi
 V3 parts http://rp3d.com/ and Eaglemoss  
 M500, M501, M502, M503 EEPROM Parts by Kliment Sprinter  
 Experimenatl I2C bus pinched from MARLIN  
-I2C_lcd  Suusi Malcolm-Brown and MARLIN
+I2C_lcd  Suusi Malcolm-Brown and MARLIN 
+Z Height M30 Suusi Malcolm-Brown
 T0 and T1 Bill Green  
+Filament Run Out Bill Green
 
 Licence: GPL  
 
@@ -123,3 +125,8 @@ Added M601  show Extruder Temp jitter
 Added M602  reset Extruder Temp jitter  
 Added M303 PID auto-tune  
 Minor bug fixes and streamlined reading Extruder temperature for consistency. 
+
+**2017/10/09 Build 0111**  
+Added Filament Run Out with thanks to Bill Green  
+Added New thermistor tables and board alternatives (pins.h)  
+Configuration example now valid for a basic Vector 3 with no mods  
