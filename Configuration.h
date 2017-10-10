@@ -219,6 +219,13 @@ const bool INVERT_E_DIR = true;
 // 
 
 //-----------------------------------------------------------------------
+//// Filament Run Out sensor
+//-----------------------------------------------------------------------
+// New with build 0111 - with thanks to Bill Green
+// uncomment this if you have repurposed the hood switch to detect the Filament Run Out
+//#define RUNOUT_SENSOR
+
+//-----------------------------------------------------------------------
 //// AD595 THERMOCOUPLE SUPPORT UNTESTED... USE WITH CAUTION!!!!
 //-----------------------------------------------------------------------
 
