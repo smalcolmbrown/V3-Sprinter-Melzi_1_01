@@ -13,6 +13,8 @@
 #include <EEPROM.h>
 #include "V3_EEPROM.h"
 
+#ifdef RUNOUT_SENSOR
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  External variables
@@ -21,6 +23,8 @@
 
 extern float destination[] ;                                       // hook to destination position coodinates for moves
 extern float current_position[];                                   // Hook to current position coodinates for moves
+
+#endif  //  end of #ifdef RUNOUT_SENSOR
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -35,17 +39,20 @@ int FSW_Counter = 0;                                               //rp3d.com Fr
 int FSW_status = 1;                                                //rp3d.com Front Switch Status. 1 = Run, -2 = Pause
 
 unsigned long previous_millis_PauseID;
+
+#ifdef RUNOUT_SENSOR
+
 float fPauseSavedZ;                                                // variable to save Z Axis poistion in
-
-//unsigned long S_to_take = axis_steps_per_unit[2]*10;               //number of steps required to move Z 10mm
-//unsigned long S_count = 0;                                         // Steps taken counter
-
 int Fil_out=0;                                                     // Filament status 0 = we have filement, 1 = No filament
+
+#endif  //  end of #ifdef RUNOUT_SENSOR
 
 union data {
   float v;
   unsigned char fchar[4];
 } fvalue; 
+
+#ifdef RUNOUT_SENSOR
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -86,6 +93,8 @@ inline void Z_UP()
   SerialMgr.cur()->println("Re-start after Filament Run Out");    // tell the world
   
 }
+
+#endif  //  end of #ifdef RUNOUT_SENSOR
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -181,7 +190,13 @@ void check_PauseID()
 //    SerialMgr.cur()->println(c, HEX);                             // print the character
 //    PauseID = c & 0x03;                                           // mask off unwanted bits
     PauseID = c & V3_SWITCHES_MASK;                               // mask off unwanted bits
-//    SerialMgr.cur()->println(Fil_out, DEC);                             // print the character
+
+#ifdef RUNOUT_SENSOR
+
+//    SerialMgr.cur()->println(Fil_out, DEC);                             // print the filament out state
+
+#endif  //  end of #ifdef RUNOUT_SENSOR
+
  }
 
   if (HSW_Enable == HOODSWITCH_DISABLED)
@@ -202,6 +217,9 @@ void check_PauseID()
     V3_I2C_Command( V3_NOZZLE_RED_FLASH, false ) ;                // nozzel red flashing
     V3_I2C_Command( V3_BUTTON_RED_FLASH, false ) ;                // front red flashing
     V3_I2C_Command( V3_BEEP_FOR_3_MIN, false ) ;                  // Beep every sec, 3 min.
+
+#ifdef RUNOUT_SENSOR
+
     if( FSW_status == 1 )
     {
       // Enter Pause state
@@ -209,6 +227,9 @@ void check_PauseID()
       Fil_out = 1;                                                // We do NOT have filament
       Z_DN();  	                                                  // Move Z down 10mm
     }  //end of if( FSW_status == 1 )
+
+#endif  //  end of #ifdef RUNOUT_SENSOR
+
   }  // end of if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x00) )
 	  
   if( (HSW_Enable == HOODSWITCH_ENABLED) && ((PauseID & HOODSWITCH_BIT) == HOODSWITCH_CLOSED) )
@@ -216,7 +237,13 @@ void check_PauseID()
     V3_I2C_Command( V3_BUTTON_BLUE, false ) ;                     // front blue
     V3_I2C_Command( V3_BEEP_OFF, false ) ;                        // beep off
     V3_I2C_Command( V3_NOZZLE_WHITE, false ) ;                    // nozzle white
+
+#ifdef RUNOUT_SENSOR
+
     Fil_out=0;                                                    // We have filament
+
+#endif  //  end of #ifdef RUNOUT_SENSOR
+
   }  // end of if ( (HSW_Enable == 0x01) && ((PauseID & 0x01) == 0x01) )
 
 // Front Button Switch		
@@ -236,10 +263,16 @@ void check_PauseID()
     {
       // Front Button Switch Released
 //      PauseID = ~PauseID;
+
+#ifdef RUNOUT_SENSOR
+
       if (Fil_out==0)
       {
         Z_UP();   // Move Z up
       }
+
+#endif  //  end of #ifdef RUNOUT_SENSOR
+
       SerialMgr.cur()->println("Pause/Unpause");
       FSW_status = ~FSW_status;
       FSW_Counter = 0;                                            // reset press time counter
